@@ -1,0 +1,350 @@
+# Chip and board description
+[DESCRIPTION]
+NAME = "Alinx_AX7A200T"
+DIRECTORY = "alinx_ax7a200t"
+CHIP_VENDOR = "Xilinx"
+BOARD_VENDOR = "Alinx"
+VENDOR.DDR = "Micron"
+FAMILY.SHORT = "xc7"
+FAMILY.LONG = "7series"
+PART.SHORT = "xc7a200t_0"
+PART.LONG = "xc7a200tfbg484-2"
+
+# include these files after the IPs have been generated. TCL generation script can figure out the path from build path
+[REQUIREMENTS]
+[REQUIREMENTS.FILES]
+[REQUIREMENTS.FILES."ddr_phy.v"]
+	HDL =[]
+	IP = ["ip_mig_params_0.prj"]
+[REQUIREMENTS.FILES."xdma_xc7.sv"]
+  HDL = ["xdma_0_axi_stream_intf.sv", "xdma_0_pcie2_ip_core_top.v", "xdma_0_rx_demux.sv", "xdma_0_tgt_cpl.sv", "xdma_0_tgt_req.sv"]
+  IP = []
+
+[REQUIREMENTS.FILES."clk_mmcm_eth_rgmmi.sv"]
+  HDL = ["clk_mmcm_eth_rgmmi.v"]
+  IP = []
+
+[REQUIREMENTS.FILES."vio_0_sw_leds.sv"]
+  HDL = ["vio_0_sw_leds.v"]
+  IP = []
+
+[REQUIREMENTS.IP]
+[REQUIREMENTS.IP."ddr_phy.v"] # need to figure out paths here! perhaps have this be a required tcl argument
+	ip_clk_wiz_0 = """
+					create_ip -name clk_wiz -vendor xilinx.com -library ip -module_name ip_clk_wiz_0
+					set_property -dict [list CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT3_USED {true} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {333.33} CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {200.000} CONFIG.USE_RESET {false}] [get_ips ip_clk_wiz_0]
+					set_property -dict [list CONFIG.MMCM_DIVCLK_DIVIDE {1} CONFIG.MMCM_CLKOUT0_DIVIDE_F {6.000} CONFIG.MMCM_CLKOUT1_DIVIDE {10} CONFIG.MMCM_CLKOUT2_DIVIDE {5} CONFIG.NUM_OUT_CLKS {3} CONFIG.CLKOUT1_JITTER {104.542} CONFIG.CLKOUT2_JITTER {130.958} CONFIG.CLKOUT2_PHASE_ERROR {98.575} CONFIG.CLKOUT3_JITTER {114.829} CONFIG.CLKOUT3_PHASE_ERROR {98.575}] [get_ips ip_clk_wiz_0]
+					generate_target all [get_files  ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_clk_wiz_0/ip_clk_wiz_0.xci]
+					export_ip_user_files -of_objects [get_files ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_clk_wiz_0/ip_clk_wiz_0.xci] -no_script -sync -force -quiet
+					create_ip_run [get_files -of_objects [get_fileset sources_1] ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_clk_wiz_0/ip_clk_wiz_0.xci]
+					launch_runs ip_clk_wiz_0_synth_1 -jobs 24
+					wait_on_run ip_clk_wiz_0_synth_1
+					add_files -fileset constrs_1 ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_clk_wiz_0/ip_clk_wiz_0.xdc
+					add_files -fileset constrs_1 ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_clk_wiz_0/ip_clk_wiz_0_ooc.xdc
+					add_files -fileset constrs_1 ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_clk_wiz_0/ip_clk_wiz_0_board.xdc
+				"""
+	ip_mig_7series_0 = """
+					create_ip -name mig_7series -vendor xilinx.com -library ip  -module_name ip_mig_7series_0
+					set_property -dict [list CONFIG.XML_INPUT_FILE {../../../../../ip_mig_params_0.prj}] [get_ips ip_mig_7series_0]			
+					generate_target all [get_files  ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_mig_7series_0/ip_mig_7series_0.xci]
+					export_ip_user_files -of_objects [get_files ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_mig_7series_0/ip_mig_7series_0.xci] -no_script -sync -force -quiet
+					create_ip_run [get_files -of_objects [get_fileset sources_1] ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_mig_7series_0/ip_mig_7series_0.xci]
+					launch_runs ip_mig_7series_0_synth_1 -jobs 24
+					wait_on_run ip_mig_7series_0_synth_1
+					remove_files  ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_mig_7series_0/ip_mig_7series_0.xci
+					add_files -scan_for_includes ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_mig_7series_0/ip_mig_7series_0/user_design/rtl/phy
+					add_files -scan_for_includes ./$PROJECT/$PROJECT.srcs/sources_1/ip/ip_mig_7series_0/ip_mig_7series_0/user_design/rtl/clocking
+					update_compile_order -fileset sources_1
+				"""
+
+[REQUIREMENTS.IP."xdma_xc7.sv"]
+  blk_mem_gen_1 = """
+          create_ip -name blk_mem_gen -vendor xilinx.com -library ip  -module_name blk_mem_gen_1
+          set_property -dict [list CONFIG.Component_Name {blk_mem_gen_1} CONFIG.Interface_Type {AXI4} CONFIG.Use_AXI_ID {true} CONFIG.Memory_Type {Simple_Dual_Port_RAM} CONFIG.Use_Byte_Write_Enable {true} CONFIG.Byte_Size {8} CONFIG.Assume_Synchronous_Clk {true} CONFIG.Write_Width_A {32} CONFIG.Write_Depth_A {8192} CONFIG.Read_Width_A {32} CONFIG.Operating_Mode_A {READ_FIRST} CONFIG.Write_Width_B {32} CONFIG.Read_Width_B {32} CONFIG.Operating_Mode_B {READ_FIRST} CONFIG.Enable_B {Use_ENB_Pin} CONFIG.Register_PortA_Output_of_Memory_Primitives {false} CONFIG.Use_RSTB_Pin {true} CONFIG.Reset_Type {ASYNC} CONFIG.Port_B_Clock {100} CONFIG.Port_B_Enable_Rate {100} CONFIG.EN_SAFETY_CKT {true}] [get_ips blk_mem_gen_1]
+          generate_target all [get_files  ./$PROJECT/$PROJECT.srcs/sources_1/ip/blk_mem_gen_1/blk_mem_gen_1.xci]
+          export_ip_user_files -of_objects [get_files ./build/[lindex $argv 0]/[lindex $argv 0].srcs/sources_1/ip/blk_mem_gen_1/blk_mem_gen_1.xci] -no_script -sync -force -quiet
+					create_ip_run [get_files -of_objects [get_fileset sources_1] ./$PROJECT/$PROJECT.srcs/sources_1/ip/blk_mem_gen_1/blk_mem_gen_1.xci]
+					launch_runs blk_mem_gen_1_synth_1 -jobs 24
+					wait_on_run blk_mem_gen_1_synth_1
+          update_compile_order -fileset sources_1
+          """
+  xdma_0 = """
+          config_ip_cache -disable_cache
+          create_ip -name xdma -vendor xilinx.com -library ip -version 4.1 -module_name xdma_0
+          set_property -dict [list CONFIG.mode_selection {Advanced} CONFIG.pl_link_cap_max_link_width {X4} CONFIG.pl_link_cap_max_link_speed {5.0_GT/s} CONFIG.axi_data_width {128_bit} CONFIG.axisten_freq {125} CONFIG.vendor_id {1AF4} CONFIG.pf0_device_id {1040} CONFIG.pf0_revision_id {01} CONFIG.pf0_subsystem_vendor_id {1AF4} CONFIG.pf0_subsystem_id {1040} CONFIG.axilite_master_en {true} CONFIG.axilite_master_size {4} CONFIG.axilite_master_scale {Kilobytes} CONFIG.pf0_msi_cap_multimsgcap {4_vectors} CONFIG.xdma_axilite_slave {true} CONFIG.xdma_num_usr_irq {4} CONFIG.plltype {QPLL1} CONFIG.dsc_bypass_rd {0001} CONFIG.dsc_bypass_wr {0001} CONFIG.xdma_sts_ports {true} CONFIG.pf0_msix_enabled {true} CONFIG.pf0_msix_cap_table_size {01F} CONFIG.pf0_msix_cap_table_offset {00008000} CONFIG.pf0_msix_cap_table_bir {BAR_1} CONFIG.pf0_msix_cap_pba_offset {00008FE0} CONFIG.pf0_msix_cap_pba_bir {BAR_1} CONFIG.cfg_mgmt_if {false} CONFIG.PF0_DEVICE_ID_mqdma {9024} CONFIG.PF2_DEVICE_ID_mqdma {9224} CONFIG.PF3_DEVICE_ID_mqdma {9324} CONFIG.PF0_SRIOV_VF_DEVICE_ID {A034} CONFIG.PF1_SRIOV_VF_DEVICE_ID {A134} CONFIG.PF2_SRIOV_VF_DEVICE_ID {A234} CONFIG.PF3_SRIOV_VF_DEVICE_ID {A334}] [get_ips xdma_0]
+          generate_target all [get_files ./build/[lindex $argv 0]/[lindex $argv 0].srcs/sources_1/ip/xdma_0/xdma_0.xci]
+          export_ip_user_files -of_objects [get_files ./build/[lindex $argv 0]/[lindex $argv 0].srcs/sources_1/ip/xdma_0/xdma_0.xci] -no_script -sync -force -quiet
+					create_ip_run [get_files -of_objects [get_fileset sources_1] ./$PROJECT/$PROJECT.srcs/sources_1/ip/xdma_0/xdma_0.xci]
+					launch_runs xdma_0_synth_1 -jobs 24
+					wait_on_run xdma_0_synth_1
+          update_compile_order -fileset sources_1
+          set_property IS_LOCKED true [get_files xdma_0.xci]
+          exec cp ../fpga/boards/alinx_ax7a200t/includes/hdl/xdma_0_axi_stream_intf.sv ./$PROJECT/$PROJECT.srcs/sources_1/ip/xdma_0/xdma_v4_1/hdl/verilog/xdma_0_axi_stream_intf.sv
+          exec cp ../fpga/boards/alinx_ax7a200t/includes/hdl/xdma_0_pcie2_ip_core_top.v ./$PROJECT/$PROJECT.srcs/sources_1/ip/xdma_0/ip_0/source/xdma_0_pcie2_ip_core_top.v
+          exec cp ../fpga/boards/alinx_ax7a200t/includes/hdl/xdma_0_rx_demux.sv ./$PROJECT/$PROJECT.srcs/sources_1/ip/xdma_0/xdma_v4_1/hdl/verilog/xdma_0_rx_demux.sv
+          exec cp ../fpga/boards/alinx_ax7a200t/includes/hdl/xdma_0_tgt_req.sv ./$PROJECT/$PROJECT.srcs/sources_1/ip/xdma_0/xdma_v4_1/hdl/verilog/xdma_0_tgt_req.sv
+          exec cp ../fpga/boards/alinx_ax7a200t/includes/hdl/xdma_0_tgt_cpl.sv ./$PROJECT/$PROJECT.srcs/sources_1/ip/xdma_0/xdma_v4_1/hdl/verilog/xdma_0_tgt_cpl.sv
+          reset_run xdma_0_synth_1
+          launch_run xdma_0_synth_1
+          wait_on_run xdma_0_synth_1
+          """
+
+[REQUIREMENTS.IP."vio_0_sw_leds.v"]
+	vio_0 = """
+			# VIO_1 tcl output (1 4-bit input and 4 1-bit outputs)
+			create_ip -name vio -vendor xilinx.com -library ip -version 3.0 -module_name vio_0
+			set_property -dict [list CONFIG.C_PROBE_IN0_WIDTH {4} CONFIG.C_NUM_PROBE_OUT {4}] [get_ips vio_0]
+			generate_target {instantiation_template} [get_files ./build/[lindex $argv 0]/[lindex $argv 0].srcs/sources_1/ip/vio_0/vio_0.xci]
+			generate_target all [get_files  ./build/[lindex $argv 0]/[lindex $argv 0].srcs/sources_1/ip/vio_0/vio_0.xci]
+			catch { config_ip_cache -export [get_ips -all vio_0] }
+			export_ip_user_files -of_objects [get_files ./build/[lindex $argv 0]/[lindex $argv 0].srcs/sources_1/ip/vio_0/vio_0.xci] -no_script -sync -force -quiet
+			create_ip_run [get_files -of_objects [get_fileset sources_1] ./build/[lindex $argv 0]/[lindex $argv 0].srcs/sources_1/ip/vio_0/vio_0.xci]
+			launch_runs vio_1_synth_1 -jobs 10
+			"""
+# VIO tcl outputs from Vivado
+# create_ip -name vio -vendor xilinx.com -library ip -version 3.0 -module_name vio_0
+# set_property -dict [list CONFIG.C_PROBE_OUT0_WIDTH {4} CONFIG.C_PROBE_IN0_WIDTH {4}] [get_ips vio_0]
+# generate_target {instantiation_template} [get_files {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_0/vio_0.xci}}]
+# INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'vio_0'...
+# generate_target all [get_files  {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_0/vio_0.xci}}]
+# INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'vio_0'...
+# INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'vio_0'...
+# INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'vio_0'...
+# catch { config_ip_cache -export [get_ips -all vio_0] }
+# export_ip_user_files -of_objects [get_files {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_0/vio_0.xci}}] -no_script -sync -force -quiet
+# create_ip_run [get_files -of_objects [get_fileset sources_1] {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_0/vio_0.xci}}]
+# create_ip_run: Time (s): cpu = 00:00:15 ; elapsed = 00:00:12 . Memory (MB): peak = 9580.141 ; gain = 8.008 ; free physical = 685 ; free virtual = 11984
+# launch_runs vio_0_synth_1 -jobs 10
+# [Mon Oct 21 13:16:00 2024] Launched vio_0_synth_1...
+# Run output will be captured here: /home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.runs/vio_0_synth_1/runme.log
+# launch_runs: Time (s): cpu = 00:00:13 ; elapsed = 00:00:15 . Memory (MB): peak = 9604.145 ; gain = 24.004 ; free physical = 664 ; free virtual = 11964
+# export_simulation -of_objects [get_files {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_0/vio_0.xci}}] -directory {/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.ip_user_files/sim_scripts} -ip_user_files_dir {/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.ip_user_files} -ipstatic_source_dir {/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.ip_user_files/ipstatic} -lib_map_path [list {modelsim=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/modelsim} {questa=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/questa} {xcelium=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/xcelium} {vcs=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/vcs} {riviera=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
+
+# VIO_1 tcl output (1 4-bit output and 4 1-bit inputs)
+# create_ip -name vio -vendor xilinx.com -library ip -version 3.0 -module_name vio_1
+# set_property -dict [list CONFIG.C_PROBE_IN0_WIDTH {4} CONFIG.C_NUM_PROBE_OUT {4}] [get_ips vio_1]
+# generate_target {instantiation_template} [get_files {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_1/vio_1.xci}}]
+# generate_target all [get_files  {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_1/vio_1.xci}}]
+# catch { config_ip_cache -export [get_ips -all vio_1] }
+# export_ip_user_files -of_objects [get_files {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_1/vio_1.xci}}] -no_script -sync -force -quiet
+# create_ip_run [get_files -of_objects [get_fileset sources_1] {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_1/vio_1.xci}}]
+# launch_runs vio_1_synth_1 -jobs 10
+# export_simulation -of_objects [get_files {{/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.srcs/sources_1/ip/vio_1/vio_1.xci}}] -directory {/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.ip_user_files/sim_scripts} -ip_user_files_dir {/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.ip_user_files} -ipstatic_source_dir {/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.ip_user_files/ipstatic} -lib_map_path [list {modelsim=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/modelsim} {questa=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/questa} {xcelium=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/xcelium} {vcs=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/vcs} {riviera=/home/zaidt/projects/docs/Alinx/AX7A200_EN/01_demo_document/Verilog HDL Demos/21_ethernet_test_z_edit2/rgmii_ethernet/eth_test.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
+
+
+
+[IO]
+	[IO.sys_clk_p]
+		DIRECTION = "SOURCE"
+		WIDTH = 1
+		INTERFACE_TYPE = "CLOCK"
+	[IO.sys_clk_n]
+		DIRECTION = "SOURCE"
+		WIDTH = 1
+		INTERFACE_TYPE = "CLOCK"
+	[IO.sys_rst_n]
+		DIRECTION = "SOURCE"
+		WIDTH = 1
+		INTERFACE_TYPE = "GENERAL"
+	[IO.uart_rx]
+		DIRECTION = "SOURCE"
+		WIDTH = 1
+		INTERFACE_TYPE = "GENERAL"
+	[IO.uart_tx]
+		DIRECTION = "SINK"
+		WIDTH = 1
+		INTERFACE_TYPE = "GENERAL"
+	# [IO.pci_exp_txp]
+	# 	DIRECTION = "SINK"
+	# 	WIDTH = 4
+	# 	INTERFACE_TYPE = "GENERAL"
+	# [IO.pci_exp_txn]
+	# 	DIRECTION = "SINK"
+	# 	WIDTH = 4
+	# 	INTERFACE_TYPE = "GENERAL"
+	# [IO.pci_exp_rxp]
+	# 	DIRECTION = "SOURCE"
+	# 	WIDTH = 4
+	# 	INTERFACE_TYPE = "GENERAL"
+	# [IO.pci_exp_rxn]
+	# 	DIRECTION = "SOURCE"
+	# 	WIDTH = 4
+	# 	INTERFACE_TYPE = "GENERAL"
+	[IO.phy_reset_n]
+		DIRECTION = "SINK"
+		WIDTH = 1
+		INTERFACE_TYPE = "GENERAL"
+	[IO.phy_rx_ctl]
+		DIRECTION = "SOURCE"
+		WIDTH = 1
+		INTERFACE_TYPE = "GENERAL"
+	[IO.phy_rx_clk]
+		DIRECTION = "SOURCE"
+		WIDTH = 1
+		INTERFACE_TYPE = "CLOCK"
+	[IO.phy_rxd]
+		DIRECTION = "SOURCE"
+		WIDTH = 4
+		INTERFACE_TYPE = "GENERAL"
+	[IO.phy_tx_clk]
+		DIRECTION = "SINK"
+		WIDTH = 1
+		INTERFACE_TYPE = "CLOCK"
+	[IO.phy_tx_ctl]
+		DIRECTION = "SINK"
+		WIDTH = 1
+		INTERFACE_TYPE = "GENERAL"
+	[IO.phy_txd]
+		DIRECTION = "SINK"
+		WIDTH = 4
+		INTERFACE_TYPE = "GENERAL"
+
+
+[CONSTRAINTS]
+
+### DIFFERENTIAL clk ##
+# sys_clk_p = """
+# set_property LOC IBUFDS_GTE2_X0Y3 [get_cells refclk_ibuf]
+# create_clock -period 10.000 -name sys_clk [get_ports {sys_clk_p}] 
+# """
+# sys_clk_n = ""
+sys_clk_p = """
+
+# General configuration
+set_property CFGBVS VCCO                               [current_design]
+set_property CONFIG_VOLTAGE 3.3                        [current_design]
+set_property BITSTREAM.GENERAL.COMPRESS true           [current_design]
+
+# https://support.xilinx.com/s/question/0D52E00006lLh4gSAC/drc-lutlp1-combinatorial-loop-error-must-be-overridden?language=en_US
+# ERROR: [DRC LUTLP-1] Combinatorial Loop Alert: 11 LUT cells form a combinatorial loop. This can create a race condition. Timing
+# analysis may not be accurate.
+set_property SEVERITY {Warning} [get_drc_checks LUTLP-1] 
+set_property ALLOW_COMBINATORIAL_LOOPS TRUE
+
+
+# set_property CFGBVS value1 [current_design]
+#where value1 is either VCCO or GND
+# set_property CONFIG_VOLTAGE value2 [current_design]
+#where value2 is the voltage provided to configuration bank 0
+
+# for DRC routing: https://support.xilinx.com/s/article/71074?language=en_US
+resize_pblock [get_pblocks Stage1_cfgiob] -add {IOB_X0Y52:IOB_X0Y103}	
+
+create_clock -period 5.000 [get_ports sys_clk_p]
+set_property PACKAGE_PIN R4 [get_ports sys_clk_p]
+
+"""
+sys_clk_n = """
+
+set_property PACKAGE_PIN T4 [get_ports sys_clk_n]
+set_property IOSTANDARD DIFF_SSTL15 [get_ports sys_clk_n]
+
+"""
+# prev version
+# sys_rst_n = """
+# set_property -dict {PACKAGE_PIN L16   IOSTANDARD LVCMOS18  PULLUP true} [get_ports {sys_rst_n}]
+# set_false_path -from [get_ports sys_rst_n]
+# """
+sys_rst_n = """
+set_property PACKAGE_PIN F15 [get_ports sys_rst_n]
+set_property IOSTANDARD LVCMOS33 [get_ports sys_rst_n]
+
+set_false_path -from [get_ports {sys_rst_n}]
+set_input_delay 0 [get_ports {sys_rst_n}]
+
+"""
+# tcl commands commented out for testing ethernet first
+# TODO: Uncomment these for PCIe exp
+# pci_exp_txp = """
+# set_property CONFIG_MODE SPIx4 [current_design]
+# set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]
+# set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
+
+# set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+# set_property BITSTREAM.CONFIG.UNUSEDPIN Pullup [current_design]
+# set_property CFGBVS VCCO [current_design]
+# set_property CONFIG_VOLTAGE 3.3 [current_design]
+# """
+# pci_exp_txn = ""
+# pci_exp_rxp = ""
+# pci_exp_rxn = ""
+
+uart_tx = "set_property -dict {PACKAGE_PIN L15   IOSTANDARD LVCMOS18} [get_ports { uart_tx }]"
+uart_rx = "set_property -dict {PACKAGE_PIN L14    IOSTANDARD LVCMOS18} [get_ports { uart_rx }]"
+
+################## Ethernet connections ###################################################################
+# phy_resetn output port
+phy_reset_n = """
+
+set_property IOSTANDARD LVCMOS33 [get_ports phy_reset_n]
+set_property PACKAGE_PIN R14 [get_ports phy_reset_n]
+set_false_path -to [get_ports {phy_reset_n}]
+set_output_delay 0 [get_ports {phy_reset_n}]
+
+"""
+
+
+# ETH phy_rx_ctl INPUT
+phy_rx_ctl = """
+
+set_property IOSTANDARD LVCMOS33 [get_ports phy_rx_ctl]
+set_property PACKAGE_PIN R19 [get_ports phy_rx_ctl]
+
+"""
+
+# phy_rx_clk INPUT
+phy_rx_clk = """
+
+create_clock -period 8.000 [get_ports phy_rx_clk]
+set_property IOSTANDARD LVCMOS33 [get_ports phy_rx_clk]
+set_property PACKAGE_PIN V18 [get_ports phy_rx_clk]
+
+"""
+
+#Commented out MDIO and MDC ports INOUT and OUT since default config works and we don't need to program the MDIO MDC
+
+# phy_rxd INPUTs
+phy_rxd = """
+
+set_property IOSTANDARD LVCMOS33 [get_ports {phy_rxd[*]}]
+set_property PACKAGE_PIN P17 [get_ports {phy_rxd[3]}]
+set_property PACKAGE_PIN U17 [get_ports {phy_rxd[2]}]
+set_property PACKAGE_PIN U18 [get_ports {phy_rxd[1]}]
+set_property PACKAGE_PIN P19 [get_ports {phy_rxd[0]}]
+
+
+"""
+# mii_tx_clk INPUT 
+phy_tx_clk = """
+
+set_property IOSTANDARD LVCMOS33 [get_ports phy_tx_clk]
+set_property SLEW FAST [get_ports phy_tx_clk]
+set_property PACKAGE_PIN P15 [get_ports phy_tx_clk]
+
+"""
+
+
+#phy_tx_ctl OUTPUT
+phy_tx_ctl = """
+
+set_property IOSTANDARD LVCMOS33 [get_ports phy_tx_ctl]
+set_property SLEW FAST [get_ports phy_tx_ctl]
+set_property PACKAGE_PIN N17 [get_ports phy_tx_ctl]
+
+"""
+
+
+#phy_txd OUTPUTs
+phy_txd = """
+
+set_property IOSTANDARD LVCMOS33 [get_ports {phy_txd[*]}]
+set_property SLEW FAST [get_ports {phy_txd[*]}]
+set_property PACKAGE_PIN R16 [get_ports {phy_txd[3]}]
+set_property PACKAGE_PIN R17 [get_ports {phy_txd[2]}]
+set_property PACKAGE_PIN P16 [get_ports {phy_txd[1]}]
+set_property PACKAGE_PIN N14 [get_ports {phy_txd[0]}]
+
+"""
+
+######################################################################################################################
+

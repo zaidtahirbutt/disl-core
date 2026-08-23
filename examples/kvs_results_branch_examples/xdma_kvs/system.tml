@@ -1,0 +1,357 @@
+[DESCRIPTION]
+NAME = "xdma_kvs"
+
+[REQUIREMENTS]
+TOOLS = ["openocd_riscv", "riscv-gnu-toolchain", "vivado"]
+BOARDS = ["artya735t", "alinx_ax7a200t"]
+
+[EXTERNAL_IO]
+PORTS = ["sys_clk_p", "sys_clk_n", "sys_rst_n", "uart_tx","uart_rx", "pci_exp_txp", "pci_exp_txn", "pci_exp_rxp", "pci_exp_rxn"]
+
+
+[INSTANTIATIONS]
+	[INSTANTIATIONS.sys_reset_n_ibuf]
+		MODULE = "IBUF"
+	[INSTANTIATIONS.refclk_ibuf]
+		MODULE = "IBUFDS_GTE2"
+  [INSTANTIATIONS.xdma_0_i]
+    MODULE = "xdma_0"
+	[INSTANTIATIONS.debug]
+		MODULE = "uart_axi"
+		PARAMETERS.CLOCK_FREQ_MHZ = 125
+		PARAMETERS.UART_BAUD_RATE_BPS = 1000000
+		PARAMETERS.DATA_WIDTH = 32
+  [INSTANTIATIONS.bram_intf0_access_ctrl]
+    MODULE = "ss_access_controller"
+    PARAMETERS.NUM_PORTS = 3
+    PARAMETERS.PORT_IDX_BITS = 2
+  [INSTANTIATIONS.dw_converter]
+    MODULE = "data_width_converter"
+    PARAMETERS.DATA_A_WIDTH = 128
+    PARAMETERS.DATA_B_WIDTH = 32
+    PARAMETERS.ADDR_WIDTH = 32
+  [INSTANTIATIONS.main_memory]
+    MODULE = "bram_axi"
+    PARAMETERS.ADDR_WIDTH = 14
+    PARAMETERS.DATA_WIDTH = 32
+    PARAMETERS.INITIALIZE = 1
+    PARAMETERS.INIT_FILE  = "\"./firmware.hex\""
+  [INSTANTIATIONS.kvs_inst]
+    MODULE = "kvs"
+    PARAMETERS.LISTEN_PORT = 44000
+    PARAMETERS.HASH_WIDTH = 16
+    PARAMETERS.KEY_WIDTH = 32
+    PARAMETERS.VALUE_WIDTH = 32
+    PARAMETERS.VALUE_SIZE = 4
+  [INSTANTIATIONS.mmap_csr_inst]
+    MODULE = "mmap_csr"
+	[INSTANTIATIONS.cpu]
+		MODULE = "picorv32_axi"
+		ARCH = "rv32i"
+		ABI = "ilp32"
+		CROSS = "riscv32-unknown-elf-"
+		CROSSCFLAGS = "-O3 -Wno-int-conversion -ffreestanding -nostdlib"
+		CROSSLDFLAGS = "-ffreestanding -nostdlib  -Wl,-M"
+		LINKER_REQUIREMENTS = ["muldi3.S", "div.S", "riscv-asm.h"]
+		MEMORY = "main_memory"
+		PARAMETERS.ENABLE_INTERRUPTS = 0
+		PARAMETERS.INSTRUCTION_MEMORY_STARTING_ADDRESS = 0
+		PARAMETERS.INTERRUPT_HANDLER_STARTING_ADDRESS = 16
+		PARAMETERS.INSTRUCTION_AND_DATA_MEMORY_SIZE_BYTES = 16384
+		[INSTANTIATIONS.cpu.MAP]
+			[INSTANTIATIONS.cpu.MAP.main_memory]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x00004000"
+			[INSTANTIATIONS.cpu.MAP.mmap_csr]
+				ORIGIN = "0x10000000"
+				LENGTH = "0x10000000"
+			[INSTANTIATIONS.cpu.MAP.kvs_cfg]
+				ORIGIN = "0x70000000"
+				LENGTH = "0x10000000"
+			[INSTANTIATIONS.cpu.MAP.debug]
+				ORIGIN = "0x80000000"
+				LENGTH = "0x10000000"
+
+# All constant numbers must be strings for the remaining system
+
+[INTRINSICS]
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = 1
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:user_reset"
+ 		INPUT_SIGNAL_1 =  "MODULE:xdma_0_i:axi_aresetn"
+ 		OPERATION = "^"
+		INPUT_SIGNAL_2 =  "1'b1"
+ 	[[INTRINSICS.ASSIGNMENT]]
+ 		CUSTOM_SIGNAL_WIDTH = 1
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:user_resetn"
+ 		INPUT_SIGNAL =  "MODULE:xdma_0_i:axi_aresetn"
+ 		SIGNAL_BITS = ""
+ 	[[INTRINSICS.ASSIGNMENT]]
+ 		CUSTOM_SIGNAL_WIDTH = 1
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:user_clk"
+ 		INPUT_SIGNAL =  "MODULE:xdma_0_i:axi_aclk"
+ 		SIGNAL_BITS = ""
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_rvalid"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:rvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:rvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_rvalid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_arvalid"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:arvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:arvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_arvalid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_arready"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:arready"
+    SIGNAL_2 = "MODULE:dw_converter:b:arready"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_arready"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_rready"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:rready"
+    SIGNAL_2 = "MODULE:dw_converter:b:rready"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_rready"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_awvalid"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:awvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:awvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_awvalid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_awready"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:awready"
+    SIGNAL_2 = "MODULE:dw_converter:b:awready"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_awready"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_bvalid"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:bvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:bvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:b_valid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 3
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_bready"
+    SIGNAL_1 = "MODULE:kvs_inst:m_axil:bready"
+    SIGNAL_2 = "MODULE:dw_converter:b:bready"
+    SIGNAL_3 = "MODULE:cpu:mem:b_ready"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_axi_araddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu_axi_araddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu:clk"
+		TRIGGER = "MODULE:cpu:mem:axi_arvalid"
+		HOLD_VALUE = "MODULE:cpu:mem:axi_araddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_axi_awaddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu_axi_awaddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+		CLOCK = "MODULE:cpu:clk"
+		TRIGGER = "MODULE:cpu:mem:axi_awvalid"
+		HOLD_VALUE = "MODULE:cpu:mem:axi_awaddr"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:main_mem_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:main_memory:mem:axi_araddr"
+ 		OPERATION = ">>"
+		INPUT_SIGNAL_2 =  "2"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:main_mem_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:main_memory:mem:axi_awaddr"
+ 		OPERATION = ">>"
+		INPUT_SIGNAL_2 =  "2"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_araddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_awaddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:kvs_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:kvs_inst:s_axil:araddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.kvs_cfg.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:kvs_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:kvs_inst:s_axil:awaddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.kvs_cfg.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:mmap_csr_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:mmap_csr_inst:b_axil:araddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.mmap_csr.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:mmap_csr_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:mmap_csr_inst:b_axil:awaddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.mmap_csr.ORIGIN"
+
+
+[INTERCONNECT]
+	STATIC = [
+        ["BOARD:sys_clk_p", "MODULE:refclk_ibuf:I"],
+        ["BOARD:sys_clk_n", "MODULE:refclk_ibuf:IB"],
+        ["BOARD:uart_rx", "MODULE:debug:urx"],
+        ["BOARD:uart_tx", "MODULE:debug:utx"],
+ 				["MODULE:refclk_ibuf:O", "MODULE:xdma_0_i:sys_clk"], 
+        ["BOARD:sys_rst_n", "MODULE:sys_reset_n_ibuf:I"],
+        ["MODULE:sys_reset_n_ibuf:O", "MODULE:xdma_0_i:sys_rst_n"],
+        ["MODULE:xdma_0_i:pci_exp_txp", "BOARD:pci_exp_txp"],
+        ["MODULE:xdma_0_i:pci_exp_txn", "BOARD:pci_exp_txn"],
+        ["BOARD:pci_exp_rxp", "MODULE:xdma_0_i:pci_exp_rxp"],
+        ["BOARD:pci_exp_rxn", "MODULE:xdma_0_i:pci_exp_rxn"],
+				["CUSTOM:user_clk", "MODULE:cpu:clk"], 
+				["CUSTOM:user_clk", "MODULE:debug:clk"], 
+				["CUSTOM:user_clk", "MODULE:mmap_csr_inst:clk"], 
+				["CUSTOM:user_reset", "MODULE:mmap_csr_inst:rst"], 
+				["CUSTOM:user_reset", "MODULE:debug:rst"], 
+				["CUSTOM:user_resetn", "MODULE:cpu:resetn"], 
+        ["MODULE:xdma_0_i:m_axil", "MODULE:mmap_csr_inst:a_axil"],
+        ["CUSTOM:bram_intf0_rvalid", "MODULE:bram_intf0_access_ctrl:rvalid"],
+        ["CUSTOM:bram_intf0_rready", "MODULE:bram_intf0_access_ctrl:rready"],
+        ["CUSTOM:bram_intf0_arvalid", "MODULE:bram_intf0_access_ctrl:arvalid"],
+        ["CUSTOM:bram_intf0_arready", "MODULE:bram_intf0_access_ctrl:arready"],
+        ["CUSTOM:bram_intf0_awvalid", "MODULE:bram_intf0_access_ctrl:awvalid"],
+        ["CUSTOM:bram_intf0_awready", "MODULE:bram_intf0_access_ctrl:awready"],
+        ["CUSTOM:bram_intf0_bvalid", "MODULE:bram_intf0_access_ctrl:bvalid"],
+        ["CUSTOM:bram_intf0_bready", "MODULE:bram_intf0_access_ctrl:bready"],
+        ["MODULE:xdma_0_i:m_axi", "MODULE:dw_converter:a"],
+        ["MODULE:mmap_csr_inst:usr_irq_req", "MODULE:xdma_0_i:usr_irq_req"],
+        ["MODULE:xdma_0_i:usr_irq_ack", "MODULE:mmap_csr_inst:usr_irq_ack"],
+# data_width_converter
+        ["CUSTOM:user_clk", "MODULE:dw_converter:clk"],
+        ["CUSTOM:user_reset", "MODULE:dw_converter:rst"],
+        ["CUSTOM:user_clk", "MODULE:bram_intf0_access_ctrl:clk"],
+        ["CUSTOM:user_reset", "MODULE:bram_intf0_access_ctrl:reset"],
+        ["CUSTOM:user_clk", "MODULE:main_memory:clk"],
+        ["CUSTOM:user_reset", "MODULE:main_memory:rst"],
+# Key value store
+        ["CUSTOM:user_clk", "MODULE:kvs_inst:clk"],
+        ["CUSTOM:user_reset", "MODULE:kvs_inst:rst"]
+	]
+
+	OVERRIDES = [ # replace port signal assignments at the end with the overrides
+			["MODULE:refclk_ibuf:CEB","0"],
+      ["MODULE:xdma_0_i:m_axi_bid", "0"],
+      ["MODULE:xdma_0_i:m_axi_rid", "0"],
+      ["MODULE:xdma_0_i:s_axil_awprot", "0"],
+      ["MODULE:xdma_0_i:s_axil_arprot", "0"],
+      ["MODULE:dw_converter:b:rresp", "0"],
+      ["MODULE:main_memory:mem:axi_araddr", "CUSTOM:main_mem_araddr"],
+      ["MODULE:main_memory:mem:axi_awaddr", "CUSTOM:main_mem_awaddr"],
+      ["MODULE:debug:a:axi_araddr", "CUSTOM:debug_araddr"],
+      ["MODULE:debug:a:axi_awaddr", "CUSTOM:debug_awaddr"],
+      ["MODULE:kvs_inst:s_axil:araddr", "CUSTOM:kvs_araddr"],
+      ["MODULE:kvs_inst:s_axil:awaddr", "CUSTOM:kvs_awaddr"],
+      ["MODULE:mmap_csr_inst:b_axil:araddr", "CUSTOM:mmap_csr_araddr"],
+      ["MODULE:mmap_csr_inst:b_axil:awaddr", "CUSTOM:mmap_csr_awaddr"],
+      ["MODULE:xdma_0_i:c2h_dsc_byp:src_addr_0", "0"],
+      ["MODULE:xdma_0_i:c2h_dsc_byp:dst_addr_0", "0"],
+      ["MODULE:xdma_0_i:c2h_dsc_byp:len_0", "0"],
+      ["MODULE:xdma_0_i:c2h_dsc_byp:ctl_0", "0"],
+      ["MODULE:xdma_0_i:c2h_dsc_byp:load_0", "0"],
+      ["MODULE:xdma_0_i:h2c_dsc_byp:src_addr_0", "0"],
+      ["MODULE:xdma_0_i:h2c_dsc_byp:dst_addr_0", "0"],
+      ["MODULE:xdma_0_i:h2c_dsc_byp:len_0", "0"],
+      ["MODULE:xdma_0_i:h2c_dsc_byp:ctl_0", "0"],
+      ["MODULE:xdma_0_i:h2c_dsc_byp:load_0", "0"],
+      ["MODULE:xdma_0_i:s_axil:awaddr", "0"],
+      ["MODULE:xdma_0_i:s_axil:awvalid", "0"],
+      ["MODULE:xdma_0_i:s_axil:wdata", "0"],
+      ["MODULE:xdma_0_i:s_axil:wstrb", "0"],
+      ["MODULE:xdma_0_i:s_axil:wvalid", "0"],
+      ["MODULE:xdma_0_i:s_axil:bready", "0"],
+      ["MODULE:xdma_0_i:s_axil:araddr", "0"],
+      ["MODULE:xdma_0_i:s_axil:arvalid", "0"],
+      ["MODULE:xdma_0_i:s_axil:rready", "0"]
+	]
+
+
+	[INTERCONNECT.DYNAMIC."MODULE:cpu:mem"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.main_memory MODULE:main_memory:mem",
+          "SYSTEM:INSTANTIATIONS.cpu.MAP.mmap_csr MODULE:mmap_csr_inst:b_axil",
+          "SYSTEM:INSTANTIATIONS.cpu.MAP.kvs_cfg MODULE:kvs_inst:s_axil",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu_axi_awaddr",
+						"WRITE_RESPONSE CUSTOM:cpu_axi_awaddr",
+						"READ_DATA CUSTOM:cpu_axi_araddr"
+			]
+
+  [INTERCONNECT.DYNAMIC."MODULE:debug:a"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:debug:a".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:kvs_inst:s_axil"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:kvs_inst:s_axil".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:mmap_csr_inst:b_axil"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:mmap_csr_inst:b_axil".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:kvs_inst:m_axil"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:kvs_inst:m_axil".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:main_memory:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:main_memory:mem"]
+    GROUP_SELECT = "MODULE:bram_intf0_access_ctrl:group_select"
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:main_memory:mem".GROUPS]]
+      SELECT_VALUE = 0
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"
+    [[INTERCONNECT.DYNAMIC."MODULE:main_memory:mem".GROUPS]]
+      SELECT_VALUE = 1
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:dw_converter:b"
+    [[INTERCONNECT.DYNAMIC."MODULE:main_memory:mem".GROUPS]]
+      SELECT_VALUE = 2
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:kvs_inst:m_axil"
+
+  [INTERCONNECT.DYNAMIC."MODULE:dw_converter:b"]
+    GROUP_SELECT = "MODULE:bram_intf0_access_ctrl:group_select"
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:dw_converter:b".GROUPS]]
+      SELECT_VALUE = 1
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:main_memory:mem"

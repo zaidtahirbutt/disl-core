@@ -1,0 +1,409 @@
+[DESCRIPTION]
+NAME = "virtio_net_device_udp_response"
+
+[REQUIREMENTS]
+TOOLS = ["openocd_riscv", "riscv-gnu-toolchain", "vivado"]
+BOARDS = ["alinx_ax7a200t"]
+
+[EXTERNAL_IO]
+PORTS = ["sys_clk_p", "sys_clk_n", "sys_rst_n", "uart_tx","uart_rx", "pci_exp_txp", "pci_exp_txn", "pci_exp_rxp", "pci_exp_rxn"]
+
+
+[INSTANTIATIONS]
+	[INSTANTIATIONS.sys_reset_n_ibuf]
+		MODULE = "IBUF"
+	[INSTANTIATIONS.refclk_ibuf]
+		MODULE = "IBUFDS_GTE2"
+  [INSTANTIATIONS.xdma_xc7_i]
+    MODULE = "xdma_xc7"
+  [INSTANTIATIONS.pcie_controller_inst]
+    MODULE = "pcie_controller"
+    PARAMETERS.NUM_QUEUES = 2
+    PARAMETERS.SLEEP_TIMER_VAL = 100
+	[INSTANTIATIONS.debug]
+		MODULE = "uart_axi"
+		PARAMETERS.CLOCK_FREQ_MHZ = 125
+		PARAMETERS.UART_BAUD_RATE_BPS = 1000000
+		PARAMETERS.DATA_WIDTH = 32
+  [INSTANTIATIONS.bram_intf0_access_ctrl]
+    MODULE = "ss_access_controller"
+    PARAMETERS.NUM_PORTS = 4
+    PARAMETERS.PORT_IDX_BITS = 2
+  [INSTANTIATIONS.endpoint_select_inst]
+    MODULE = "endpoint_selector"
+    PARAMETERS.AXI_BUS_WIDTH = 128
+    PARAMETERS.AXI_ADDR_WIDTH = 64
+  [INSTANTIATIONS.dw_converter]
+    MODULE = "data_width_converter"
+    PARAMETERS.DATA_A_WIDTH = 128
+    PARAMETERS.DATA_B_WIDTH = 32
+    PARAMETERS.ADDR_WIDTH = 32
+  [INSTANTIATIONS.main_memory]
+    MODULE = "bram_axi"
+    PARAMETERS.ADDR_WIDTH = 14
+    PARAMETERS.DATA_WIDTH = 32
+    PARAMETERS.INITIALIZE = 1
+    PARAMETERS.INIT_FILE  = "\"./cpu_firmware.hex\""
+  [INSTANTIATIONS.intf_splitter2]
+    MODULE = "interface_splitter_2"
+    PARAMETERS.DATA_WIDTH = 32
+    PARAMETERS.ADDR_WIDTH = 32
+    PARAMETERS.STRB_WIDTH = 4
+  [INSTANTIATIONS.intf_concat2]
+    MODULE = "interface_concat_2"
+    PARAMETERS.DATA_WIDTH = 32
+    PARAMETERS.ADDR_WIDTH = 32
+    PARAMETERS.STRB_WIDTH = 4
+	[INSTANTIATIONS.cpu]
+		MODULE = "picorv32_axi"
+		ARCH = "rv32i"
+		ABI = "ilp32"
+		CROSS = "riscv32-unknown-elf-"
+		CROSSCFLAGS = "-O3 -Wno-int-conversion -ffreestanding -nostdlib"
+		CROSSLDFLAGS = "-ffreestanding -nostdlib  -Wl,-M"
+		LINKER_REQUIREMENTS = ["muldi3.S", "div.S", "riscv-asm.h"]
+		MEMORY = "main_memory"
+		PARAMETERS.ENABLE_INTERRUPTS = 0
+		PARAMETERS.INSTRUCTION_MEMORY_STARTING_ADDRESS = 0
+		PARAMETERS.INTERRUPT_HANDLER_STARTING_ADDRESS = 16
+		PARAMETERS.INSTRUCTION_AND_DATA_MEMORY_SIZE_BYTES = 16384
+		[INSTANTIATIONS.cpu.MAP]
+			[INSTANTIATIONS.cpu.MAP.main_memory]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x00004000"
+			[INSTANTIATIONS.cpu.MAP.pci_cfg0]
+				ORIGIN = "0x10000000"
+				LENGTH = "0x10000000"
+			[INSTANTIATIONS.cpu.MAP.pci_cfg1]
+				ORIGIN = "0x20000000"
+				LENGTH = "0x10000000"
+			[INSTANTIATIONS.cpu.MAP.debug]
+				ORIGIN = "0x80000000"
+				LENGTH = "0x10000000"
+
+# All constant numbers must be strings for the remaining system
+
+[INTRINSICS]
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = 1
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:user_reset"
+ 		INPUT_SIGNAL_1 =  "MODULE:xdma_xc7_i:axi_aresetn"
+ 		OPERATION = "^"
+		INPUT_SIGNAL_2 =  "1'b1"
+ 	[[INTRINSICS.ASSIGNMENT]]
+ 		CUSTOM_SIGNAL_WIDTH = 1
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:user_resetn"
+ 		INPUT_SIGNAL =  "MODULE:xdma_xc7_i:axi_aresetn"
+ 		SIGNAL_BITS = ""
+ 	[[INTRINSICS.ASSIGNMENT]]
+ 		CUSTOM_SIGNAL_WIDTH = 1
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:user_clk"
+ 		INPUT_SIGNAL =  "MODULE:xdma_xc7_i:axi_aclk"
+ 		SIGNAL_BITS = ""
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_rvalid"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_rvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:rvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_rvalid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_arvalid"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_arvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:arvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_arvalid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_arready"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_arready"
+    SIGNAL_2 = "MODULE:dw_converter:b:arready"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_arready"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_rready"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_rready"
+    SIGNAL_2 = "MODULE:dw_converter:b:rready"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_rready"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_awvalid"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_awvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:awvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_awvalid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_awready"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_awready"
+    SIGNAL_2 = "MODULE:dw_converter:b:awready"
+    SIGNAL_3 = "MODULE:cpu:mem:axi_awready"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_bvalid"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_bvalid"
+    SIGNAL_2 = "MODULE:dw_converter:b:bvalid"
+    SIGNAL_3 = "MODULE:cpu:mem:b_valid"
+	[[INTRINSICS.CONCAT3]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:bram_intf0_bready"
+    SIGNAL_1 = "MODULE:pcie_controller_inst:m_axil_bready"
+    SIGNAL_2 = "MODULE:dw_converter:b:bready"
+    SIGNAL_3 = "MODULE:cpu:mem:b_ready"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_axi_araddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu_axi_araddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu:clk"
+		TRIGGER = "MODULE:cpu:mem:axi_arvalid"
+		HOLD_VALUE = "MODULE:cpu:mem:axi_araddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_axi_awaddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu_axi_awaddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+		CLOCK = "MODULE:cpu:clk"
+		TRIGGER = "MODULE:cpu:mem:axi_awvalid"
+		HOLD_VALUE = "MODULE:cpu:mem:axi_awaddr"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:main_mem_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:main_memory:mem:axi_araddr"
+ 		OPERATION = ">>"
+		INPUT_SIGNAL_2 =  "2"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:main_mem_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:main_memory:mem:axi_awaddr"
+ 		OPERATION = ">>"
+		INPUT_SIGNAL_2 =  "2"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:intf_concat_a0_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:intf_concat2:a0:araddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.pci_cfg0.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:intf_concat_a0_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:intf_concat2:a0:awaddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.pci_cfg0.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:intf_concat_a1_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:intf_concat2:a1:araddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.pci_cfg1.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:intf_concat_a1_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:intf_concat2:a1:awaddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.pci_cfg1.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_araddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_araddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+ 	[[INTRINSICS.COMBINATIONAL]]
+ 		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+ 		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_awaddr"
+ 		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_awaddr"
+ 		OPERATION = "-"
+		INPUT_SIGNAL_2 = "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+
+
+[INTERCONNECT]
+	STATIC = [
+        ["BOARD:sys_clk_p", "MODULE:refclk_ibuf:I"],
+        ["BOARD:sys_clk_n", "MODULE:refclk_ibuf:IB"],
+        ["BOARD:uart_rx", "MODULE:debug:urx"],
+        ["BOARD:uart_tx", "MODULE:debug:utx"],
+ 				["MODULE:refclk_ibuf:O", "MODULE:xdma_xc7_i:sys_clk"], 
+        ["BOARD:sys_rst_n", "MODULE:sys_reset_n_ibuf:I"],
+        ["MODULE:sys_reset_n_ibuf:O", "MODULE:xdma_xc7_i:sys_rst_n"],
+        ["MODULE:xdma_xc7_i:pci_exp_txp", "BOARD:pci_exp_txp"],
+        ["MODULE:xdma_xc7_i:pci_exp_txn", "BOARD:pci_exp_txn"],
+        ["BOARD:pci_exp_rxp", "MODULE:xdma_xc7_i:pci_exp_rxp"],
+        ["BOARD:pci_exp_rxn", "MODULE:xdma_xc7_i:pci_exp_rxn"],
+				["CUSTOM:user_clk", "MODULE:cpu:clk"], 
+				["CUSTOM:user_clk", "MODULE:debug:clk"], 
+				["CUSTOM:user_clk", "MODULE:pcie_controller_inst:clk"], 
+				["CUSTOM:user_reset", "MODULE:pcie_controller_inst:reset"], 
+				["CUSTOM:user_reset", "MODULE:debug:rst"], 
+				["CUSTOM:user_resetn", "MODULE:cpu:resetn"], 
+        ["MODULE:xdma_xc7_i:m_axil", "MODULE:pcie_controller_inst:s_axil"],
+        ["MODULE:pcie_controller_inst:c2h_dsc_byp", "MODULE:xdma_xc7_i:c2h_dsc_byp"],
+        ["MODULE:pcie_controller_inst:h2c_dsc_byp", "MODULE:xdma_xc7_i:h2c_dsc_byp"],
+        ["CUSTOM:bram_intf0_rvalid", "MODULE:bram_intf0_access_ctrl:rvalid"],
+        ["CUSTOM:bram_intf0_rready", "MODULE:bram_intf0_access_ctrl:rready"],
+        ["CUSTOM:bram_intf0_arvalid", "MODULE:bram_intf0_access_ctrl:arvalid"],
+        ["CUSTOM:bram_intf0_arready", "MODULE:bram_intf0_access_ctrl:arready"],
+        ["CUSTOM:bram_intf0_awvalid", "MODULE:bram_intf0_access_ctrl:awvalid"],
+        ["CUSTOM:bram_intf0_awready", "MODULE:bram_intf0_access_ctrl:awready"],
+        ["CUSTOM:bram_intf0_bvalid", "MODULE:bram_intf0_access_ctrl:bvalid"],
+        ["CUSTOM:bram_intf0_bready", "MODULE:bram_intf0_access_ctrl:bready"],
+        ["MODULE:xdma_xc7_i:m_axi", "MODULE:endpoint_select_inst:pci_axi"],
+        ["MODULE:pcie_controller_inst:dma_engine_config_axil", "MODULE:xdma_xc7_i:s_axil"],
+        ["MODULE:xdma_xc7_i:c2h_sts_0", "MODULE:pcie_controller_inst:c2h_sts_0"],
+        ["MODULE:xdma_xc7_i:h2c_sts_0", "MODULE:pcie_controller_inst:h2c_sts_0"],
+        ["MODULE:pcie_controller_inst:usr_irq_req", "MODULE:xdma_xc7_i:usr_irq_req"],
+        ["MODULE:xdma_xc7_i:usr_irq_ack", "MODULE:pcie_controller_inst:usr_irq_ack"],
+# endpoint_selector
+        ["MODULE:pcie_controller_inst:endpoint_ctrl", "MODULE:endpoint_select_inst:endpoint_ctrl"],
+        ["MODULE:endpoint_select_inst:vc_axi", "MODULE:pcie_controller_inst:s_axi"],
+        ["MODULE:endpoint_select_inst:ss", "MODULE:dw_converter:a"],
+        ["MODULE:endpoint_select_inst:ss:wvalid", "MODULE:pcie_controller_inst:s_axi_wvalid_to_mem"],
+        ["MODULE:endpoint_select_inst:ss:wstrb", "MODULE:pcie_controller_inst:s_axi_wstrb_to_mem"],
+        ["MODULE:dw_converter:a:rvalid", "MODULE:pcie_controller_inst:s_axi_rvalid_from_mem"],
+        ["MODULE:dw_converter:a:wready", "MODULE:pcie_controller_inst:s_axi_wready_from_mem"],
+        ["MODULE:endpoint_select_inst:ss:rready", "MODULE:pcie_controller_inst:s_axi_rready_to_mem"],
+        ["MODULE:endpoint_select_inst:ss:bready", "MODULE:pcie_controller_inst:s_axi_bready_to_mem"],
+        ["MODULE:dw_converter:a:bvalid", "MODULE:pcie_controller_inst:s_axi_bvalid_from_mem"],
+# data_width_converter
+        ["CUSTOM:user_clk", "MODULE:dw_converter:clk"],
+        ["CUSTOM:user_reset", "MODULE:dw_converter:rst"],
+# pcie_controller to interface splitter
+        ["MODULE:pcie_controller_inst:m_axil_araddr", "MODULE:intf_splitter2:a_araddr"],
+        ["MODULE:pcie_controller_inst:m_axil_arvalid", "MODULE:intf_splitter2:a_arvalid"],
+        ["MODULE:pcie_controller_inst:m_axil_arready", "MODULE:intf_splitter2:a_arready"],
+        ["MODULE:pcie_controller_inst:m_axil_awaddr", "MODULE:intf_splitter2:a_awaddr"],
+        ["MODULE:pcie_controller_inst:m_axil_awvalid", "MODULE:intf_splitter2:a_awvalid"],
+        ["MODULE:pcie_controller_inst:m_axil_awready", "MODULE:intf_splitter2:a_awready"],
+        ["MODULE:pcie_controller_inst:m_axil_wdata", "MODULE:intf_splitter2:a_wdata"],
+        ["MODULE:pcie_controller_inst:m_axil_wvalid", "MODULE:intf_splitter2:a_wvalid"],
+        ["MODULE:pcie_controller_inst:m_axil_wready", "MODULE:intf_splitter2:a_wready"],
+        ["MODULE:pcie_controller_inst:m_axil_wstrb", "MODULE:intf_splitter2:a_wstrb"],
+        ["MODULE:pcie_controller_inst:m_axil_rdata", "MODULE:intf_splitter2:a_rdata"],
+        ["MODULE:pcie_controller_inst:m_axil_rvalid", "MODULE:intf_splitter2:a_rvalid"],
+        ["MODULE:pcie_controller_inst:m_axil_rready", "MODULE:intf_splitter2:a_rready"],
+        ["MODULE:pcie_controller_inst:m_axil_rresp", "MODULE:intf_splitter2:a_rresp"],
+        ["MODULE:pcie_controller_inst:m_axil_bvalid", "MODULE:intf_splitter2:a_bvalid"],
+        ["MODULE:pcie_controller_inst:m_axil_bready", "MODULE:intf_splitter2:a_bready"],
+        ["MODULE:pcie_controller_inst:m_axil_bresp", "MODULE:intf_splitter2:a_bresp"],
+        ["MODULE:intf_concat2:b_awvalid", "MODULE:pcie_controller_inst:cfg_intf_axil_awvalid"],
+        ["MODULE:intf_concat2:b_awready", "MODULE:pcie_controller_inst:cfg_intf_axil_awready"],
+        ["MODULE:intf_concat2:b_awaddr", "MODULE:pcie_controller_inst:cfg_intf_axil_awaddr"],
+        ["MODULE:intf_concat2:b_wvalid", "MODULE:pcie_controller_inst:cfg_intf_axil_wvalid"],
+        ["MODULE:intf_concat2:b_wready", "MODULE:pcie_controller_inst:cfg_intf_axil_wready"],
+        ["MODULE:intf_concat2:b_wdata", "MODULE:pcie_controller_inst:cfg_intf_axil_wdata"],
+        ["MODULE:intf_concat2:b_wstrb", "MODULE:pcie_controller_inst:cfg_intf_axil_wstrb"],
+        ["MODULE:intf_concat2:b_bvalid", "MODULE:pcie_controller_inst:cfg_intf_axil_bvalid"],
+        ["MODULE:intf_concat2:b_bready", "MODULE:pcie_controller_inst:cfg_intf_axil_bready"],
+        ["MODULE:intf_concat2:b_bresp", "MODULE:pcie_controller_inst:cfg_intf_axil_bresp"],
+        ["MODULE:intf_concat2:b_arvalid", "MODULE:pcie_controller_inst:cfg_intf_axil_arvalid"],
+        ["MODULE:intf_concat2:b_arready", "MODULE:pcie_controller_inst:cfg_intf_axil_arready"],
+        ["MODULE:intf_concat2:b_araddr", "MODULE:pcie_controller_inst:cfg_intf_axil_araddr"],
+        ["MODULE:intf_concat2:b_rvalid", "MODULE:pcie_controller_inst:cfg_intf_axil_rvalid"],
+        ["MODULE:intf_concat2:b_rready", "MODULE:pcie_controller_inst:cfg_intf_axil_rready"],
+        ["MODULE:intf_concat2:b_rdata", "MODULE:pcie_controller_inst:cfg_intf_axil_rdata"],
+        ["MODULE:intf_concat2:b_rresp", "MODULE:pcie_controller_inst:cfg_intf_axil_rresp"],
+        ["CUSTOM:user_clk", "MODULE:bram_intf0_access_ctrl:clk"],
+        ["CUSTOM:user_reset", "MODULE:bram_intf0_access_ctrl:reset"],
+        ["CUSTOM:user_clk", "MODULE:main_memory:clk"],
+        ["CUSTOM:user_reset", "MODULE:main_memory:rst"]
+	]
+
+	OVERRIDES = [ # replace port signal assignments at the end with the overrides
+			["MODULE:refclk_ibuf:CEB","0"],
+      ["MODULE:xdma_xc7_i:m_axi_bid", "0"],
+      ["MODULE:xdma_xc7_i:m_axi_rid", "0"],
+      ["MODULE:xdma_xc7_i:s_axil_awprot", "0"],
+      ["MODULE:xdma_xc7_i:s_axil_arprot", "0"],
+      ["MODULE:dw_converter:b:rresp", "0"],
+      ["MODULE:pcie_controller_inst:interrupt_usr_ack", "0"],
+      ["MODULE:main_memory:mem:axi_araddr", "CUSTOM:main_mem_araddr"],
+      ["MODULE:main_memory:mem:axi_awaddr", "CUSTOM:main_mem_awaddr"],
+      ["MODULE:intf_concat2:a0:araddr", "CUSTOM:intf_concat_a0_araddr"],
+      ["MODULE:intf_concat2:a0:awaddr", "CUSTOM:intf_concat_a0_awaddr"],
+      ["MODULE:intf_concat2:a1:araddr", "CUSTOM:intf_concat_a1_araddr"],
+      ["MODULE:intf_concat2:a1:awaddr", "CUSTOM:intf_concat_a1_awaddr"],
+      ["MODULE:debug:a:axi_araddr", "CUSTOM:debug_araddr"],
+      ["MODULE:debug:a:axi_awaddr", "CUSTOM:debug_awaddr"],
+      ["MODULE:intf_splitter2:b0:rresp", "0"],
+      ["MODULE:intf_splitter2:b1:rresp", "0"]
+	]
+
+
+	[INTERCONNECT.DYNAMIC."MODULE:cpu:mem"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.main_memory MODULE:main_memory:mem",
+          "SYSTEM:INSTANTIATIONS.cpu.MAP.pci_cfg0 MODULE:intf_concat2:a0",
+          "SYSTEM:INSTANTIATIONS.cpu.MAP.pci_cfg1 MODULE:intf_concat2:a1",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu_axi_awaddr",
+						"WRITE_RESPONSE CUSTOM:cpu_axi_awaddr",
+						"READ_DATA CUSTOM:cpu_axi_araddr"
+			]
+
+  [INTERCONNECT.DYNAMIC."MODULE:debug:a"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:debug:a".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:main_memory:mem"]
+    GROUP_SELECT = "MODULE:bram_intf0_access_ctrl:group_select"
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:main_memory:mem".GROUPS]]
+      SELECT_VALUE = 0
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"
+    [[INTERCONNECT.DYNAMIC."MODULE:main_memory:mem".GROUPS]]
+      SELECT_VALUE = 1
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:dw_converter:b"
+    [[INTERCONNECT.DYNAMIC."MODULE:main_memory:mem".GROUPS]]
+      SELECT_VALUE = 2
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:intf_splitter2:b0"
+    [[INTERCONNECT.DYNAMIC."MODULE:main_memory:mem".GROUPS]]
+      SELECT_VALUE = 3
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:intf_splitter2:b1"
+
+  [INTERCONNECT.DYNAMIC."MODULE:dw_converter:b"]
+    GROUP_SELECT = "MODULE:bram_intf0_access_ctrl:group_select"
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:dw_converter:b".GROUPS]]
+      SELECT_VALUE = 1
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:main_memory:mem"
+    
+  [INTERCONNECT.DYNAMIC."MODULE:intf_splitter2:b0"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:intf_splitter2:b0".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:main_memory:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:intf_splitter2:b1"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:intf_splitter2:b1".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:main_memory:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:intf_concat2:a0"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:intf_concat2:a0".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"
+
+  [INTERCONNECT.DYNAMIC."MODULE:intf_concat2:a1"]
+    GROUP_SELECT = ""
+    HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+    [[INTERCONNECT.DYNAMIC."MODULE:intf_concat2:a1".GROUPS]]
+      INTERCONNECT_TYPE = "ONE_TO_ONE"
+      INTERFACE = "MODULE:cpu:mem"

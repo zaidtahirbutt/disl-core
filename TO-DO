@@ -1,0 +1,5 @@
+- Add support for Many-to-One connectivity. Example usage is a CPU with separate instruction and data buses, and a single shared cache  
+
+- Add pre and post build verification 
+
+- known bug: using "i2cbus" as instance name works but "i2c_bus" causes a bug

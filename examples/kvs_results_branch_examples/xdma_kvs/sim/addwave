@@ -1,0 +1,78 @@
+add wave -position insertpoint  \
+sim:/tb_kvs/DUT/clk \
+sim:/tb_kvs/DUT/rst
+
+add wave -position insertpoint -radix decimal \
+sim:/tb_kvs/cycle_count
+
+add wave -position insertpoint -group state_variables \
+sim:/tb_kvs/DUT/kvs_state \
+sim:/tb_kvs/DUT/csr_rd_state \
+sim:/tb_kvs/DUT/csr_wr_state \
+sim:/tb_kvs/DUT/fsm_nxt_state
+
+add wave -position insertpoint -group kvs_config \
+sim:/tb_kvs/DUT/s_axil_awaddr \
+sim:/tb_kvs/DUT/s_axil_awvalid \
+sim:/tb_kvs/DUT/s_axil_awready \
+sim:/tb_kvs/DUT/s_axil_wdata \
+sim:/tb_kvs/DUT/s_axil_wstrb \
+sim:/tb_kvs/DUT/s_axil_wvalid \
+sim:/tb_kvs/DUT/s_axil_wready \
+sim:/tb_kvs/DUT/s_axil_bresp \
+sim:/tb_kvs/DUT/s_axil_bvalid \
+sim:/tb_kvs/DUT/s_axil_bready \
+sim:/tb_kvs/DUT/s_axil_araddr \
+sim:/tb_kvs/DUT/s_axil_arvalid \
+sim:/tb_kvs/DUT/s_axil_arready \
+sim:/tb_kvs/DUT/s_axil_rdata \
+sim:/tb_kvs/DUT/s_axil_rresp \
+sim:/tb_kvs/DUT/s_axil_rvalid \
+sim:/tb_kvs/DUT/s_axil_rready
+
+add wave -position insertpoint -group memory_intf \
+sim:/tb_kvs/DUT/m_axil_awaddr \
+sim:/tb_kvs/DUT/m_axil_awvalid \
+sim:/tb_kvs/DUT/m_axil_awready \
+sim:/tb_kvs/DUT/m_axil_wdata \
+sim:/tb_kvs/DUT/m_axil_wstrb \
+sim:/tb_kvs/DUT/m_axil_wvalid \
+sim:/tb_kvs/DUT/m_axil_wready \
+sim:/tb_kvs/DUT/m_axil_bresp \
+sim:/tb_kvs/DUT/m_axil_bvalid \
+sim:/tb_kvs/DUT/m_axil_bready \
+sim:/tb_kvs/DUT/m_axil_araddr \
+sim:/tb_kvs/DUT/m_axil_arvalid \
+sim:/tb_kvs/DUT/m_axil_arready \
+sim:/tb_kvs/DUT/m_axil_rdata \
+sim:/tb_kvs/DUT/m_axil_rresp \
+sim:/tb_kvs/DUT/m_axil_rvalid \
+sim:/tb_kvs/DUT/m_axil_rready
+
+add wave -position insertpoint -group CSR \
+sim:/tb_kvs/DUT/kvs_csr.kvs_csr_struct \
+sim:/tb_kvs/DUT/kvs_csr.kvs_csr_dwords \
+sim:/tb_kvs/DUT/csr_awaddr \
+sim:/tb_kvs/DUT/csr_araddr
+
+add wave -position insertpoint -group CRC \
+sim:/tb_kvs/DUT/crc16_inst/Reset \
+sim:/tb_kvs/DUT/crc16_inst/Clk \
+sim:/tb_kvs/DUT/crc16_inst/Init \
+sim:/tb_kvs/DUT/crc16_inst/Frame_data \
+sim:/tb_kvs/DUT/crc16_inst/Data_en \
+sim:/tb_kvs/DUT/crc16_inst/CRC_rd \
+sim:/tb_kvs/DUT/crc16_inst/CRC_out \
+sim:/tb_kvs/DUT/crc16_inst/CRC_end \
+sim:/tb_kvs/DUT/crc16_inst/CRC_reg \
+sim:/tb_kvs/DUT/crc16_inst/CRC_temp
+
+add wave -position insertpoint -group key_store \
+sim:/tb_kvs/DUT/ks_addr \
+sim:/tb_kvs/DUT/ks_din \
+sim:/tb_kvs/DUT/ks_we \
+sim:/tb_kvs/DUT/ks_dout
+
+# temp
+add wave sim:/tb_kvs/DUT/crc16_byte_count
+add wave sim:/tb_kvs/DUT/memcache_key_length

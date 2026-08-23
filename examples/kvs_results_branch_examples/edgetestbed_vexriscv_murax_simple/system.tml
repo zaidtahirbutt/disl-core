@@ -1,0 +1,333 @@
+[DESCRIPTION]
+NAME = "edgetestbed_vexriscv_murax_simple"
+
+[REQUIREMENTS]
+TOOLS = ["openocd_riscv", "riscv-gnu-toolchain", "vivado"]
+BOARDS = ["artya735t"]
+
+[EXTERNAL_IO]
+PORTS = ["clk_i","sw","led","ddr","uart_tx","uart_rx"]
+
+
+[INSTANTIATIONS]
+	[INSTANTIATIONS.cache]
+		MODULE = "cache"
+		PARAMETERS.CACHE_SIZE = 16
+		PARAMETERS.CONFIGADDR_START_CACHE_POLICY = 0
+		PARAMETERS.CONFIGADDR_END_CACHE_POLICY = 0
+	[INSTANTIATIONS.clb]
+		MODULE = "cache_line_builder"
+		PARAMETERS.CACHE_LINE_SIZE = 128
+	[INSTANTIATIONS.dram]
+		MODULE = "ddr_controller"
+	[INSTANTIATIONS.gpio]
+		MODULE = "gpio_axi"
+	[INSTANTIATIONS.timer]
+		MODULE = "timer_axi"
+	[INSTANTIATIONS.debug]
+		MODULE = "uart_axi"
+		PARAMETERS.CLOCK_FREQ_MHZ = 83
+		PARAMETERS.UART_BAUD_RATE_BPS = 1000000
+		PARAMETERS.DATA_WIDTH = 32
+	[INSTANTIATIONS.programmer]
+		MODULE = "progloader_axi"
+		PARAMETERS.CLOCK_FREQ_MHZ = 83
+		PARAMETERS.UART_BAUD_RATE_BPS = 1000000
+	[INSTANTIATIONS.cpu]
+		MODULE = "vexriscv_murax_simple"
+		ARCH = "rv32i"
+		ABI = "ilp32"
+		CROSS = "riscv32-unknown-elf-"
+		CROSSCFLAGS = "-O3 -Wno-int-conversion -ffreestanding -nostdlib"
+		CROSSLDFLAGS = "-ffreestanding -nostdlib  -Wl,-M"
+		LINKER_REQUIREMENTS = ["muldi3.S", "div.S", "riscv-asm.h"]
+		MEMORY = "cache"
+		PARAMETERS.ENABLE_INTERRUPTS = 0
+		[INSTANTIATIONS.cpu.MAP]
+			[INSTANTIATIONS.cpu.MAP.cache]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x10000000"
+			[INSTANTIATIONS.cpu.MAP.gpio]
+				ORIGIN = "0x10000000"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu.MAP.debug]
+				ORIGIN = "0x10000018"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu.MAP.timer]
+				ORIGIN = "0x1000001C"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu.MAP.cache_config]
+				ORIGIN = "0x80000000"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu.MAP.dram_config]
+				ORIGIN = "0x80000004"
+				LENGTH = "0x10000000"
+
+# All constant numbers must be strings for the remaining system
+
+[INTRINSICS]
+	# Connecting external switches to resets
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:dram_rst_i"
+		INPUT_SIGNAL =  "BOARD:sw"
+		SIGNAL_BITS = "[0]"
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:board_sw_1"
+		INPUT_SIGNAL =  "BOARD:sw"
+		SIGNAL_BITS = "[1]"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:reprogram"
+		INPUT_SIGNAL_1 =  "MODULE:programmer:busy"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "CUSTOM:board_sw_1"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:softcore_reset"
+		INPUT_SIGNAL_1 =  "MODULE:dram:ui_rst"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "CUSTOM:reprogram"
+		
+	# Cache select arbitration
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_d_request"
+		INPUT_SIGNAL_1 =  "MODULE:cpu:d:read"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "MODULE:cpu:d:write"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_i_request"
+		INPUT_SIGNAL_1 =  "MODULE:cpu:i:read"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "MODULE:cpu:i:write"
+	[[INTRINSICS.COMBINATIONAL_MUX]]
+		CUSTOM_SIGNAL_WIDTH = 2
+		CUSTOM_SIGNAL_NAME = "CUSTOM:arbitrate_cpu_i_d"
+		CONDITION = "CUSTOM:cpu_i_request"
+		INPUT_SIGNAL_1 = 1
+		INPUT_SIGNAL_2 =  0
+	[[INTRINSICS.COMBINATIONAL_MUX]]
+		CUSTOM_SIGNAL_WIDTH = 2
+		CUSTOM_SIGNAL_NAME = "CUSTOM:arbitrate_programmer_cpu_i_d"
+		CONDITION = "CUSTOM:reprogram"
+		INPUT_SIGNAL_1 = 2
+		INPUT_SIGNAL_2 =  "CUSTOM:arbitrate_cpu_i_d"	
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "2"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_select"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cache_select"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu:clk"
+		TRIGGER = "MODULE:cache:cpu:ready"
+		HOLD_VALUE = "CUSTOM:arbitrate_programmer_cpu_i_d"
+	
+	
+	# Address translations
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:dram:CONFIGURATION_ADDR_BITS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:dram_config_config_addr_word"
+		INPUT_SIGNAL_1 =  "MODULE:dram:config:addr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.dram_config.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:dram:CONFIGURATION_ADDR_BITS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:dram_config_config_addr_byte"
+		INPUT_SIGNAL_1 =  "CUSTOM:dram_config_config_addr_word"
+		OPERATION = ">>"
+		INPUT_SIGNAL_2 =  2
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache:CONFIGURATION_ADDR_BITS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_config_config_addr_word"
+		INPUT_SIGNAL_1 =  "MODULE:cache:config:addr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.cache_config.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache:CONFIGURATION_ADDR_BITS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_config_config_addr_byte"
+		INPUT_SIGNAL_1 = "CUSTOM:cache_config_config_addr_word"
+		OPERATION = ">>"
+		INPUT_SIGNAL_2 =  2
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:gpio:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:gpio_a_axi_awaddr"
+		INPUT_SIGNAL_1 =  "MODULE:gpio:a:axi_awaddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.gpio.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:gpio:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:gpio_a_axi_araddr"
+		INPUT_SIGNAL_1 =  "MODULE:gpio:a:axi_araddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.gpio.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:debug:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_a_axi_awaddr"
+		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_awaddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:debug:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_a_axi_araddr"
+		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_araddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:timer:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:timer_a_axi_awaddr"
+		INPUT_SIGNAL_1 =  "MODULE:timer:a:axi_awaddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.timer.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		"CUSTOM_SIGNAL_WIDTH" = "PARAMETER:timer:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:timer_a_axi_araddr"
+		INPUT_SIGNAL_1 =  "MODULE:timer:a:axi_araddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.timer.ORIGIN"
+	
+
+[INTERCONNECT]
+	STATIC = [
+				["BOARD:clk_i", "MODULE:dram:clk_i"], 
+				["MODULE:dram:ui_clk", "MODULE:cpu:clk","MODULE:cache:clk","MODULE:clb:clk","MODULE:programmer:clk", "MODULE:debug:clk", "MODULE:timer:clk", "MODULE:gpio:clk"],
+				["BOARD:ddr","MODULE:dram:ddr"],
+				["BOARD:uart_rx" , "MODULE:debug:urx", "MODULE:programmer:urx"],
+				["BOARD:uart_tx" , "MODULE:debug:utx"],
+				["BOARD:led" ,"MODULE:gpio:led"],
+				["BOARD:sw" , "MODULE:gpio:sw"],
+				["MODULE:clb:device", "MODULE:dram:r"],
+				["MODULE:cache:mem" , "MODULE:clb:host"],
+				["CUSTOM:dram_rst_i", "MODULE:dram:rst_i"],
+				["CUSTOM:softcore_reset","MODULE:cpu:rst", "MODULE:gpio:rst", "MODULE:debug:rst", "MODULE:timer:rst"],
+				["MODULE:dram:ui_rst" , "MODULE:cache:rst", "MODULE:clb:rst", "MODULE:programmer:rst"],
+				["CUSTOM:reprogram", "MODULE:programmer:reprogram"]
+	]
+
+	OVERRIDES = [ # replace port signal assignments at the end with the overrides
+			["MODULE:programmer:a:b_response", "0"],
+			["MODULE:programmer:a:b_valid", "1"],
+			["MODULE:cpu:timerInterrupt", "0"],
+			["MODULE:cpu:externalInterrupt", "0"],
+			["MODULE:cpu:softwareInterrupt", "0"],
+			["MODULE:cpu:debug:read", "0"],
+			["MODULE:cpu:debug:write", "0"],
+			["MODULE:gpio:a:axi_b_ready", "1"],
+			["MODULE:debug:a:axi_b_ready", "1"],
+			["MODULE:timer:a:axi_b_ready", "1"],
+			["MODULE:dram:config:addr","CUSTOM:dram_config_config_addr_byte"],
+			["MODULE:cache:config:addr","CUSTOM:cache_config_config_addr_byte"],
+			["MODULE:gpio:a:axi_awaddr","CUSTOM:gpio_a_axi_awaddr"],
+			["MODULE:gpio:a:axi_araddr","CUSTOM:gpio_a_axi_araddr"],
+			["MODULE:debug:a:axi_awaddr","CUSTOM:debug_a_axi_awaddr"],
+			["MODULE:debug:a:axi_araddr","CUSTOM:debug_a_axi_araddr"],
+			["MODULE:timer:a:axi_awaddr","CUSTOM:timer_a_axi_awaddr"],
+			["MODULE:timer:a:axi_araddr","CUSTOM:timer_a_axi_araddr"],
+			["MODULE:dram:ddr:dqs_p","BOARD:ddr:dqs_p"],
+			["MODULE:dram:ddr:dqs_n","BOARD:ddr:dqs_n"],
+			["MODULE:dram:ddr:dq","BOARD:ddr:dq"]
+	]
+
+	[INTERCONNECT.DYNAMIC."MODULE:cpu:d"]
+		GROUP_SELECT = "CUSTOM:reprogram"
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:d".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			SELECT_VALUE = 0
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.cache MODULE:cache:cpu",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.gpio MODULE:gpio:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.timer MODULE:timer:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.cache_config MODULE:cache:config",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.dram_config MODULE:dram:config"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:d:address",
+						"READ_ADDRESS MODULE:cpu:d:address",
+						"WRITE_DATA MODULE:cpu:d:address",
+						"READ_DATA MODULE:cpu:d:address"
+			]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:d".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			SELECT_VALUE = 1
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.gpio MODULE:gpio:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.timer MODULE:timer:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.cache_config MODULE:cache:config",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.dram_config MODULE:dram:config"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:d:address",
+						"READ_ADDRESS MODULE:cpu:d:address",
+						"WRITE_DATA MODULE:cpu:d:address",
+						"READ_DATA MODULE:cpu:d:address"
+			]
+			
+	[INTERCONNECT.DYNAMIC."MODULE:cpu:i"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:i".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cache:cpu"
+			
+			
+	[INTERCONNECT.DYNAMIC."MODULE:programmer:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:programmer:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cache:cpu"
+		
+	[INTERCONNECT.DYNAMIC."MODULE:cache:cpu"]
+		GROUP_SELECT = "CUSTOM:cache_select"
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache:cpu".GROUPS]]
+			SELECT_VALUE = 0
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:i"
+		[[INTERCONNECT.DYNAMIC."MODULE:cache:cpu".GROUPS]]
+			SELECT_VALUE = 1
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE =  "MODULE:cpu:d"
+		[[INTERCONNECT.DYNAMIC."MODULE:cache:cpu".GROUPS]]
+			SELECT_VALUE = 2
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:programmer:a"
+
+	[INTERCONNECT.DYNAMIC."MODULE:gpio:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:gpio:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:d"
+
+	[INTERCONNECT.DYNAMIC."MODULE:debug:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:debug:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:d"
+
+	[INTERCONNECT.DYNAMIC."MODULE:timer:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:timer:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:d"
+
+	[INTERCONNECT.DYNAMIC."MODULE:cache:config"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache:config".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:d"
+
+	[INTERCONNECT.DYNAMIC."MODULE:dram:config"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:dram:config".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:d"

@@ -1,0 +1,640 @@
+[DESCRIPTION]
+# this name should be the same as the example project folder name
+NAME = "2024_10_3_edgetestbed_jtag_uartprog_no_dram_network_subsystem_test1_arty100t"
+
+[REQUIREMENTS]
+TOOLS = ["pyjtag"]
+BOARDS = ["artya7100t"]
+
+[EXTERNAL_IO]
+PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_crs", "phy_rx_clk", "phy_rx_er", "phy_rx_dv", "phy_rxd", "phy_tx_clk", "phy_tx_en", "phy_txd", "phy_ref_clk", "i2c"]
+
+
+[INSTANTIATIONS]
+	# [INSTANTIATIONS.cache]
+	# 	MODULE = "bram"
+	# 	PARAMETERS.MEMORY_SIZE = 256
+	[INSTANTIATIONS.gpio]
+		MODULE = "gpio_axi"
+		PARAMETERS.NUM_SWITCHES = 4
+		PARAMETERS.NUM_LEDS = 4
+	[INSTANTIATIONS.timer]
+		MODULE = "timer_axi"
+		# 100 MHz is the original clk crystal freq of arty100t oscillator connected to pin E3
+		PARAMETERS.CLOCK_FREQ_MHZ = 100
+	[INSTANTIATIONS.debug]
+		MODULE = "uart_axi"
+		PARAMETERS.CLOCK_FREQ_MHZ = 100
+		PARAMETERS.UART_BAUD_RATE_BPS = 921600
+		PARAMETERS.DATA_WIDTH = 32
+	# [INSTANTIATIONS.i2cbus]
+	# 	MODULE = "i2c_axi"
+	# 	PARAMETERS.CLOCK_FREQ_MHZ = 100
+	[INSTANTIATIONS.rand_mod]
+		MODULE = "random_module"
+	# [INSTANTIATIONS.chip_manager]
+	# 	MODULE = "jtag_chip_manager"
+	# [INSTANTIATIONS.programmer]
+	# 	MODULE = "progloader_axi"
+	# 	PARAMETERS.CLOCK_FREQ_MHZ = 100
+	# 	PARAMETERS.UART_BAUD_RATE_BPS = 921600
+	[INSTANTIATIONS.progloader_v2]
+		MODULE = "progloader_riscv_vebpf_v2"
+		PARAMETERS.CLOCK_FREQ_MHZ = 100
+		PARAMETERS.UART_BAUD_RATE_BPS = 921600
+		PARAMETERS.SIMULATION = 0
+		PARAMETERS.DATA_WIDTH = 32
+		PARAMETERS.VEBPF_PROG_ADDRESS_WIDTH = 12
+		PARAMETERS.VEBPF_PROG_DATA_WIDTH = 64
+		PARAMETERS.VEBPF_PROG_DATA_BYTES = 8
+		PARAMETERS.MEM_ADDR_SIZE = 32
+	[INSTANTIATIONS.softcore_memory_bus_arbiter]
+		MODULE = "softcore_memory_bus_grant"
+		PARAMETERS.SIMULATION = 0
+	[INSTANTIATIONS.cache_bram_cachecontroller_v2]
+		MODULE = "bram_axi_cachecontroller_v2"
+		# 524288 bits (64 kB)
+		PARAMETERS.MEM_SIZE_BITS = 524288
+		# 2^16 = 65,536 bytes memory
+		PARAMETERS.ADDR_WIDTH = 16
+		PARAMETERS.DATA_WIDTH = 32
+	[INSTANTIATIONS.eth_nic]
+		MODULE  = "eth_nic_100m_mmi"
+		PARAMETERS.SIMULATION = 0
+		PARAMETERS.AXI_DATA_WIDTH = 32
+		PARAMETERS.AXI_ADDRESS_WIDTH = 32
+		PARAMETERS.VEBPF_PROG_ADDRESS_WIDTH = 12
+		PARAMETERS.VEBPF_PROG_DATA_WIDTH = 64
+		PARAMETERS.VEBPF_PROG_DATA_BYTES = 8
+	[INSTANTIATIONS.clk_wiz_eth]
+		MODULE = "clk_wiz_ethernet_phy"
+	# Going to keep the memory stack for riscv at 32 kB atm for the printf test
+	# then will increment it to 64 kB as per the Bram_v2 memory
+	 
+	# so riscv linker and reset handler are populated by MAP fileds of the riscv address map in the system.tml file. The cache depth is not translated to the linker or reset handler.
+	# the user has to manually specify cache depth separately and has to make sure that the cache depth/memory length of the riscv address map can fit into the cache (bram, etc) being
+	# instantiated separately.
+	[INSTANTIATIONS.cpu]
+		MODULE = "picorv32_axi"
+		ARCH = "rv32i"
+		ABI = "ilp32"
+		CROSS = "riscv32-unknown-elf-"
+		CROSSCFLAGS = "-O3 -Wno-int-conversion -ffreestanding -nostdlib"
+		CROSSLDFLAGS = "-ffreestanding -nostdlib  -Wl,-M"
+		LINKER_REQUIREMENTS = ["muldi3.S", "div.S", "riscv-asm.h"]
+		MEMORY = "cache"
+		PARAMETERS.ENABLE_INTERRUPTS = 0
+		PARAMETERS.ENABLE_PCPI = 1
+		PARAMETERS.INSTRUCTION_MEMORY_STARTING_ADDRESS = 0
+		PARAMETERS.INTERRUPT_HANDLER_STARTING_ADDRESS = 16
+		# This is what determines the rest_handler stack pointer
+		# 32 kB => [INSTANTIATIONS.cpu.MAP.cache] => LENGTH = "0x00040000"
+			# NOPE WRONG. 32 kB => 32768 bytes => 0x8000 bytes
+			# 0x40000 bytes = 256 kB as per cache memory address
+		# PARAMETERS.INSTRUCTION_AND_DATA_MEMORY_SIZE_BYTES = 32768 
+		# Changing inst and data mem to 64 kB as well
+		PARAMETERS.INSTRUCTION_AND_DATA_MEMORY_SIZE_BYTES = 65536 
+			# So this is going to the PicoRV hw as a paramter input to the parameter
+			# "STACKADDR" of picorv32_axi module but we don't get an error since the 
+			# linker script allocates the stack pointer to a higher value of 256 kB instead of
+			# 32 kB as stated above.... but ideally these two should be the same imo 
+		# changing LENGTH for cache to "0x10000" from "0x40000"
+		[INSTANTIATIONS.cpu.MAP]
+			[INSTANTIATIONS.cpu.MAP.cache]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x00010000"
+			[INSTANTIATIONS.cpu.MAP.gpio]
+				ORIGIN = "0x00040000"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu.MAP.debug]
+				ORIGIN = "0x00040004"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu.MAP.timer]
+				ORIGIN = "0x00040008"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu.MAP.eth_nic]
+				ORIGIN = "0x20000000"
+				LENGTH = "0x01900000"
+
+# All constant numbers must be strings for the remaining system
+
+
+[INTRINSICS]
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:sw0_reset"
+		INPUT_SIGNAL =  "BOARD:sw"
+		SIGNAL_BITS = "[0]"
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:sw1"
+		INPUT_SIGNAL =  "BOARD:sw"
+		SIGNAL_BITS = "[1]"
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:reprogram_vebpf"
+		INPUT_SIGNAL =  "BOARD:sw"
+		SIGNAL_BITS = "[2]"
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_arvalid"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_arvalid"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_arready"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_arready"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_rvalid"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_rvalid"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_rready"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_rready"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_awvalid"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_awvalid"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_awready"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_awready"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_wvalid"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_wvalid"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_wready"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_wready"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 4
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_axi_wstrb"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:axi_wstrb"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_b_ready"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:b_ready"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_b_valid"
+		INPUT_SIGNAL =  "MODULE:cpu:mem:b_valid"
+		SIGNAL_BITS = ""
+	[[INTRINSICS.ASSIGNMENT_MULTIBIT]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache_bram_cachecontroller_v2:ADDR_WIDTH - 2"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_axi_araddr"
+		INPUT_SIGNAL =  "MODULE:cache_bram_cachecontroller_v2:a:axi_araddr"
+		SIGNAL_MSB = "PARAMETER:cache_bram_cachecontroller_v2:ADDR_WIDTH - 1"
+		SIGNAL_LSB = "2"
+	[[INTRINSICS.ASSIGNMENT_MULTIBIT]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache_bram_cachecontroller_v2:ADDR_WIDTH - 2"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_axi_awaddr"
+		INPUT_SIGNAL =  "MODULE:cache_bram_cachecontroller_v2:a:axi_awaddr"
+		SIGNAL_MSB = "PARAMETER:cache_bram_cachecontroller_v2:ADDR_WIDTH - 1"
+		SIGNAL_LSB = "2"
+	# [[INTRINSICS.COMBINATIONAL]]
+	# 	CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache_bram_cachecontroller_v2:ADDR_WIDTH"
+	# 	CUSTOM_SIGNAL_NAME = "CUSTOM:cache_bram_cachecontroller_v2_araddr"
+	# 	INPUT_SIGNAL_1 =  "MODULE:cache_bram_cachecontroller_v2:a:axi_araddr"
+	# 	OPERATION = ">>"
+	# 	INPUT_SIGNAL_2 = "2"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:reprogram"
+		INPUT_SIGNAL_1 =  "CUSTOM:sw1"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "MODULE:progloader_v2:busy"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:sw0_reset_or_reprogram"
+		INPUT_SIGNAL_1 =  "CUSTOM:sw0_reset"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "CUSTOM:reprogram"
+	# bitwise ^ with mask of 1 is bitwise not
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_resetn"
+		INPUT_SIGNAL_1 =  "CUSTOM:sw0_reset_or_reprogram"
+		OPERATION = "^"
+		INPUT_SIGNAL_2 =  "1'd1"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:not_cache_bram_cachecontroller_v2_a_axi_wready_out"
+		INPUT_SIGNAL_1 =  "MODULE:cache_bram_cachecontroller_v2:a:axi_wready"
+		OPERATION = "^"
+		INPUT_SIGNAL_2 =  "1'd1"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_wvalid_and_wready"
+		INPUT_SIGNAL_1 =  "MODULE:cpu:mem:axi_wvalid"
+		OPERATION = "&"
+		INPUT_SIGNAL_2 =  "MODULE:cpu:mem:axi_wready"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_wvalid_and_wready_resetn"
+		INPUT_SIGNAL_1 =  "CUSTOM:cpu_mem_wvalid_and_wready"
+		OPERATION = "&"
+		INPUT_SIGNAL_2 =  "CUSTOM:cpu_resetn"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:gpio:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:gpio_a_axi_awaddr"
+		INPUT_SIGNAL_1 =  "MODULE:gpio:a:axi_awaddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.gpio.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:gpio:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:gpio_a_axi_araddr"
+		INPUT_SIGNAL_1 =  "MODULE:gpio:a:axi_araddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.gpio.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:debug:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_a_axi_awaddr"
+		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_awaddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:debug:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:debug_a_axi_araddr"
+		INPUT_SIGNAL_1 =  "MODULE:debug:a:axi_araddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.debug.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:timer:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:timer_a_axi_awaddr"
+		INPUT_SIGNAL_1 =  "MODULE:timer:a:axi_awaddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.timer.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		"CUSTOM_SIGNAL_WIDTH" = "PARAMETER:timer:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:timer_a_axi_araddr"
+		INPUT_SIGNAL_1 =  "MODULE:timer:a:axi_araddr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.timer.ORIGIN"
+	# [[INTRINSICS.COMBINATIONAL]]
+	# 	CUSTOM_SIGNAL_WIDTH = "PARAMETER:i2cbus:ADDR_WIDTH"
+	# 	CUSTOM_SIGNAL_NAME = "CUSTOM:i2cbus_a_axi_awaddr"
+	# 	INPUT_SIGNAL_1 =  "MODULE:i2cbus:a:axi_awaddr"
+	# 	OPERATION = "-"
+	# 	INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.i2cbus.ORIGIN"
+	# [[INTRINSICS.COMBINATIONAL]]
+	# 	CUSTOM_SIGNAL_WIDTH = "PARAMETER:i2cbus:ADDR_WIDTH"
+	# 	CUSTOM_SIGNAL_NAME = "CUSTOM:i2cbus_a_axi_araddr"
+	# 	INPUT_SIGNAL_1 =  "MODULE:i2cbus:a:axi_araddr"
+	# 	OPERATION = "-"
+	# 	INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu.MAP.i2cbus.ORIGIN"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_axi_araddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu_axi_araddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu:clk"
+		TRIGGER = "MODULE:cpu:mem:axi_arvalid"
+		HOLD_VALUE = "MODULE:cpu:mem:axi_araddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_axi_awaddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu_axi_awaddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+		CLOCK = "MODULE:cpu:clk"
+		TRIGGER = "MODULE:cpu:mem:axi_awvalid"
+		HOLD_VALUE = "MODULE:cpu:mem:axi_awaddr"
+	# [[INTRINSICS.SEQUENTIAL_IFELSEIF]]
+	# 	CUSTOM_SIGNAL_WIDTH = 1
+	# 	CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_mem_b_valid"
+	# 	CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+	# 	CLOCK = "MODULE:cpu:clk"
+	# 	CONDITION_1 = "CUSTOM:cpu_mem_wvalid_and_wready_resetn"
+	# 	ASSIGNMENT_IF_CONDITION_1_TRUE = "1"
+	# 	CONDITION_2 = "MODULE:cpu:mem:b_ready"
+	# 	ASSIGNMENT_IF_CONDITION_2_TRUE = "0"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:gpio:NUM_LEDS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:custom_led_assign_sw_and_gpio_sw"
+		INPUT_SIGNAL_1 =  "BOARD:sw"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "MODULE:gpio:led"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:gpio:NUM_LEDS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:custom_led_assign_random_mod_and_gpio_sw"
+		INPUT_SIGNAL_1 =  "MODULE:rand_mod:four_bit_out"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "MODULE:gpio:led"
+	[[INTRINSICS.CONCAT2]]
+		CUSTOM_SIGNAL_WIDTH = 2
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_group_select_2bit_reprogram_with_mem_arbiter_select"
+		SIGNAL_1 =  "CUSTOM:reprogram"
+		SIGNAL_2 =  "MODULE:softcore_memory_bus_arbiter:mem_bus_group_sel"
+	[[INTRINSICS.CONCAT2]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache_bram_cachecontroller_v2:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_with_0_concat_axi_araddr"
+		SIGNAL_1 =  "2'b0"
+		SIGNAL_2 =  "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_axi_araddr"
+	[[INTRINSICS.CONCAT2]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache_bram_cachecontroller_v2:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_with_0_concat_axi_awaddr"
+		SIGNAL_1 =  "2'b0"
+		SIGNAL_2 =  "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_axi_awaddr"
+
+[INTERCONNECT]
+	STATIC = [
+				# clock connections
+				["BOARD:clk_i", "MODULE:clk_wiz_eth:clk"],
+				["MODULE:clk_wiz_eth:clk_25_mhz_out", "BOARD:phy_ref_clk"],
+				["BOARD:phy_tx_clk", "MODULE:eth_nic:phy_tx_clk"],
+				["BOARD:phy_rx_clk", "MODULE:eth_nic:phy_rx_clk"],
+				["MODULE:clk_wiz_eth:clk_100_mhz_out", "MODULE:debug:clk", "MODULE:softcore_memory_bus_arbiter:clk", "MODULE:eth_nic:clk", "MODULE:cpu:clk","MODULE:cache_bram_cachecontroller_v2:clk", "MODULE:timer:clk", "MODULE:gpio:clk","MODULE:progloader_v2:clk", "MODULE:rand_mod:clk"],
+				# FPGA board interfaces connections
+				["BOARD:uart_rx" , "MODULE:debug:urx", "MODULE:progloader_v2:urx"],
+				["BOARD:uart_tx" , "MODULE:debug:utx"],
+				["BOARD:led" , "CUSTOM:custom_led_assign_random_mod_and_gpio_sw"],
+				["BOARD:sw" , "MODULE:gpio:sw", "MODULE:rand_mod:four_bit_in"],
+				# FPGA BOARD Ethernet PHY connections x eth_nic PHY interface
+				["BOARD:phy_reset_n", "MODULE:eth_nic:phy_reset_n"],
+				["BOARD:phy_col", "MODULE:eth_nic:phy_col"],
+				["BOARD:phy_crs", "MODULE:eth_nic:phy_crs"],
+				["BOARD:phy_rx_er", "MODULE:eth_nic:phy_rx_er"],
+				["BOARD:phy_rx_dv", "MODULE:eth_nic:phy_rx_dv"],
+				["BOARD:phy_rxd", "MODULE:eth_nic:phy_rxd"],
+				["BOARD:phy_tx_en", "MODULE:eth_nic:phy_tx_en"],
+				["BOARD:phy_txd", "MODULE:eth_nic:phy_txd"],
+				# different reset and reprogram connections
+				["CUSTOM:cpu_resetn", "MODULE:cpu:resetn"],
+				["CUSTOM:sw0_reset_or_reprogram", "MODULE:gpio:rst", "MODULE:debug:rst", "MODULE:timer:rst", "MODULE:rand_mod:rst"],
+				["CUSTOM:reprogram", "MODULE:progloader_v2:reprogram"],
+				["CUSTOM:sw0_reset", "MODULE:cache_bram_cachecontroller_v2:rst","MODULE:eth_nic:rst","MODULE:progloader_v2:rst", "MODULE:softcore_memory_bus_arbiter:rst"],
+				["CUSTOM:reprogram_vebpf", "MODULE:progloader_v2:reprogram_VeBPF_in"],
+				# progloader_v2 x eth_nic VeBPF eBPF rules loading connections
+				["MODULE:progloader_v2:VeBPF_prog_addr_out", "MODULE:eth_nic:VeBPF_prog_addr_in"],
+				["MODULE:progloader_v2:VeBPF_prog_data_out", "MODULE:eth_nic:VeBPF_prog_data_in"],
+				["MODULE:progloader_v2:VeBPF_prog_write_enable_out", "MODULE:eth_nic:VeBPF_prog_write_enable_in"],
+				["MODULE:progloader_v2:VeBPF_prog_reset_out", "MODULE:eth_nic:VeBPF_prog_reset_in"],
+				["MODULE:progloader_v2:VeBPF_prog_busy_out", "MODULE:eth_nic:VeBPF_prog_busy_in"],
+				["MODULE:progloader_v2:VeBPF_prog_done_out", "MODULE:eth_nic:VeBPF_prog_done_in"],
+				["MODULE:progloader_v2:VeBPF_next_rule_switch_flag_out", "MODULE:eth_nic:VeBPF_next_rule_switch_flag_in"],
+				["MODULE:progloader_v2:VeBPF_all_rules_done_switch_flag_out", "MODULE:eth_nic:VeBPF_all_rules_done_switch_flag_in"],
+				# eth_nic x memory bus grant arbiter connections
+				["MODULE:eth_nic:eth_mem_write_req", "MODULE:softcore_memory_bus_arbiter:mem_bus_grant_request"],
+				["MODULE:eth_nic:eth_mem_write_grant", "MODULE:softcore_memory_bus_arbiter:mem_bus_grant"],
+				# memory bus grant arbiter connections spying connections on RISC-V ports
+				# Using custom signals instead of riscv signals directly since two SINK type interfaces can't be connected together
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_arvalid", "CUSTOM:cpu_mem_axi_arvalid"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_arready", "CUSTOM:cpu_mem_axi_arready"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_rvalid", "CUSTOM:cpu_mem_axi_rvalid"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_rready", "CUSTOM:cpu_mem_axi_rready"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_awvalid", "CUSTOM:cpu_mem_axi_awvalid"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_awready", "CUSTOM:cpu_mem_axi_awready"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_wvalid", "CUSTOM:cpu_mem_axi_wvalid"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_wready", "CUSTOM:cpu_mem_axi_wready"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_wstrb", "CUSTOM:cpu_mem_axi_wstrb"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_b_ready", "CUSTOM:cpu_mem_b_ready"],
+				["MODULE:softcore_memory_bus_arbiter:m_softcore_axi_b_valid", "CUSTOM:cpu_mem_b_valid"]
+				# TODO: 
+					# progloader_v2 and cache connection will be in dynamic interconnects tab
+					# uart_axi connection will be in dynamic interconnects tab
+					# picorv32_axi connection will be in dynamic interconnects tab
+					# timer_axi connection will be in dynamic interconnects tab
+					# gpio_axi connection will be in dynamic interconnects tab
+					# cache_bram_v2 connection will be in dynamic interconnects tab
+					# softcore_memory_bus_arbiter group select will be in dynamic interconnects tab
+					# eth_nic master and slave AXIL connections will be in dynamic interconnects tab
+	]
+
+	OVERRIDES = [ # replace port signal assignments at the end with the overrides
+			# DONE: comment these out since I am using a different bram cache (cache controller bram v2 something). Uncomment these if riscv isn't working.
+				# now I know why these were manually tied to these values.... because the b_ signals don't connect to their respective interfaces when two AXIMML 
+				# are connected normally. The b_ interfaces were simply left unconnected. 
+			# Will have to connect b_ signals manually :\ Also check Sahanz implementation of AXIMML
+
+			# ["MODULE:cpu:mem:b_valid","CUSTOM:cpu_mem_b_valid"],
+			# ["MODULE:cpu:mem:b_response", "0"],
+				# uncommenting these to see if these work since I don't want any X's appearing during dynamic switching of interconnects
+
+
+			# ["MODULE:chip_manager:a:b_response", "0"],
+			# ["MODULE:chip_manager:a:b_valid", "1"],
+			# ["MODULE:programmer:a:b_response", "0"],
+			# ["MODULE:programmer:a:b_valid", "1"],
+			["MODULE:cpu:irq", "0"],
+			["MODULE:gpio:a:axi_awaddr","CUSTOM:gpio_a_axi_awaddr"],
+			["MODULE:gpio:a:axi_araddr","CUSTOM:gpio_a_axi_araddr"],
+			["MODULE:debug:a:axi_awaddr","CUSTOM:debug_a_axi_awaddr"],
+			["MODULE:debug:a:axi_araddr","CUSTOM:debug_a_axi_araddr"],
+			# ["MODULE:i2cbus:a:axi_awaddr","CUSTOM:i2cbus_a_axi_awaddr"],
+			# ["MODULE:i2cbus:a:axi_araddr","CUSTOM:i2cbus_a_axi_araddr"],
+			["MODULE:timer:a:axi_awaddr","CUSTOM:timer_a_axi_awaddr"],
+			["MODULE:timer:a:axi_araddr","CUSTOM:timer_a_axi_araddr"],
+			# ["MODULE:i2cbus:i2c:sda","BOARD:i2c:sda"],
+			# ["MODULE:i2cbus:a:b_ready","1"],
+			# ["MODULE:chip_manager:a:axi_rvalid","0"],
+			# ["MODULE:chip_manager:a:axi_arready","0"],
+			# ["MODULE:chip_manager:a:axi_awready","0"],
+			# ["MODULE:chip_manager:a:axi_wready","0"],
+			# ["MODULE:chip_manager:a:b_valid","0"]
+			
+			# right shifting axi_awaddr and axi_araddr to cache_bram_cachecontroller_v2 since it is word (4 byte word) addressable 
+			["MODULE:cache_bram_cachecontroller_v2:a:axi_araddr", "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_with_0_concat_axi_araddr"],
+			["MODULE:cache_bram_cachecontroller_v2:a:axi_awaddr", "CUSTOM:cache_bram_cachecontroller_v2_right_shift_by_2_with_0_concat_axi_awaddr"]
+	]
+
+	# MODULE:cpu dynamic connections defs
+	[INTERCONNECT.DYNAMIC."MODULE:cpu:mem"]
+		GROUP_SELECT = "CUSTOM:cache_group_select_2bit_reprogram_with_mem_arbiter_select"
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		# TODO: Atm I am writing conditions for all values of the 2 bit select line. After first exp, I will comment out the conditions that arent being used and will see what happens (gets generated)
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			SELECT_VALUE = 0
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.cache MODULE:cache_bram_cachecontroller_v2:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.gpio MODULE:gpio:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.timer MODULE:timer:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.eth_nic MODULE:eth_nic:s_eth",
+			]
+			# After reading DISL readme, I came to the conclusion that 
+			# for WRITE_DATA and READ_DATA, CUSTOM:cpu_axi_awaddr is being
+			# used as opposed to MODULE:cpu:mem:axi_awaddr being used
+			# for WRITE_ADDRESS handshake, the reason is that for WRITE_DATA
+			# or READ_DATA, it might take some time to write or read data (DDR might take longer than cache)
+			# hence the custom signal CUSTOM:cpu_axi_awaddr is used for WRITE_DATA (and similar for READ_DATA)
+			# since the write or read address needs to be held to the same value while the data is being 
+			# written or read in the memory, but riscv has same address bus and the value on it changes 
+			# after I believe it receives a ready for WIRE_ADDRESS operation and READ_ADDRESS operation
+			# (that is why MODULE:cpu:mem:axi_awaddr is used directly for WRITE_ADDRESS since RISC-V 
+			# will hold that address value till it gets a ready flag that the module at the other end
+			# has "registered" the address). But same can not be said for WRITE_DATA or READ_DATA op
+			# where address value has been registered already, but the handshake_map requires we give
+			# it the same write or read address, this is where we use the intrinsic where these address
+			# values are being held.
+			
+			# For WRITE_RESPONSE CUSTOM:cpu_axi_awaddr I am using this custom awaddr it is due to the same reason
+			# that awaddr can change on the riscv side if it READING something else now while waiting for the write resp
+			# and I believe the addr line is the same for reading and writing, hence we need to hold the writing address 
+			# for this Write response
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu_axi_awaddr",
+						"READ_DATA CUSTOM:cpu_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu_axi_awaddr"
+			]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			SELECT_VALUE = 1
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.gpio MODULE:gpio:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.timer MODULE:timer:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.eth_nic MODULE:eth_nic:s_eth",
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu_axi_awaddr",
+						"READ_DATA CUSTOM:cpu_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu_axi_awaddr"
+			]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			SELECT_VALUE = 2
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.gpio MODULE:gpio:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.timer MODULE:timer:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.eth_nic MODULE:eth_nic:s_eth",
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu_axi_awaddr",
+						"READ_DATA CUSTOM:cpu_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu_axi_awaddr"
+			]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			# connect cpu with cache for select value of 3
+			SELECT_VALUE = 3
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.cache MODULE:cache_bram_cachecontroller_v2:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.gpio MODULE:gpio:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.debug MODULE:debug:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.timer MODULE:timer:a",
+					"SYSTEM:INSTANTIATIONS.cpu.MAP.eth_nic MODULE:eth_nic:s_eth",
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu_axi_awaddr",
+						"READ_DATA CUSTOM:cpu_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu_axi_awaddr"
+			]
+	
+	# MODULE:cache_bram_cachecontroller_v2 dynamic connections defs	
+	[INTERCONNECT.DYNAMIC."MODULE:cache_bram_cachecontroller_v2:a"]
+		GROUP_SELECT = "CUSTOM:cache_group_select_2bit_reprogram_with_mem_arbiter_select"
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_bram_cachecontroller_v2:a".GROUPS]]
+			SELECT_VALUE = 0
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:mem"
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_bram_cachecontroller_v2:a".GROUPS]]
+			SELECT_VALUE = 1
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:eth_nic:m_eth"
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_bram_cachecontroller_v2:a".GROUPS]]
+			SELECT_VALUE = 2
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:progloader_v2:a"
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_bram_cachecontroller_v2:a".GROUPS]]
+			# connect with CPU for value for select value of 3
+			SELECT_VALUE = 3
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:mem"
+
+
+	# MODULE:eth_nic m_eth dynamic connections defs	
+	[INTERCONNECT.DYNAMIC."MODULE:eth_nic:m_eth"]
+		# logic taken from connecting programmer to cache
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		
+		# TODO: Decide what to do when there are no interfaces available to connect to for certain SELECT_VALUEs
+		
+		# [[INTERCONNECT.DYNAMIC."MODULE:eth_nic:m_eth".GROUPS]]
+		# 	SELECT_VALUE = 0
+		# 	INTERCONNECT_TYPE = "ONE_TO_ONE"
+		# 	INTERFACE = ""
+		
+		[[INTERCONNECT.DYNAMIC."MODULE:eth_nic:m_eth".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cache_bram_cachecontroller_v2:a"
+
+		# [[INTERCONNECT.DYNAMIC."MODULE:eth_nic:m_eth".GROUPS]]
+		# 	SELECT_VALUE = 2
+		# 	INTERCONNECT_TYPE = "ONE_TO_ONE"
+		# 	INTERFACE = ""
+		# [[INTERCONNECT.DYNAMIC."MODULE:eth_nic:m_eth".GROUPS]]
+		# 	SELECT_VALUE = 3
+		# 	INTERCONNECT_TYPE = "ONE_TO_ONE"
+		# 	INTERFACE = ""
+
+	# Was getting this error because I forgot to define this s_eth below
+		# File "/home/zaidt/projects/Git_synched_repos/DISL_latest_v_may2024/DISL/./fpga//system_builder/build.py", line 1246, in <module>
+		# builder.generate_top()
+		# File "/home/zaidt/projects/Git_synched_repos/DISL_latest_v_may2024/DISL/./fpga//system_builder/build.py", line 877, in generate_top
+		# 	source_groups = self.system["INTERCONNECT"]["DYNAMIC"][source]["GROUPS"]
+		# 					~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+		# KeyError: 'MODULE:eth_nic:s_eth'
+	# MODULE:eth_nic s_eth dynamic connections defs	
+	[INTERCONNECT.DYNAMIC."MODULE:eth_nic:s_eth"]
+		# logic taken from connecting programmer to cache
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		
+		[[INTERCONNECT.DYNAMIC."MODULE:eth_nic:s_eth".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:mem"
+
+
+	[INTERCONNECT.DYNAMIC."MODULE:gpio:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:gpio:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:mem"
+
+
+	[INTERCONNECT.DYNAMIC."MODULE:debug:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:debug:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:mem"
+		
+
+	[INTERCONNECT.DYNAMIC."MODULE:timer:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:timer:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu:mem"
+			
+
+	[INTERCONNECT.DYNAMIC."MODULE:progloader_v2:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:progloader_v2:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cache_bram_cachecontroller_v2:a"
+

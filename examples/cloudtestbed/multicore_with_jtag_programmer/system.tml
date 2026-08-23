@@ -1,0 +1,452 @@
+[DESCRIPTION]
+NAME = "multicore_with_jtag_programmer"
+
+[REQUIREMENTS]
+TOOLS = ["pyjtag"]
+BOARDS = ["cvp13"]
+
+[EXTERNAL_IO]
+PORTS = ["fake_io_port","uart_tx","uart_rx", "led",  "ddr", "ddr_clk_i_p", "ddr_clk_i_n"]
+
+[GLOBAL_PARAMETERS]
+ADDR_WIDTH = 32
+CLOCK_FREQ_MHZ = 200
+DATA_WIDTH = 32
+UART_BAUD_RATE_BPS = 1000000
+ENABLE_MHARTID = 1
+INSTRUCTION_AND_DATA_MEMORY_SIZE_BYTES = 16777216
+INSTRUCTION_MEMORY_STARTING_ADDRESS = 0
+INTERRUPT_HANDLER_STARTING_ADDRESS = 16
+ENABLE_INTERRUPTS = 0
+ENABLE_PCPI = 0
+ENABLE_WRITE_RESPONSE = 0
+
+[INSTANTIATIONS]
+	[INSTANTIATIONS.cache]
+		MODULE = "cache"
+		PARAMETERS.CACHE_SIZE = 16
+		PARAMETERS.SET_SIZE = 1
+		PARAMETERS.CONFIGADDR_START_CACHE_POLICY = 0
+		PARAMETERS.CONFIGADDR_END_CACHE_POLICY = 0
+		PARAMETERS.MEM_DATA_WIDTH = 512
+	[INSTANTIATIONS.dram]
+		MODULE = "ddr4_mig"
+	[INSTANTIATIONS.timer]
+		MODULE = "timer_axi"
+	[INSTANTIATIONS.debug]
+		MODULE = "uart_axi"
+	[INSTANTIATIONS.chip_manager]
+		MODULE = "jtag_chip_manager"
+
+	[INSTANTIATIONS.cache_arbiter]
+		MODULE = "simple_arbiter_x8"
+		PARAMETERS.NUMBER_OF_INPUTS = 5
+		PARAMETERS.IN0_ADDRESS_OFFSET = 0
+		PARAMETERS.IN1_ADDRESS_OFFSET = 0
+		PARAMETERS.IN2_ADDRESS_OFFSET = 16777216
+		PARAMETERS.IN3_ADDRESS_OFFSET = 33554432
+		PARAMETERS.IN4_ADDRESS_OFFSET = 50331648
+		PARAMETERS.IN0_ADDRESS_MASK = 67108863
+	[INSTANTIATIONS.debug_arbiter]
+		MODULE = "aximml_arbiter_x8"
+		PARAMETERS.NUMBER_OF_INPUTS = 4
+		PARAMETERS.IN0_ADDRESS_MASK = 0
+		PARAMETERS.IN1_ADDRESS_MASK = 0
+		PARAMETERS.IN2_ADDRESS_MASK = 0
+		PARAMETERS.IN3_ADDRESS_MASK = 0
+	[INSTANTIATIONS.timer_arbiter]
+		MODULE = "aximml_arbiter_x8"
+		PARAMETERS.NUMBER_OF_INPUTS = 4
+		PARAMETERS.IN0_ADDRESS_MASK = 0
+		PARAMETERS.IN1_ADDRESS_MASK = 0
+		PARAMETERS.IN2_ADDRESS_MASK = 0
+		PARAMETERS.IN3_ADDRESS_MASK = 0
+
+	[INSTANTIATIONS.cpu0]
+		MODULE = "picorv32_hydra_axi"
+		MEMORY = "cache"
+		PARAMETERS.HART_ID = 0
+		[INSTANTIATIONS.cpu0.MAP]
+			[INSTANTIATIONS.cpu0.MAP.cache]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x01000000"
+			[INSTANTIATIONS.cpu0.MAP.debug]
+				ORIGIN = "0x80000000"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu0.MAP.timer]
+				ORIGIN = "0x80000004"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu0.MAP.cache_config]
+				ORIGIN = "0x80000008"
+				LENGTH = "0x00000004"
+
+	[INSTANTIATIONS.cpu1]
+		MODULE = "picorv32_hydra_axi"
+		MEMORY = "cache"
+		PARAMETERS.HART_ID = 1
+		[INSTANTIATIONS.cpu1.MAP]
+			[INSTANTIATIONS.cpu1.MAP.cache]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x01000000"
+			[INSTANTIATIONS.cpu1.MAP.debug]
+				ORIGIN = "0x80000000"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu1.MAP.timer]
+				ORIGIN = "0x80000004"
+				LENGTH = "0x00000004"
+
+	[INSTANTIATIONS.cpu2]
+		MODULE = "picorv32_hydra_axi"
+		MEMORY = "cache"
+		PARAMETERS.HART_ID = 2
+		[INSTANTIATIONS.cpu2.MAP]
+			[INSTANTIATIONS.cpu2.MAP.cache]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x01000000"
+			[INSTANTIATIONS.cpu2.MAP.debug]
+				ORIGIN = "0x80000000"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu2.MAP.timer]
+				ORIGIN = "0x80000004"
+				LENGTH = "0x00000004"
+
+	[INSTANTIATIONS.cpu3]
+		MODULE = "picorv32_hydra_axi"
+		MEMORY = "cache"
+		PARAMETERS.HART_ID = 3
+		[INSTANTIATIONS.cpu3.MAP]
+			[INSTANTIATIONS.cpu3.MAP.cache]
+				ORIGIN = "0x00000000"
+				LENGTH = "0x01000000"
+			[INSTANTIATIONS.cpu3.MAP.debug]
+				ORIGIN = "0x80000000"
+				LENGTH = "0x00000004"
+			[INSTANTIATIONS.cpu3.MAP.timer]
+				ORIGIN = "0x80000004"
+				LENGTH = "0x00000004"
+
+# All constant numbers must be strings for the remaining system
+
+[INTRINSICS]
+	# Map chip manager control pins
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:jtag_reset"
+		INPUT_SIGNAL =  "MODULE:chip_manager:control"
+		SIGNAL_BITS = "[0]"
+	[[INTRINSICS.ASSIGNMENT]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_reset_host"
+		INPUT_SIGNAL =  "MODULE:chip_manager:control"
+		SIGNAL_BITS = "[1]"
+
+	# Evaluate softcore reset (active low)
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_reset"
+		INPUT_SIGNAL_1 =  "MODULE:dram:ui_rst"
+		OPERATION = "|"
+		INPUT_SIGNAL_2 =  "CUSTOM:cpu_reset_host"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = 1
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu_resetn"
+		INPUT_SIGNAL_1 =  "1'd1"
+		OPERATION = "^"
+		INPUT_SIGNAL_2 =  "CUSTOM:cpu_reset"
+
+	# Remove address map offset and ccnvert byte addressing to word addressing for the cache config port
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache:CONFIGURATION_ADDR_BITS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_config_config_addr_byte"
+		INPUT_SIGNAL_1 =  "MODULE:cache:config:addr"
+		OPERATION = "-"
+		INPUT_SIGNAL_2 =  "SYSTEM:INSTANTIATIONS.cpu0.MAP.cache_config.ORIGIN"
+	[[INTRINSICS.COMBINATIONAL]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cache:CONFIGURATION_ADDR_BITS"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cache_config_config_addr_word"
+		INPUT_SIGNAL_1 = "CUSTOM:cache_config_config_addr_byte"
+		OPERATION = ">>"
+		INPUT_SIGNAL_2 =  2
+
+	# Buffer read/write addresses for interfaces sourcing ONE_TO_MANY connections
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu0:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu0_axi_araddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu0_axi_araddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu0:clk"
+		TRIGGER = "MODULE:cpu0:mem:axi_arvalid"
+		HOLD_VALUE = "MODULE:cpu0:mem:axi_araddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu0:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu0_axi_awaddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu0_axi_awaddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+		CLOCK = "MODULE:cpu0:clk"
+		TRIGGER = "MODULE:cpu0:mem:axi_awvalid"
+		HOLD_VALUE = "MODULE:cpu0:mem:axi_awaddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu1:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu1_axi_araddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu1_axi_araddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu1:clk"
+		TRIGGER = "MODULE:cpu1:mem:axi_arvalid"
+		HOLD_VALUE = "MODULE:cpu1:mem:axi_araddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu1:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu1_axi_awaddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu1_axi_awaddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+		CLOCK = "MODULE:cpu1:clk"
+		TRIGGER = "MODULE:cpu1:mem:axi_awvalid"
+		HOLD_VALUE = "MODULE:cpu1:mem:axi_awaddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu2:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu2_axi_araddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu2_axi_araddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu2:clk"
+		TRIGGER = "MODULE:cpu2:mem:axi_arvalid"
+		HOLD_VALUE = "MODULE:cpu2:mem:axi_araddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu2:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu2_axi_awaddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu2_axi_awaddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+		CLOCK = "MODULE:cpu2:clk"
+		TRIGGER = "MODULE:cpu2:mem:axi_awvalid"
+		HOLD_VALUE = "MODULE:cpu2:mem:axi_awaddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu3:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu3_axi_araddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu3_axi_araddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE = 0
+		CLOCK = "MODULE:cpu3:clk"
+		TRIGGER = "MODULE:cpu3:mem:axi_arvalid"
+		HOLD_VALUE = "MODULE:cpu3:mem:axi_araddr"
+	[[INTRINSICS.SEQUENTIAL_HOLD]]
+		CUSTOM_SIGNAL_WIDTH = "PARAMETER:cpu3:ADDR_WIDTH"
+		CUSTOM_SIGNAL_NAME = "CUSTOM:cpu3_axi_awaddr"
+		INTERNAL_SIGNAL_NAME = "INTERNAL:CUSTOM:cpu3_axi_awaddr"
+		CUSTOM_SIGNAL_DEFAULT_VALUE =  0
+		CLOCK = "MODULE:cpu3:clk"
+		TRIGGER = "MODULE:cpu3:mem:axi_awvalid"
+		HOLD_VALUE = "MODULE:cpu3:mem:axi_awaddr"
+
+
+	
+[INTERCONNECT]
+	STATIC = [
+				["BOARD:ddr_clk_i_p", "MODULE:dram:clk_i_p"], 
+				["BOARD:ddr_clk_i_n", "MODULE:dram:clk_i_n"],
+				["MODULE:dram:ui_clk", "MODULE:cpu0:clk", "MODULE:cpu1:clk", "MODULE:cpu2:clk", "MODULE:cpu3:clk","MODULE:cache:clk","MODULE:chip_manager:clk", "MODULE:debug:clk", "MODULE:timer:clk", "MODULE:cache_arbiter:clk", "MODULE:debug_arbiter:clk", "MODULE:timer_arbiter:clk"],
+				["BOARD:uart_rx" ,  "MODULE:debug:urx"],
+				["BOARD:uart_tx" , "MODULE:debug:utx"],
+				["CUSTOM:cpu_resetn","MODULE:cpu0:resetn","MODULE:cpu1:resetn","MODULE:cpu2:resetn","MODULE:cpu3:resetn"],
+				["CUSTOM:cpu_reset", "MODULE:debug:rst", "MODULE:timer:rst", "MODULE:debug_arbiter:rst", "MODULE:timer_arbiter:rst"],
+				["CUSTOM:jtag_reset" , "MODULE:dram:rst_i"],
+				["MODULE:dram:ui_rst" , "MODULE:chip_manager:rst", "MODULE:cache:rst"],
+				["MODULE:cache:mem" , "MODULE:dram:r"],
+				["BOARD:ddr","MODULE:dram:ddr"],
+				["MODULE:cache_arbiter:out", "MODULE:cache:cpu"],
+				["MODULE:debug_arbiter:out", "MODULE:debug:a"],
+				["MODULE:timer_arbiter:out", "MODULE:timer:a"]
+	]
+
+
+	OVERRIDES = [ # replace port signal assignments at the end with the overrides
+			["MODULE:chip_manager:a:b_response", "0"],
+			["MODULE:chip_manager:a:b_valid", "1"],
+			["MODULE:cpu0:irq", "0"],
+			["MODULE:cpu1:irq", "0"],
+			["MODULE:cpu2:irq", "0"],
+			["MODULE:cpu3:irq", "0"],
+			["MODULE:cache:config:addr","CUSTOM:cache_config_config_addr_word"],
+			["MODULE:dram:ddr:dqs_c","BOARD:ddr:dqs_c"],
+			["MODULE:dram:ddr:dqs_t","BOARD:ddr:dqs_t"],
+			["MODULE:dram:ddr:dq","BOARD:ddr:dq"],
+			["MODULE:cache_arbiter:in0:read", "0"]
+	]
+
+	[INTERCONNECT.DYNAMIC."MODULE:cpu0:mem"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu0:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu0.MAP.cache MODULE:cache_arbiter:in1",
+					"SYSTEM:INSTANTIATIONS.cpu0.MAP.debug MODULE:debug_arbiter:in0",
+					"SYSTEM:INSTANTIATIONS.cpu0.MAP.timer MODULE:timer_arbiter:in0",
+					"SYSTEM:INSTANTIATIONS.cpu0.MAP.cache_config MODULE:cache:config"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu0:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu0:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu0_axi_awaddr",
+						"READ_DATA CUSTOM:cpu0_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu0_axi_awaddr"
+			]
+
+	[INTERCONNECT.DYNAMIC."MODULE:cpu1:mem"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu1:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu1.MAP.cache MODULE:cache_arbiter:in2",
+					"SYSTEM:INSTANTIATIONS.cpu1.MAP.debug MODULE:debug_arbiter:in1",
+					"SYSTEM:INSTANTIATIONS.cpu1.MAP.timer MODULE:timer_arbiter:in1"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu1:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu1:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu1_axi_awaddr",
+						"READ_DATA CUSTOM:cpu1_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu1_axi_awaddr"
+			]
+			
+	[INTERCONNECT.DYNAMIC."MODULE:cpu2:mem"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu2:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu2.MAP.cache MODULE:cache_arbiter:in3",
+					"SYSTEM:INSTANTIATIONS.cpu2.MAP.debug MODULE:debug_arbiter:in2",
+					"SYSTEM:INSTANTIATIONS.cpu2.MAP.timer MODULE:timer_arbiter:in2"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu2:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu2:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu2_axi_awaddr",
+						"READ_DATA CUSTOM:cpu2_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu2_axi_awaddr"
+			]
+			
+	[INTERCONNECT.DYNAMIC."MODULE:cpu3:mem"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cpu3:mem".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_MANY"
+			ADDRESS_MAP = [
+					"SYSTEM:INSTANTIATIONS.cpu3.MAP.cache MODULE:cache_arbiter:in4",
+					"SYSTEM:INSTANTIATIONS.cpu3.MAP.debug MODULE:debug_arbiter:in3",
+					"SYSTEM:INSTANTIATIONS.cpu3.MAP.timer MODULE:timer_arbiter:in3"
+			]
+			HANDSHAKE_MAP = [
+						"WRITE_ADDRESS MODULE:cpu3:mem:axi_awaddr",
+						"READ_ADDRESS MODULE:cpu3:mem:axi_araddr",
+						"WRITE_DATA CUSTOM:cpu3_axi_awaddr",
+						"READ_DATA CUSTOM:cpu3_axi_araddr",
+						"WRITE_RESPONSE CUSTOM:cpu3_axi_awaddr"
+			]
+
+		
+	[INTERCONNECT.DYNAMIC."MODULE:chip_manager:a"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:chip_manager:a".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cache_arbiter:in0"
+
+	[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in0"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in0".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:chip_manager:a"
+
+	[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in1"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in1".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu0:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in2"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in2".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu1:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in3"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in3".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu2:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in4"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache_arbiter:in4".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu3:mem"
+
+
+
+	[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in0"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in0".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu0:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in1"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in1".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu1:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in2"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in2".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu2:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in3"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:debug_arbiter:in3".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu3:mem"
+
+
+	[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in0"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in0".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu0:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in1"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in1".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu1:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in2"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in2".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu2:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in3"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA", "READ_ADDRESS", "READ_DATA", "WRITE_RESPONSE"]
+		[[INTERCONNECT.DYNAMIC."MODULE:timer_arbiter:in3".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu3:mem"
+
+	[INTERCONNECT.DYNAMIC."MODULE:cache:config"]
+		GROUP_SELECT = ""
+		HANDSHAKES = ["WRITE_ADDRESS", "WRITE_DATA"]
+		[[INTERCONNECT.DYNAMIC."MODULE:cache:config".GROUPS]]
+			INTERCONNECT_TYPE = "ONE_TO_ONE"
+			INTERFACE = "MODULE:cpu0:mem"

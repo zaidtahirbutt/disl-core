@@ -1,0 +1,1941 @@
+[cache]
+
+	TYPE = ["MEMORY"]
+
+	PARAMETERS = ["CACHE_SIZE", "SET_SIZE", "CACHE_POLICY_RESET", "ADDR_WIDTH", 
+				  "CPU_DATA_WIDTH", "MEM_DATA_WIDTH", 
+				  "CONFIGURATION_DATA_BITS", "CONFIGURATION_ADDR_BITS", 
+				  "CONFIGADDR_START_CACHE_POLICY", "CONFIGADDR_END_CACHE_POLICY"]
+
+	[cache.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "config", "cpu", "mem"]
+		[cache.REQUIREMENTS.INCLUDES]
+			COMMON = ["cache.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+	[cache.ENCODINGS]
+		[cache.ENCODINGS.CACHE_POLICY]
+			WRITE_THROUGH = 1
+			WRITE_BACK = 2
+			READ_ONLY = 0
+
+	[cache.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[cache.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[cache.INTERFACES.config]
+			TYPE = "CONFIGURATION"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			ADDRESS_WIDTH = "CONFIGURATION_ADDR_BITS"
+			DATA_WIDTH = "CONFIGURATION_DATA_BITS"
+			[cache.INTERFACES.config.LAYOUT.cache]
+				START_PARAMETER = "CONFIGADDR_START_CACHE_POLICY"
+				END_PARAMETER = "CONFIGADDR_END_CACHE_POLICY"
+				SIZE = 1
+				INITIALIZATION = ""
+				[cache.INTERFACES.config.LAYOUT.cache.MAP]
+						"policy" = 0
+	[cache.INTERFACES.cpu]
+			TYPE = "SIMPLE"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			DATA_WIDTH = "CPU_DATA_WIDTH"
+			MASK_WIDTH = "CPU_DATA_WIDTH >> 3"
+	[cache.INTERFACES.mem]
+			TYPE = "SIMPLE"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			DATA_WIDTH = "MEM_DATA_WIDTH"
+			MASK_WIDTH = "MEM_DATA_WIDTH >> 3"
+	[cache.INTERFACES.state]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 8
+#######################################################################
+[cache_line_builder]
+
+	TYPES = ["SIMPLE"]
+
+	PARAMETERS = ["ADDR_WIDTH", "DEVICE_DATA_BUS_WIDTH", "CACHE_LINE_SIZE", "DEVICE_DATA_WIDTH"]
+
+	[cache_line_builder.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "host", "device"]
+		[cache_line_builder.REQUIREMENTS.INCLUDES]
+			COMMON = ["cache.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+	[cache_line_builder.ENCODINGS]
+
+	[cache_line_builder.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[cache_line_builder.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[cache_line_builder.INTERFACES.host]
+			TYPE = "SIMPLE"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			DATA_WIDTH = "CACHE_LINE_SIZE"
+			MASK_WIDTH = "CACHE_LINE_SIZE >> 3"
+	[cache_line_builder.INTERFACES.device]
+			TYPE = "SIMPLE"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			DATA_WIDTH = "DEVICE_DATA_WIDTH"
+			MASK_WIDTH = "DEVICE_DATA_WIDTH >> 3"
+	[cache_line_builder.INTERFACES.state]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 8
+#######################################################################
+[ddr_controller]
+
+	TYPES = ["PERIPHERAL"]
+
+	PARAMETERS = ["TIMERID_0","TIMERID_TRP","TIMERID_TRCD","TIMERID_TRTP_TWR_TRAS","TIMERID_TCCD",
+			   "CONFIGURATION_DATA_BITS","CONFIGURATION_ADDR_BITS",
+			   "ENABLE_PERFTUNER", "TRANSACTION_DELAY","ADDRESS_FORMAT_RESET","AP_BIT_RESET","AUTO_PRECHARGE_IDLE_ROW_EN_RESET",
+			   "AUTO_PRECHARGE_IDLE_ROW_LIMIT_RESET", "AUTO_ACTIVATE_IDLE_BANK_EN_RESET","MAX_REFRESH_DEBT","SIMULATION","AP","CKE_BITS", 
+			   "CK_BITS", "CS_BITS", "ODT_BITS", "DM_BITS","DQS_BITS", "DQ_BITS", "DDR_ADDR_BITS", "DDR_BA_WIDTH","DDR_ROW_WIDTH","DDR_COL_WIDTH","BURST_SIZE",
+			   "TIMER_TCCD_RESET","TIMER_TRP_RESET", "TIMER_TRP_AP_RESET","TIMER_TRTP_RESET","TIMER_TRCD_RESET","TIMER_TRAS_RESET","TIMER_TREFI_RESET",
+			   "TIMER_TRFC_RESET", "TIMER_TWTR_RESET","TIMER_TRTW_RESET","TIMER_TWR_RESET","CMD_READ","CMD_WRITE","CMD_ACTIVATE","CMD_PRECHARGE",
+			   "CMD_REFRESH","COMMAND_WORD", "MACRO_WORD", "MACRO_COUNT_BITS","TIMER_BITS","NUM_SLOTS",
+			   "USER_ADDR_WIDTH","USER_MASK_WIDTH","USER_DATA_WIDTH", "MACRO_CONFIG_WORDS_NEEDED","MACRO_CONFIG_BITS_NEEDED",
+			   "REFRESH_RULES_INIT_HEX","RUNTIME_RULES_INIT_HEX","ARBITER_RULES_INIT_HEX",
+			   "CONFIGADDR_START_TIMERS","CONFIGADDR_END_TIMERS","CONFIGADDR_START_RUNTIME_RULES","CONFIGADDR_END_RUNTIME_RULES",
+			   "CONFIGADDR_START_REFRESH_RULES","CONFIGADDR_END_REFRESH_RULES","CONFIGADDR_START_ARBITER","CONFIGADDR_END_ARBITER",
+			   "CONFIGADDR_START_ADDRESS_FORMAT","CONFIGADDR_END_ADDRESS_FORMAT","CONFIGADDR_START_PERFTUNER","CONFIGADDR_END_PERFTUNER"]
+
+
+	[ddr_controller.REQUIREMENTS]
+		INTERFACES = ["clk_i", "rst_i", "config", "r", "ddr"]
+		[ddr_controller.REQUIREMENTS.INCLUDES]
+			COMMON = ["ddr.v"]
+			BOARD = ["ddr_phy.v", "ddr_command_loader.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+
+	[ddr_controller.ENCODINGS]
+		[ddr_controller.ENCODINGS.chip_command_word]
+			[ddr_controller.ENCODINGS.chip_command_word.ras_n]
+				ENABLE =  0
+				DISABLE = 1
+				BITS =  [0]
+			[ddr_controller.ENCODINGS.chip_command_word.cas_n]
+				ENABLE =  0
+				DISABLE = 2
+				BITS =  [1]
+			[ddr_controller.ENCODINGS.chip_command_word.we_n]
+				ENABLE =  0
+				DISABLE = 4
+				BITS =  [2]
+			[ddr_controller.ENCODINGS.chip_command_word.cs_n]
+				ENABLE =  0
+				DISABLE = 8
+				BITS =  [3]
+		[ddr_controller.ENCODINGS.controller_command_word]
+			[ddr_controller.ENCODINGS.controller_command_word.chip_command_word]
+				0 = 0
+				1 = 1
+				2 = 2
+				3 = 3
+				4 = 4
+				5 = 5
+				6 = 6
+				7 = 7
+				8 = 8
+				9 = 9
+				10 = 10
+				11 = 11
+				12 = 12
+				13 = 13
+				14 = 14
+				15 = 15
+				BITS = [0,1,2,3]
+			[ddr_controller.ENCODINGS.controller_command_word.phy_command]
+				0 =  0
+				1 = 16
+				2 = 32
+				3 = 48
+				4 = 64
+				5 = 80
+				6 = 96
+				7 = 112
+				BITS =  [4,5,6]
+			[ddr_controller.ENCODINGS.controller_command_word.wrdata_en]
+				ENABLE =  128
+				DISABLE = 0
+				BITS =  [7]
+			[ddr_controller.ENCODINGS.controller_command_word.bank]
+				CURRENT =  256
+				IDLE = 0
+				BITS =  [8]
+			[ddr_controller.ENCODINGS.controller_command_word.address]
+				IDLE =  0
+				ROW =  512
+				COL = 1024
+				AP = 1536
+				BITS =  [9,10]
+		[ddr_controller.ENCODINGS.macro_word]
+			ADDRESS = ["WRITE_TRANSACTION_REQUESTED", "ROW_IS_OPEN", "BANK_IS_PRECHARGED"]
+			ENCODING = ["COMMAND_SLOT", "TIMER", "RUNTIME_COMMAND"]
+		[ddr_controller.ENCODINGS.command]
+			ADDRESS_WIDTH = 11
+		[ddr_controller.ENCODINGS.refresh]
+			ADDRESS_WIDTH = 1
+		[ddr_controller.ENCODINGS.macro]
+			ADDRESS_WIDTH = 3
+
+
+	[ddr_controller.INTERFACES]
+		[ddr_controller.INTERFACES.clk_i]
+				TYPE = "CLOCK"
+				DIRECTION = "SINK"
+		[ddr_controller.INTERFACES.ui_clk]
+				TYPE = "CLOCK"
+				DIRECTION = "SOURCE"
+		[ddr_controller.INTERFACES.rst_i]
+				TYPE = "GENERAL"
+				WIDTH = 1
+				DIRECTION = "SINK"
+		[ddr_controller.INTERFACES.ui_rst]
+				TYPE = "GENERAL"
+				WIDTH = 1
+				DIRECTION = "SOURCE"
+		[ddr_controller.INTERFACES.config]
+				TYPE = "CONFIGURATION"
+				DIRECTION = "SINK"
+				CLOCK = "ui_clk"
+				ADDRESS_WIDTH = "CONFIGURATION_ADDR_BITS"
+				DATA_WIDTH = "CONFIGURATION_DATA_BITS"
+				[ddr_controller.INTERFACES.config.layout]
+					[ddr_controller.INTERFACES.config.layout.ddr_controller]
+						START_PARAMETER = ""
+						END_PARAMETER = ""
+						SIZE = 0
+						INITIALIZATION = ""
+					[ddr_controller.INTERFACES.config.LAYOUT.ddr_timer_db]
+						START_PARAMETER = "CONFIGADDR_START_TIMERS"
+						END_PARAMETER = "CONFIGADDR_END_TIMERS"
+						SIZE = 12
+						INITIALIZATION = ""
+						[ddr_controller.INTERFACES.config.LAYOUT.ddr_timer_db.MAP]
+							"tccd" = 0
+							"trp" = 1
+							"trcd" = 2
+							"tras" = 3
+							"trefi" = 4
+							"trfc" = 5
+							"twtr" = 6
+							"trtw" = 7
+							"twr" = 8
+							"trtp" = 9
+							"trp_ap" = 10
+							"refresh_debt" = 11
+					[ddr_controller.INTERFACES.config.LAYOUT.ddr_runtime_rules]
+						START_PARAMETER = "CONFIGADDR_START_RUNTIME_RULES"
+						END_PARAMETER = "CONFIGADDR_END_RUNTIME_RULES"
+						SIZE = "8 * math.ceil ( MACRO_WORD / CONFIGURATION_DATA_BITS )"
+						INITIALIZATION = "RUNTIME_RULES_INIT_HEX"
+						[ddr_controller.INTERFACES.config.LAYOUT.ddr_runtime_rules.MAP]
+							"runtime_rules" = 0
+					[ddr_controller.INTERFACES.config.LAYOUT.ddr_refresh]
+						START_PARAMETER = "CONFIGADDR_START_REFRESH_RULES"
+						END_PARAMETER = "CONFIGADDR_END_REFRESH_RULES"
+						SIZE = 2
+						INITIALIZATION = "REFRESH_RULES_INIT_HEX"
+						[ddr_controller.INTERFACES.config.LAYOUT.ddr_refresh.MAP]
+							"refresh_rules" = 0
+					[ddr_controller.INTERFACES.config.LAYOUT.ddr_arbiter]
+						START_PARAMETER = "CONFIGADDR_START_ARBITER"
+						END_PARAMETER = "CONFIGADDR_END_ARBITER"
+						SIZE = "2 ** ( DDR_BA_WIDTH + 2**( DDR_BA_WIDTH ))"
+						INITIALIZATION = "ARBITER_RULES_INIT_HEX"
+						[ddr_controller.INTERFACES.config.LAYOUT.ddr_arbiter.MAP]
+							"arbiter_rules" = 0
+					[ddr_controller.INTERFACES.config.LAYOUT.ddr_perftuner]
+						START_PARAMETER = "CONFIGADDR_START_PERFTUNER"
+						END_PARAMETER = "CONFIGADDR_END_PERFTUNER"
+						SIZE = 4
+						INITIALIZATION = ""
+						[ddr_controller.INTERFACES.config.LAYOUT.ddr_perftuner.MAP]
+							"auto_precharge_idle_row_en" = 0
+							"auto_precharge_idle_row_limit" = 1
+							"auto_activate_idle_bank_en" = 2
+							"ap_bit" = 3
+					[ddr_controller.INTERFACES.config.LAYOUT.ddr_address_map]
+						START_PARAMETER = "CONFIGADDR_START_ADDRESS_FORMAT"
+						END_PARAMETER = "CONFIGADDR_END_ADDRESS_FORMAT"
+						SIZE = 1
+						INITIALIZATION = ""
+						[ddr_controller.INTERFACES.config.LAYOUT.ddr_address_map.MAP]
+							"map_id" = 0
+		[ddr_controller.INTERFACES.r]
+				TYPE = "SIMPLE"
+				DIRECTION = "SINK"
+				CLOCK = "ui_clk"
+				ADDRESS_WIDTH = "USER_ADDR_WIDTH"
+				DATA_WIDTH = "USER_DATA_WIDTH"
+				MASK_WIDTH = "USER_MASK_WIDTH"
+		[ddr_controller.INTERFACES.ddr]
+				TYPE = "DDR"
+				DIRECTION = "SOURCE"
+				ADDRESS_WIDTH = "DDR_ADDR_BITS"
+				DATA_WIDTH = "DQ_BITS"
+				MASK_WIDTH = "DM_BITS"
+				CK_WIDTH = "CK_BITS"
+				CKE_WIDTH = "CKE_BITS"
+				BANK_WIDTH = "DDR_BA_WIDTH"
+				DQS_WIDTH = "DQS_BITS"
+				ODT_WIDTH = "ODT_BITS"
+				CS_WIDTH = "CS_BITS"
+#######################################################################
+[gpio_axi]
+
+	TYPES = ["PERIPHERAL"]
+
+	PARAMETERS = ["ADDR_WIDTH", "DATA_WIDTH","NUM_LEDS", "NUM_SWITCHES"]
+
+	[gpio_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a"]
+		[gpio_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+	[gpio_axi.ENCODINGS]
+
+
+	[gpio_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[gpio_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[gpio_axi.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[gpio_axi.INTERFACES.sw]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = "NUM_SWITCHES"
+	[gpio_axi.INTERFACES.led]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = "NUM_LEDS"
+#######################################################################
+[timer_axi]
+
+	TYPES = ["SIMPLE"]
+
+	PARAMETERS = ["ADDR_WIDTH", "DATA_WIDTH","TCKS_PER_US"]
+
+	[timer_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a"]
+		[timer_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+	[timer_axi.ENCODINGS]
+
+
+	[timer_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[timer_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[timer_axi.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+#######################################################################
+[uart_axi]
+
+	TYPES = ["PERIPHERAL"]
+
+	PARAMETERS = ["ADDR_WIDTH","DATA_WIDTH","CLKS_PER_BIT"]
+
+	[uart_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a"]
+		[uart_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v","fifo.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+	[uart_axi.ENCODINGS]
+
+
+	[uart_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[uart_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[uart_axi.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[uart_axi.INTERFACES.urx]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[uart_axi.INTERFACES.utx]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+
+#######################################################################
+[i2c_axi]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = ["ADDR_WIDTH","DATA_WIDTH","CLOCK_DIVISOR"]
+	[i2c_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a", "sda", "scl", "scl_pup", "sda_pup"]
+		[i2c_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v"]
+			BOARD = ["tristate.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+	[i2c_axi.ENCODINGS]
+	[i2c_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[i2c_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[i2c_axi.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[i2c_axi.INTERFACES.i2c]
+			TYPE = "I2C"
+			DIRECTION = "SOURCE"
+#######################################################################
+[spi_axi]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = ["ADDR_WIDTH","DATA_WIDTH","CLOCK_DIVISOR","DUAL_TRANSFER","DUAL_CLOCK"]
+	[spi_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a", "spi"]
+		[spi_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+	[spi_axi.ENCODINGS]
+	[spi_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[spi_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[spi_axi.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[spi_axi.INTERFACES.spi]
+			TYPE = "SPI"
+			DIRECTION = "SOURCE"
+#######################################################################
+[random_module]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = []
+
+	[random_module.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "four_bit_in", "four_bit_out"]
+		[random_module.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			COMMON_FOLDER = ["random_test_module"]
+			BOARD = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
+			COMMON_FOLDER_FILES = ["random_module.v", "random_submodule.v"]
+
+	[random_module.ENCODINGS]
+
+	[random_module.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[random_module.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[random_module.INTERFACES.four_bit_in]
+			TYPE = "GENERAL"
+			WIDTH = 4
+			DIRECTION = "SINK"
+	[random_module.INTERFACES.four_bit_out]
+			TYPE = "GENERAL"
+			WIDTH = 4
+			DIRECTION = "SOURCE"
+#######################################################################
+[progloader_axi]
+
+	TYPES = ["PERIPHERAL"]
+
+	PARAMETERS = ["MEM_ADDR_SIZE", "DATA_WIDTH", "SIMULATION", "CLKS_PER_BIT"]
+
+	[progloader_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a", "urx", "reprogram", "busy"]
+		[progloader_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+
+	[progloader_axi.ENCODINGS]
+
+
+	[progloader_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[progloader_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[progloader_axi.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "MEM_ADDR_SIZE"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[progloader_axi.INTERFACES.urx]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[progloader_axi.INTERFACES.reprogram]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[progloader_axi.INTERFACES.busy]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+#######################################################################
+[picorv32_axi]
+
+	TYPES = ["CPU"]
+
+
+	PARAMETERS = ["PROGADDR_RESET","PROGADDR_IRQ","STACKADDR", "ENABLE_COUNTERS","ENABLE_COUNTERS64","ENABLE_REGS_16_31",
+				  "ENABLE_REGS_DUALPORT","TWO_STAGE_SHIFT","BARREL_SHIFTER","TWO_CYCLE_COMPARE","TWO_CYCLE_ALU","COMPRESSED_ISA",
+				  "CATCH_MISALIGN","CATCH_ILLINSN","ENABLE_PCPI","ENABLE_MUL","ENABLE_FAST_MUL","ENABLE_DIV","ENABLE_IRQ","ENABLE_IRQ_QREGS",
+				  "ENABLE_IRQ_TIMER","ENABLE_TRACE","REGS_INIT_ZERO","MASKED_IRQ","LATCHED_IRQ","ADDR_WIDTH","DATA_WIDTH", "PROGADDR_RESET", "PROGADDR_IRQ", "STACKADDR"]
+		
+
+	[picorv32_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "resetn", "mem", "irq"]
+		[picorv32_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["picorv32.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+	[picorv32_axi.ENCODINGS]
+
+
+	[picorv32_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[picorv32_axi.INTERFACES.resetn]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[picorv32_axi.INTERFACES.mem]
+			TYPE = "AXIMML"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			DATA_WIDTH = 32
+			ADDRESS_WIDTH = 32
+			MASK_WIDTH = 4
+	[picorv32_axi.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+	[picorv32_axi.INTERFACES.irq]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 32
+	[picorv32_axi.INTERFACES.eoi]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 32
+#######################################################################
+[picorv32_hydra_axi]
+
+	TYPES = ["CPU"]
+
+
+	PARAMETERS = ["PROGADDR_RESET","PROGADDR_IRQ","STACKADDR", "ENABLE_COUNTERS","ENABLE_COUNTERS64","ENABLE_REGS_16_31",
+				  "ENABLE_REGS_DUALPORT","TWO_STAGE_SHIFT","BARREL_SHIFTER","TWO_CYCLE_COMPARE","TWO_CYCLE_ALU","COMPRESSED_ISA",
+				  "CATCH_MISALIGN","CATCH_ILLINSN","ENABLE_PCPI","ENABLE_MUL","ENABLE_FAST_MUL","ENABLE_DIV","ENABLE_IRQ","ENABLE_IRQ_QREGS",
+				  "ENABLE_IRQ_TIMER","ENABLE_TRACE","REGS_INIT_ZERO","MASKED_IRQ","LATCHED_IRQ","ADDR_WIDTH","DATA_WIDTH", "PROGADDR_RESET", "PROGADDR_IRQ", "STACKADDR",
+				  "HART_ID","ENABLE_MHARTID","ENABLE_MCOMPOSE", "ENABLE_WRITE_RESPONSE"]
+		
+
+	[picorv32_hydra_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "resetn", "mem", "irq"]
+		[picorv32_hydra_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["picorv32.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+
+	[picorv32_hydra_axi.ENCODINGS]
+
+
+	[picorv32_hydra_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[picorv32_hydra_axi.INTERFACES.resetn]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[picorv32_hydra_axi.INTERFACES.mem]
+			TYPE = "AXIMML"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			DATA_WIDTH = 32
+			ADDRESS_WIDTH = 32
+			MASK_WIDTH = 4
+	[picorv32_hydra_axi.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+	[picorv32_hydra_axi.INTERFACES.irq]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 32
+	[picorv32_hydra_axi.INTERFACES.eoi]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 32
+#######################################################################
+[jtag_chip_manager]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = ["MEM_ADDR_SIZE","DATA_WIDTH","CLOCK_CROSSING_FIFO_DEPTH","JTAG_USER_REG_ID"]
+	[jtag_chip_manager.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a", "control"]
+		[jtag_chip_manager.REQUIREMENTS.INCLUDES]
+			COMMON = ["jtag.v"]
+			BOARD = ["jtag_phy.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+	[jtag_chip_manager.ENCODINGS]
+	[jtag_chip_manager.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[jtag_chip_manager.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[jtag_chip_manager.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "MEM_ADDR_SIZE"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[jtag_chip_manager.INTERFACES.control]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 96
+#######################################################################
+# this name has to be same as the module name in the HDL file that we want to instantiate
+# progloader_riscv_vebpf_v2 module between cache and network subsystem
+[progloader_riscv_vebpf_v2]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = ["MEM_ADDR_SIZE", "DATA_WIDTH", "SIMULATION", "CLKS_PER_BIT", "VEBPF_PROG_ADDRESS_WIDTH", "VEBPF_PROG_DATA_WIDTH", "VEBPF_PROG_DATA_BYTES", "VEBPF_MEMORY_DEPTH", "VIVADO_SIMULATION", "VEBPF_SIMULATION", "COCOTB_MANUAL_RISCV_PROG_LOADING", "VEBPF_CURR_RULE_START_DWORD", "VEBPF_CURR_RULE_END_DWORD", "VEBPF_ALL_RULES_END_DWORD"]
+	[progloader_riscv_vebpf_v2.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "urx", "reprogram", "w_processing", "busy", "reprogram_VeBPF_in", "VeBPF_prog_addr_out", "VeBPF_prog_data_out", "VeBPF_prog_write_enable_out", "VeBPF_prog_reset_out", "VeBPF_prog_busy_out", "VeBPF_prog_done_out", "VeBPF_next_rule_switch_flag_out", "VeBPF_all_rules_done_switch_flag_out", "a"]
+	[progloader_riscv_vebpf_v2.REQUIREMENTS.INCLUDES]
+		COMMON = []
+		BOARD = []
+		COMMON_FOLDER = ["programmer_riscv_vebpf_v2"]
+		USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
+		COMMON_FOLDER_FILES = ["progloader_riscv_vebpf_v2.v"]
+	[progloader_riscv_vebpf_v2.ENCODINGS]
+	[progloader_riscv_vebpf_v2.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[progloader_riscv_vebpf_v2.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[progloader_riscv_vebpf_v2.INTERFACES.urx]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.reprogram]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.w_processing]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.busy]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.reprogram_VeBPF_in]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_prog_addr_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = "VEBPF_PROG_ADDRESS_WIDTH"
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_prog_data_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = "VEBPF_PROG_DATA_WIDTH"
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_prog_write_enable_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_prog_reset_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_prog_busy_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_prog_done_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_next_rule_switch_flag_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.VeBPF_all_rules_done_switch_flag_out]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[progloader_riscv_vebpf_v2.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "MEM_ADDR_SIZE"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+#######################################################################
+# this name has to be same as the module name in the HDL file that we want to instantiate
+# memory bus grant module between riscv and network subsystem
+[softcore_memory_bus_grant]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = ["SIMULATION"]
+	[softcore_memory_bus_grant.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "m_softcore_axi_arvalid", "m_softcore_axi_arready", "m_softcore_axi_rvalid", "m_softcore_axi_rready", "m_softcore_axi_awvalid", "m_softcore_axi_awready", "m_softcore_axi_wvalid", "m_softcore_axi_wready", "m_softcore_axi_wstrb", "m_softcore_axi_b_ready", "m_softcore_axi_b_valid", "mem_bus_grant_request", "mem_bus_grant", "mem_bus_group_sel"]
+	[softcore_memory_bus_grant.REQUIREMENTS.INCLUDES]
+		COMMON = []
+		BOARD = []
+		COMMON_FOLDER = ["memory_subsystem"]
+		USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
+		COMMON_FOLDER_FILES = ["softcore_memory_bus_grant.v"]
+	[softcore_memory_bus_grant.ENCODINGS]
+	[softcore_memory_bus_grant.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_arvalid]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_arready]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_rvalid]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_rready]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_awvalid]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_awready]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_wvalid]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_wready]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_wstrb]
+			TYPE = "GENERAL"
+			WIDTH = 4
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_b_ready]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.m_softcore_axi_b_valid]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.mem_bus_grant_request]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[softcore_memory_bus_grant.INTERFACES.mem_bus_grant]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[softcore_memory_bus_grant.INTERFACES.mem_bus_group_sel]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+#######################################################################
+# this name has to be same as the module name in the HDL file that we want to instantiate
+# network subsystem
+[eth_nic_100m_mmi]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = ["TARGET","AXI_DATA_WIDTH", "AXI_ADDRESS_WIDTH", "VEBPF_PROG_ADDRESS_WIDTH","VEBPF_PROG_DATA_WIDTH", "VEBPF_PROG_DATA_BYTES", "SIMULATION", "NUMBER_OF_VEBPF", "MAX_NUMBER_OF_VEBPF", "VEBPF_PROG_ADDRESS_WIDTH_REDUCED", "VEBPF_RULES_SCHEDULER_TABLE_DEPTH_MAX"]
+	[eth_nic_100m_mmi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "phy_rx_clk", "phy_rxd", "phy_rx_dv", "phy_rx_er", "phy_tx_clk", "phy_txd", "phy_tx_en", "phy_col", "phy_crs", "phy_reset_n", "s_eth", "m_eth", "eth_mem_write_req", "eth_mem_write_grant", "VeBPF_prog_addr_in", "VeBPF_prog_data_in", "VeBPF_prog_write_enable_in", "VeBPF_prog_reset_in", "VeBPF_prog_busy_in", "VeBPF_prog_done_in", "VeBPF_next_rule_switch_flag_in", "VeBPF_all_rules_done_switch_flag_in"]
+		[eth_nic_100m_mmi.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = []
+			COMMON_FOLDER = ["network_subsystem"]
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
+			COMMON_FOLDER_FILES = ["eth_nic_100m_mmi.v", "eth_mac_mii_fifo.v", "eth_mac_mii.v", "mii_phy_if.v", "ssio_sdr_in.v", "eth_mac_1g.v", "axis_gmii_rx.v", "lfsr.v", "axis_gmii_tx.v", "axis_async_fifo_adapter.v", "axis_async_fifo.v", "axis_adapter.v", "axis_fifo.v", "eth_fifo_axis_to_bram_axi.v", "arbiter_z1.v", "priority_encoder_z1.v", "perf_counter.v", "cpu.v", "ram64_memory_v3.v", "ram_module_v3.v", "shifter.v", "divider.v", "call_handler.v", "ram64_memory_v1.v", "iverilog_dump_sv.sv"]
+
+
+	[eth_nic_100m_mmi.ENCODINGS]
+
+	[eth_nic_100m_mmi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_rx_clk]
+			TYPE = "CLOCK"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_rxd]
+			TYPE = "GENERAL"
+			# I can use the parameters from above in the "WIDTH" filed below in the later 
+			# versions of this (simple use the paramter like "AXI_DATA_WIDTH" and can even perform bit wise ops, e.g., 
+			# search "MASK_WIDTH = "DATA_WIDTH >> 3 and I believe this is written in verilog code which is then calculated upon Verilog code compilation")
+			WIDTH = 4
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_rx_dv]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_rx_er]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_tx_clk]
+			TYPE = "CLOCK"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_txd]
+			TYPE = "GENERAL"
+			WIDTH = 4
+			DIRECTION = "SOURCE"
+	[eth_nic_100m_mmi.INTERFACES.phy_tx_en]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[eth_nic_100m_mmi.INTERFACES.phy_col]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_crs]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.phy_reset_n]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[eth_nic_100m_mmi.INTERFACES.s_eth]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "AXI_DATA_WIDTH"
+			ADDRESS_WIDTH = "AXI_ADDRESS_WIDTH"
+			MASK_WIDTH = "AXI_DATA_WIDTH >> 3"
+	[eth_nic_100m_mmi.INTERFACES.m_eth]
+			TYPE = "AXIMML"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			DATA_WIDTH = "AXI_DATA_WIDTH"
+			ADDRESS_WIDTH = "AXI_ADDRESS_WIDTH"
+			MASK_WIDTH = "AXI_DATA_WIDTH >> 3"
+	[eth_nic_100m_mmi.INTERFACES.eth_mem_write_req]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[eth_nic_100m_mmi.INTERFACES.eth_mem_write_grant]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_prog_addr_in]
+			TYPE = "GENERAL"
+			WIDTH = "VEBPF_PROG_ADDRESS_WIDTH"
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_prog_data_in]
+			TYPE = "GENERAL"
+			WIDTH = "VEBPF_PROG_DATA_WIDTH"
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_prog_write_enable_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_prog_reset_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_prog_busy_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_prog_done_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_next_rule_switch_flag_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_100m_mmi.INTERFACES.VeBPF_all_rules_done_switch_flag_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+#######################################################################
+# this name has to be same as the module name in the HDL file that we want to instantiate
+# network subsystem
+[eth_nic_1g_rgmmi]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = ["TARGET","AXI_DATA_WIDTH", "AXI_ADDRESS_WIDTH", "VEBPF_PROG_ADDRESS_WIDTH","VEBPF_PROG_DATA_WIDTH", "VEBPF_PROG_DATA_BYTES", "SIMULATION", "NUMBER_OF_VEBPF", "MAX_NUMBER_OF_VEBPF", "VEBPF_PROG_ADDRESS_WIDTH_REDUCED", "VEBPF_RULES_SCHEDULER_TABLE_DEPTH_MAX"]
+	[eth_nic_1g_rgmmi.REQUIREMENTS]
+		INTERFACES = ["clk", "clk90", "rst", "phy_rx_clk", "phy_rxd", "phy_rx_ctl", "phy_tx_clk", "phy_tx_ctl", "phy_txd", "phy_reset_n", "s_eth", "m_eth", "eth_mem_write_req", "eth_mem_write_grant", "VeBPF_prog_addr_in", "VeBPF_prog_data_in", "VeBPF_prog_write_enable_in", "VeBPF_prog_reset_in", "VeBPF_prog_busy_in", "VeBPF_prog_done_in", "VeBPF_next_rule_switch_flag_in", "VeBPF_all_rules_done_switch_flag_in"]
+		[eth_nic_1g_rgmmi.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = []
+			COMMON_FOLDER = ["network_subsystem"]
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
+			COMMON_FOLDER_FILES = ["eth_nic_1g_rgmmi.v", "eth_mac_1g_rgmii_fifo.v", "eth_mac_1g_rgmii.v", "rgmii_phy_if.v", "ssio_ddr_in.v", "iddr.v", "oddr.v", "eth_mac_1g.v", "axis_gmii_rx.v", "lfsr.v", "axis_gmii_tx.v", "axis_async_fifo_adapter.v", "axis_async_fifo.v", "axis_adapter.v", "axis_fifo.v", "eth_fifo_axis_to_bram_axi.v", "arbiter_z1.v", "priority_encoder_z1.v", "perf_counter.v", "cpu.v", "ram64_memory_v3.v", "ram_module_v3.v", "shifter.v", "divider.v", "call_handler.v", "ram64_memory_v1.v", "iverilog_dump_sv.sv"]
+
+	[eth_nic_1g_rgmmi.ENCODINGS]
+
+	[eth_nic_1g_rgmmi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.clk90]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.phy_rx_clk]
+			TYPE = "CLOCK"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.phy_rxd]
+			TYPE = "GENERAL"
+			# I can use the parameters from above in the "WIDTH" filed below in the later 
+			# versions of this (simple use the paramter like "AXI_DATA_WIDTH" and can even perform bit wise ops, e.g., 
+			# search "MASK_WIDTH = "DATA_WIDTH >> 3 and I believe this is written in verilog code which is then calculated upon Verilog code compilation")
+			WIDTH = 4
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.phy_rx_ctl]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.phy_tx_clk]
+			TYPE = "CLOCK"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[eth_nic_1g_rgmmi.INTERFACES.phy_txd]
+			TYPE = "GENERAL"
+			WIDTH = 4
+			DIRECTION = "SOURCE"
+	[eth_nic_1g_rgmmi.INTERFACES.phy_tx_ctl]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[eth_nic_1g_rgmmi.INTERFACES.phy_reset_n]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[eth_nic_1g_rgmmi.INTERFACES.s_eth]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "AXI_DATA_WIDTH"
+			ADDRESS_WIDTH = "AXI_ADDRESS_WIDTH"
+			MASK_WIDTH = "AXI_DATA_WIDTH >> 3"
+	[eth_nic_1g_rgmmi.INTERFACES.m_eth]
+			TYPE = "AXIMML"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			DATA_WIDTH = "AXI_DATA_WIDTH"
+			ADDRESS_WIDTH = "AXI_ADDRESS_WIDTH"
+			MASK_WIDTH = "AXI_DATA_WIDTH >> 3"
+	[eth_nic_1g_rgmmi.INTERFACES.eth_mem_write_req]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[eth_nic_1g_rgmmi.INTERFACES.eth_mem_write_grant]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_prog_addr_in]
+			TYPE = "GENERAL"
+			WIDTH = "VEBPF_PROG_ADDRESS_WIDTH"
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_prog_data_in]
+			TYPE = "GENERAL"
+			WIDTH = "VEBPF_PROG_DATA_WIDTH"
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_prog_write_enable_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_prog_reset_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_prog_busy_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_prog_done_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_next_rule_switch_flag_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.VeBPF_all_rules_done_switch_flag_in]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+#######################################################################
+# this name has to be same as the module name in the HDL file that we want to instantiate
+#######################################################################
+[bram_axi_cachecontroller_v2]
+	TYPE = ["MEMORY"]
+	PARAMETERS = ["MEM_SIZE_BITS", "ADDR_WIDTH", "DATA_WIDTH", "SIMULATION"]
+	[bram_axi_cachecontroller_v2.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a"]
+		[bram_axi_cachecontroller_v2.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = []
+			COMMON_FOLDER = ["memory_subsystem"]
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
+		  	COMMON_FOLDER_FILES = ["bram_axi_cachecontroller_v2.v"]
+	[bram_axi_cachecontroller_v2.ENCODINGS]
+
+	[bram_axi_cachecontroller_v2.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[bram_axi_cachecontroller_v2.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[bram_axi_cachecontroller_v2.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+#######################################################################
+# BRAM used for PCIe experiments
+########################################################################
+[bram_axi]
+
+	TYPE = ["MEMORY"]
+
+	PARAMETERS = ["ADDR_WIDTH", "DATA_WIDTH", "INITIALIZE", "INIT_FILE"]
+
+	[bram_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "mem"]
+		[bram_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["bram_axi.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+		  	COMMON_FOLDER_FILES = []
+	[bram_axi.ENCODINGS]
+
+	[bram_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[bram_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[bram_axi.INTERFACES.mem]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+
+########################################################################
+[bram]
+	TYPE = ["MEMORY"]
+	PARAMETERS = ["MEMORY_SIZE", "ADDR_WIDTH", "DATA_WIDTH"]
+	[bram.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "cpu"]
+		[bram.REQUIREMENTS.INCLUDES]
+			COMMON = ["cache.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  		COMMON_FOLDER_FILES = []
+	[bram.ENCODINGS]
+	[bram.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[bram.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[bram.INTERFACES.cpu]
+			TYPE = "SIMPLE"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			ADDRESS_WIDTH = "ADDR_WIDTH"
+			DATA_WIDTH = "DATA_WIDTH"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+#######################################################################
+[mm_crossover_axi]
+	TYPES = ["INTERCONNECT"]
+	PARAMETERS = ["MEM_ADDR_SIZE", "DATA_WIDTH"]
+	[mm_crossover_axi.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "a", "b"]
+		[mm_crossover_axi.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  		COMMON_FOLDER_FILES = []
+	[mm_crossover_axi.ENCODINGS]
+	[mm_crossover_axi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[mm_crossover_axi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[mm_crossover_axi.INTERFACES.a]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "MEM_ADDR_SIZE"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[mm_crossover_axi.INTERFACES.b]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "MEM_ADDR_SIZE"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[mm_crossover_axi.INTERFACES.sa]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "MEM_ADDR_SIZE"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+	[mm_crossover_axi.INTERFACES.sb]
+			TYPE = "AXIMML"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			DATA_WIDTH = "DATA_WIDTH"
+			ADDRESS_WIDTH = "MEM_ADDR_SIZE"
+			MASK_WIDTH = "DATA_WIDTH >> 3"
+#######################################################################
+[laplacian_rgb565_rv32_pcpi]
+	TYPES = ["INTERCONNECT"]
+	PARAMETERS = ["OPCODE", "IMAGE_WIDTH", "IMAGE_HEIGHT"]
+	[laplacian_rgb565_rv32_pcpi.REQUIREMENTS]
+		INTERFACES = ["clk", "pcpi"]
+		[laplacian_rgb565_rv32_pcpi.REQUIREMENTS.INCLUDES]
+			COMMON = ["riscv_ci.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  		COMMON_FOLDER_FILES = []
+	[laplacian_rgb565_rv32_pcpi.ENCODINGS]
+	[laplacian_rgb565_rv32_pcpi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[laplacian_rgb565_rv32_pcpi.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+#######################################################################
+[laplacian_rgb565_rv32_pcpi_full]
+	TYPES = ["INTERCONNECT"]
+	PARAMETERS = ["OPCODE", "IMAGE_WIDTH", "IMAGE_HEIGHT", "UART_TX_CLKS_PER_BIT", "SPI_CLOCK_DIVISOR"]
+	[laplacian_rgb565_rv32_pcpi_full.REQUIREMENTS]
+		INTERFACES = ["clk", "pcpi", "spi", "uart_tx", "busy"]
+		[laplacian_rgb565_rv32_pcpi_full.REQUIREMENTS.INCLUDES]
+			COMMON = ["soc_components.v","riscv_ci.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  		COMMON_FOLDER_FILES = []
+	[laplacian_rgb565_rv32_pcpi_full.ENCODINGS]
+	[laplacian_rgb565_rv32_pcpi_full.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[laplacian_rgb565_rv32_pcpi_full.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+	[laplacian_rgb565_rv32_pcpi_full.INTERFACES.spi]
+			TYPE = "SPI"
+			DIRECTION = "SOURCE"
+	[laplacian_rgb565_rv32_pcpi_full.INTERFACES.uart_tx]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[laplacian_rgb565_rv32_pcpi_full.INTERFACES.busy]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+#######################################################################
+[finn_rv32_pcpi_wrapper]
+	TYPES = ["INTERCONNECT"]
+	PARAMETERS = ["OPCODE", "INPUT_WIDTH_BYTES"]
+	[finn_rv32_pcpi_wrapper.REQUIREMENTS]
+		INTERFACES = ["clk", "pcpi"]
+		[finn_rv32_pcpi_wrapper.REQUIREMENTS.INCLUDES]
+			COMMON = ["riscv_ci.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  		COMMON_FOLDER_FILES = []
+	[finn_rv32_pcpi_wrapper.ENCODINGS]
+	[finn_rv32_pcpi_wrapper.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[finn_rv32_pcpi_wrapper.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+#######################################################################
+[clk_ibufds]
+	TYPES = ["CLOCK"]
+	PARAMETERS = []
+	[clk_ibufds.REQUIREMENTS]
+		INTERFACES = ["clk_p", "clk_n", "clk"]
+		[clk_ibufds.REQUIREMENTS.INCLUDES]
+			COMMON = ["primitives.v"]
+			BOARD = ["ibufds_phy.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  		COMMON_FOLDER_FILES = []
+	[clk_ibufds.ENCODINGS]
+	[clk_ibufds.INTERFACES.clk_p]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[clk_ibufds.INTERFACES.clk_n]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[clk_ibufds.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+#######################################################################
+[ddr4_mig]
+
+	TYPES = ["MEMORY"]
+
+	PARAMETERS = ["USER_ADDR_WIDTH","USER_MASK_WIDTH","USER_DATA_WIDTH","CKE_BITS","CK_BITS","CS_BITS",
+	"DDR_BA_WIDTH","DDR_BG_WIDTH","DDR_ADDR_BITS","ODT_BITS","DM_BITS","DQS_BITS","DQ_BITS"]
+
+
+	[ddr4_mig.REQUIREMENTS]
+		INTERFACES = ["clk_i_p", "clk_i_n", "rst_i", "r", "ddr"]
+		[ddr4_mig.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = ["ddr.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	        COMMON_FOLDER_FILES = []
+
+	[ddr4_mig.ENCODINGS]
+	
+	[ddr4_mig.INTERFACES]
+		[ddr4_mig.INTERFACES.clk_i_p]
+				TYPE = "CLOCK"
+				DIRECTION = "SINK"
+		[ddr4_mig.INTERFACES.clk_i_n]
+				TYPE = "CLOCK"
+				DIRECTION = "SINK"
+		[ddr4_mig.INTERFACES.ui_clk]
+				TYPE = "CLOCK"
+				DIRECTION = "SOURCE"
+		[ddr4_mig.INTERFACES.rst_i]
+				TYPE = "GENERAL"
+				WIDTH = 1
+				DIRECTION = "SINK"
+		[ddr4_mig.INTERFACES.ui_rst]
+				TYPE = "GENERAL"
+				WIDTH = 1
+				DIRECTION = "SOURCE"
+		[ddr4_mig.INTERFACES.r]
+				TYPE = "SIMPLE"
+				DIRECTION = "SINK"
+				CLOCK = "ui_clk"
+				ADDRESS_WIDTH = "USER_ADDR_WIDTH"
+				DATA_WIDTH = "USER_DATA_WIDTH"
+				MASK_WIDTH = "USER_MASK_WIDTH"
+		[ddr4_mig.INTERFACES.ddr]
+				TYPE = "DDR4"
+				DIRECTION = "SOURCE"
+				ADDRESS_WIDTH = "DDR_ADDR_BITS"
+				DATA_WIDTH = "DQ_BITS"
+				MASK_WIDTH = "DM_BITS"
+				CK_WIDTH = "CK_BITS"
+				CKE_WIDTH = "CKE_BITS"
+				BANK_WIDTH = "DDR_BA_WIDTH"
+				BANKGROUP_WIDTH = "DDR_BA_WIDTH"
+				DQS_WIDTH = "DQS_BITS"
+				ODT_WIDTH = "ODT_BITS"
+				CS_WIDTH = "CS_BITS"
+#######################################################################
+[simple_arbiter_x8]
+
+TYPES = ["SIMPLE"]
+
+PARAMETERS = ["ADDR_WIDTH", "DATA_WIDTH", "NUMBER_OF_INPUTS", "POLICY", "GENERATE_CROSSBAR", 
+		"IN0_ADDRESS_OFFSET","IN1_ADDRESS_OFFSET","IN2_ADDRESS_OFFSET","IN3_ADDRESS_OFFSET",
+		"IN4_ADDRESS_OFFSET","IN5_ADDRESS_OFFSET","IN6_ADDRESS_OFFSET","IN7_ADDRESS_OFFSET", 
+		"IN0_ADDRESS_MASK","IN1_ADDRESS_MASK","IN2_ADDRESS_MASK","IN3_ADDRESS_MASK",
+		"IN4_ADDRESS_MASK","IN5_ADDRESS_MASK","IN6_ADDRESS_MASK","IN7_ADDRESS_MASK"]
+
+[simple_arbiter_x8.REQUIREMENTS]
+	INTERFACES = ["clk",  "in0", "out", "active"]
+	[simple_arbiter_x8.REQUIREMENTS.INCLUDES]
+		COMMON = ["arbiter.v"]
+		BOARD = []
+		COMMON_FOLDER = []
+		USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+  	    COMMON_FOLDER_FILES = []
+
+[simple_arbiter_x8.ENCODINGS]
+		MAX_INPUTS = 8
+	[simple_arbiter_x8.ENCODINGS.policy]
+		PRIORITY = 0
+
+[simple_arbiter_x8.INTERFACES.clk]
+		TYPE = "CLOCK"
+		DIRECTION = "SINK"
+[simple_arbiter_x8.INTERFACES.active]
+		TYPE = "GENERAL"
+		WIDTH = 3
+		DIRECTION = "SOURCE"
+[simple_arbiter_x8.INTERFACES.out]
+		TYPE = "SIMPLE"
+		DIRECTION = "SOURCE"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in0]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in1]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in2]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in3]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in4]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in5]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in6]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[simple_arbiter_x8.INTERFACES.in7]
+		TYPE = "SIMPLE"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+#######################################################################
+[aximml_arbiter_x8]
+
+TYPES = ["AXIMML"]
+
+PARAMETERS = ["ADDR_WIDTH", "DATA_WIDTH", "NUMBER_OF_INPUTS", "POLICY", "GENERATE_CROSSBAR", 
+		"IN0_ADDRESS_OFFSET","IN1_ADDRESS_OFFSET","IN2_ADDRESS_OFFSET","IN3_ADDRESS_OFFSET",
+		"IN4_ADDRESS_OFFSET","IN5_ADDRESS_OFFSET","IN6_ADDRESS_OFFSET","IN7_ADDRESS_OFFSET", 
+		"IN0_ADDRESS_MASK","IN1_ADDRESS_MASK","IN2_ADDRESS_MASK","IN3_ADDRESS_MASK",
+		"IN4_ADDRESS_MASK","IN5_ADDRESS_MASK","IN6_ADDRESS_MASK","IN7_ADDRESS_MASK"]
+
+[aximml_arbiter_x8.REQUIREMENTS]
+	INTERFACES = ["clk", "rst",  "in0", "out", "active"]
+	[aximml_arbiter_x8.REQUIREMENTS.INCLUDES]
+		COMMON = ["arbiter.v"]
+		BOARD = []
+		COMMON_FOLDER = []
+		USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	    COMMON_FOLDER_FILES = []
+[aximml_arbiter_x8.ENCODINGS]
+		MAX_INPUTS = 8
+	[aximml_arbiter_x8.ENCODINGS.policy]
+		PRIORITY = 0
+
+[aximml_arbiter_x8.INTERFACES.clk]
+		TYPE = "CLOCK"
+		DIRECTION = "SINK"
+[aximml_arbiter_x8.INTERFACES.rst]
+		TYPE = "CLOCK"
+		DIRECTION = "SINK"
+[aximml_arbiter_x8.INTERFACES.active]
+		TYPE = "GENERAL"
+		WIDTH = 3
+		DIRECTION = "SOURCE"
+[aximml_arbiter_x8.INTERFACES.out]
+		TYPE = "AXIMML"
+		DIRECTION = "SOURCE"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in0]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in1]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in2]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in3]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in4]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in5]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in6]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+[aximml_arbiter_x8.INTERFACES.in7]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "DATA_WIDTH"
+		MASK_WIDTH = "DATA_WIDTH >> 3"
+#######################################################################
+[aximml_address_translation]
+
+TYPES = ["AXIMML"]
+
+PARAMETERS = ["ADDR_WIDTH", "NUMBER_OF_MEMORY_REGIONS"]
+
+[aximml_address_translation.REQUIREMENTS]
+	INTERFACES = ["clk", "rst",  "in", "out", "c"]
+	[aximml_address_translation.REQUIREMENTS.INCLUDES]
+		COMMON = ["tables.v"]
+		BOARD = []
+		COMMON_FOLDER = []
+		USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	    COMMON_FOLDER_FILES = []
+[aximml_address_translation.ENCODINGS]
+
+[aximml_address_translation.INTERFACES.clk]
+		TYPE = "CLOCK"
+		DIRECTION = "SINK"
+[aximml_address_translation.INTERFACES.rst]
+		TYPE = "CLOCK"
+		DIRECTION = "SINK"
+[aximml_address_translation.INTERFACES.out]
+		TYPE = "AXIMML"
+		DIRECTION = "SOURCE"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "ADDR_WIDTH"
+		MASK_WIDTH = "ADDR_WIDTH >> 3"
+[aximml_address_translation.INTERFACES.in]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "ADDR_WIDTH"
+		MASK_WIDTH = "ADDR_WIDTH >> 3"
+[aximml_address_translation.INTERFACES.c]
+		TYPE = "AXIMML"
+		DIRECTION = "SINK"
+		CLOCK = "clk"
+		ADDRESS_WIDTH = "ADDR_WIDTH"
+		DATA_WIDTH = "ADDR_WIDTH"
+		MASK_WIDTH = "ADDR_WIDTH >> 3"
+#######################################################################
+[pcpi_delay]
+	TYPES = ["INTERCONNECT"]
+	PARAMETERS = ["OPCODE"]
+	[pcpi_delay.REQUIREMENTS]
+		INTERFACES = ["clk", "pcpi"]
+		[pcpi_delay.REQUIREMENTS.INCLUDES]
+			COMMON = ["riscv_ci.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  	    COMMON_FOLDER_FILES = []
+	[pcpi_delay.ENCODINGS]
+	[pcpi_delay.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[pcpi_delay.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+#######################################################################
+[clk_wiz_ethernet_phy]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = []
+	[clk_wiz_ethernet_phy.REQUIREMENTS]
+		INTERFACES = ["clk", "clk_83_33_mhz_out", "clk_100_mhz_out", "clk_25_mhz_out"]
+		[clk_wiz_ethernet_phy.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = ["clk_wiz_ethernet_phy.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	        COMMON_FOLDER_FILES = []
+	[clk_wiz_ethernet_phy.ENCODINGS]
+	[clk_wiz_ethernet_phy.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[clk_wiz_ethernet_phy.INTERFACES.clk_83_33_mhz_out]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+	[clk_wiz_ethernet_phy.INTERFACES.clk_100_mhz_out]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+	[clk_wiz_ethernet_phy.INTERFACES.clk_25_mhz_out]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+#######################################################################
+[clk_mmcm_eth_rgmmi]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = []
+	[clk_mmcm_eth_rgmmi.REQUIREMENTS]
+		INTERFACES = ["clkin200mhz", "rst", "clkout125mhz", "clkout125mhz_90shift", "locked"]
+		[clk_mmcm_eth_rgmmi.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = ["clk_mmcm_eth_rgmmi.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  	    COMMON_FOLDER_FILES = []
+	[clk_mmcm_eth_rgmmi.ENCODINGS]
+	[clk_mmcm_eth_rgmmi.INTERFACES.clkin200mhz]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[clk_mmcm_eth_rgmmi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[clk_mmcm_eth_rgmmi.INTERFACES.clkout125mhz]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+	[clk_mmcm_eth_rgmmi.INTERFACES.clkout125mhz_90shift]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+	[clk_mmcm_eth_rgmmi.INTERFACES.locked]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+#######################################################################
+[vio_0_sw_leds]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = []
+	[vio_0_sw_leds.REQUIREMENTS]
+		INTERFACES = ["clk", "sw0", "sw1", "sw2", "sw3", "leds"]
+		[vio_0_sw_leds.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = ["vio_0_sw_leds.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+   	        COMMON_FOLDER_FILES = []
+	[vio_0_sw_leds.ENCODINGS]
+	[vio_0_sw_leds.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[vio_0_sw_leds.INTERFACES.leds]
+			TYPE = "GENERAL"
+			WIDTH = 4
+			DIRECTION = "SINK"
+	[vio_0_sw_leds.INTERFACES.sw0]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[vio_0_sw_leds.INTERFACES.sw1]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[vio_0_sw_leds.INTERFACES.sw2]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[vio_0_sw_leds.INTERFACES.sw3]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SOURCE"
+################################################
+[sync_reset]	
+
+  TYPES = ["PERIPHERAL"]
+
+  PARAMETERS = []
+
+  [sync_reset.REQUIREMENTS]
+    INTERFACES = ["clk",  "rst", "out"]
+    [sync_reset.REQUIREMENTS.INCLUDES]
+      COMMON = []
+      BOARD  = []
+	  COMMON_FOLDER = ["network_subsystem"]
+	  USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
+	  COMMON_FOLDER_FILES = ["sync_reset.v"]
+
+  [sync_reset.ENCODINGS]
+
+  [sync_reset.INTERFACES.clk]
+    TYPE = "CLOCK"
+    DIRECTION = "SINK"
+  [sync_reset.INTERFACES.rst]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+  [sync_reset.INTERFACES.out]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SOURCE"
+################################################
+[IBUFGDS]	
+
+  TYPES = ["SIMPLE"]
+
+  PARAMETERS = []
+
+  [IBUFGDS.REQUIREMENTS]
+    INTERFACES = ["I",  "IB", "O"]
+    [IBUFGDS.REQUIREMENTS.INCLUDES]
+      COMMON = []
+      BOARD  = []
+	  COMMON_FOLDER = []
+	  USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  COMMON_FOLDER_FILES = []
+
+  [IBUFGDS.ENCODINGS]
+
+  [IBUFGDS.INTERFACES.I]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+  [IBUFGDS.INTERFACES.IB]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+  [IBUFGDS.INTERFACES.O]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SOURCE"
+################################################
+[BUFG]	
+
+  TYPES = ["SIMPLE"]
+
+  PARAMETERS = []
+
+  [BUFG.REQUIREMENTS]
+    INTERFACES = ["I", "O"]
+    [BUFG.REQUIREMENTS.INCLUDES]
+      COMMON = []
+      BOARD  = []
+	  COMMON_FOLDER = []
+	  USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  COMMON_FOLDER_FILES = []
+
+  [BUFG.ENCODINGS]
+
+  [BUFG.INTERFACES.I]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+  [BUFG.INTERFACES.O]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SOURCE"
+################################################
+[IBUF]	
+
+  TYPES = ["SIMPLE"]
+
+  PARAMETERS = []
+
+  [IBUF.REQUIREMENTS]
+    INTERFACES = ["I", "O"]
+    [IBUF.REQUIREMENTS.INCLUDES]
+      COMMON = []
+      BOARD  = []
+	  COMMON_FOLDER = []
+	  USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  COMMON_FOLDER_FILES = []
+
+  [IBUF.ENCODINGS]
+
+  [IBUF.INTERFACES.I]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+  [IBUF.INTERFACES.O]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SOURCE"
+################################################
+[IBUFDS_GTE2]	
+
+  TYPES = ["SIMPLE"]
+
+  PARAMETERS = []
+
+  [IBUFDS_GTE2.REQUIREMENTS]
+    INTERFACES = ["I", "O", "IB", "CEB", "ODIV2"]
+    [IBUFDS_GTE2.REQUIREMENTS.INCLUDES]
+      COMMON = []
+      BOARD  = []
+	  COMMON_FOLDER = []
+	  USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	  COMMON_FOLDER_FILES = []
+
+  [IBUFDS_GTE2.ENCODINGS]
+
+  [IBUFDS_GTE2.INTERFACES.I]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+  [IBUFDS_GTE2.INTERFACES.O]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SOURCE"
+  [IBUFDS_GTE2.INTERFACES.IB]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+  [IBUFDS_GTE2.INTERFACES.ODIV2]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SOURCE"
+  [IBUFDS_GTE2.INTERFACES.CEB]
+    TYPE = "GENERAL"
+    WIDTH = 1
+    DIRECTION = "SINK"
+#######################################################################
+[fp32units_pcpi]
+	TYPES = ["INTERCONNECT"]
+	PARAMETERS = ["OPCODE"]
+	[fp32units_pcpi.REQUIREMENTS]
+		INTERFACES = ["clk", "pcpi"]
+		[fp32units_pcpi.REQUIREMENTS.INCLUDES]
+			COMMON = ["riscv_ci.v"]
+			BOARD = ["fp32_add.v", "fp32_mul.v", "fp32_div.v", "fp32_exp.v", "fp32_log.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+	[fp32units_pcpi.ENCODINGS]
+	[fp32units_pcpi.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[fp32units_pcpi.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+#######################################################################
+[riscv_vector_extension]
+	TYPES = ["COMPUTE"]
+	PARAMETERS = ["ENABLE_PCPI_PASSTHROUGH", "XLEN", "CACHE_WORD_SIZE", "CACHE_ADDR_SIZE", "VLEN", "ENABLE_SEW_8", "ALU_UNITS_SEW_8", "ENABLE_SEW_8_ALU_ADD", "ENABLE_SEW_8_ALU_SUB", "ENABLE_SEW_8_ALU_MUL", "ENABLE_SEW_8_ALU_SLL", "ENABLE_SEW_8_ALU_SRL", "ENABLE_SEW_16", "ALU_UNITS_SEW_16", "ENABLE_SEW_16_ALU_ADD", "ENABLE_SEW_16_ALU_SUB", "ENABLE_SEW_16_ALU_MUL", "ENABLE_SEW_16_ALU_SLL", "ENABLE_SEW_16_ALU_SRL", "ENABLE_SEW_32", "ALU_UNITS_SEW_32", "ENABLE_SEW_32_ALU_ADD", "ENABLE_SEW_32_ALU_SUB", "ENABLE_SEW_32_ALU_MUL", "ENABLE_SEW_32_ALU_SLL", "ENABLE_SEW_32_ALU_SRL", "ENABLE_SEW_64", "ALU_UNITS_SEW_64", "ENABLE_SEW_64_ALU_ADD", "ENABLE_SEW_64_ALU_SUB", "ENABLE_SEW_64_ALU_MUL", "ENABLE_SEW_64_ALU_SLL", "ENABLE_SEW_64_ALU_SRL", "ENABLE_CSRRS_RW_VSTART", "ENABLE_CSRRS_RW_VSXSAT", "ENABLE_CSRRS_RW_VXRM", "ENABLE_CSRRS_RW_VCSR", "ENABLE_CSRRS_RW_VL", "ENABLE_CSRRS_RW_VTYPE", "ENABLE_CSRRS_RW_VLENB", "ENABLE_VSETVL", "ENABLE_VSETVLI", "ENABLE_VSETIVLI", "ENABLE_VL_WHOLE_REGISTER", "ENABLE_VS_WHOLE_REGISTER", "ENABLE_VL_UNIT_STRIDE", "ENABLE_VS_UNIT_STRIDE", "ENABLE_VL_STRIDED", "ENABLE_VS_STRIDED", "ENABLE_VL_INDEX_UNORDERED", "ENABLE_VS_INDEX_UNORDERED", "ENABLE_VL_INDEX_ORDERED", "ENABLE_VS_INDEX_ORDERED", "ENABLE_INTEGER_VECTOR_VECTOR_ADD", "ENABLE_FLOATINGPOINT_VECTOR_VECTOR_ADD"]
+	[riscv_vector_extension.REQUIREMENTS]
+		INTERFACES = ["clk", "rst", "pcpi", "pcpi_passthrough", "cache", "mem_request"]
+		[riscv_vector_extension.REQUIREMENTS.INCLUDES]
+			COMMON = ["riscv_vector_extension.v"]
+			BOARD = []
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+			COMMON_FOLDER_FILES = []
+	[riscv_vector_extension.ENCODINGS]
+	[riscv_vector_extension.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[riscv_vector_extension.INTERFACES.rst]
+			TYPE = "GENERAL"
+			DIRECTION = "SINK"
+			WIDTH = 1
+	[riscv_vector_extension.INTERFACES.mem_request]
+			TYPE = "GENERAL"
+			DIRECTION = "SOURCE"
+			WIDTH = 1
+	[riscv_vector_extension.INTERFACES.pcpi]
+			TYPE = "PCPI"
+			DIRECTION = "SINK"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+	[riscv_vector_extension.INTERFACES.pcpi_passthrough]
+			TYPE = "PCPI"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			WORD_WIDTH = 32
+	[riscv_vector_extension.INTERFACES.cache]
+			TYPE = "SIMPLE"
+			DIRECTION = "SOURCE"
+			CLOCK = "clk"
+			ADDRESS_WIDTH = 32
+			DATA_WIDTH = 32
+			MASK_WIDTH = 4

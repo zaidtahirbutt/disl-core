@@ -1,0 +1,23 @@
+#include <stdarg.h> 
+#include <stdint.h>
+#include <stddef.h>
+#include "utils.h"
+#include "arducam_ov2640.h"
+#define BME280_ADDRESS (0x76 << 1)
+
+
+int main( )
+{
+  uint8_t threshold = 250;      
+  while(1){
+    //capture_and_transmit(RGB565,OV2640_320x240,200,Auto,Saturation0,Brightness0,Contrast0,Normal);
+    //capture_and_transmit(BINARY,OV2640_320x240,220,Auto,Saturation0,Brightness0,Contrast0,Normal);
+    //capture_and_transmit(EDGE_SW,OV2640_320x240,threshold,Office,Saturation0,Brightness0,Contrast0,Normal);
+    capture_and_transmit(EDGE_HW,OV2640_320x240,threshold,Office,Saturation0,Brightness0,Contrast0,Normal); 
+  //  //threshold += 20;  
+  } 
+  while(1); 
+}    
+
+
+

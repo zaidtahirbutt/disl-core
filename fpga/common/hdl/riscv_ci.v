@@ -1,0 +1,671 @@
+module fp32units_pcpi(
+input clk,
+input        	pcpi_valid,
+input [31:0] 	pcpi_insn,
+input [31:0] 	pcpi_rs1,
+input [31:0] 	pcpi_rs2,
+output       	pcpi_wr,
+output  [31:0] 	pcpi_rd,
+output       	pcpi_wait,
+output 	    	pcpi_ready
+);
+
+parameter OPCODE = 127;
+
+wire [2:0] func3 = pcpi_insn[14:12];
+wire [6:0] func7 = pcpi_insn[31:25];
+wire [6:0] cmd = func7;
+wire cmd_add = (cmd == 7'd0) ? 1'b1 : 1'b0;
+wire cmd_mul = (cmd == 7'd1) ? 1'b1 : 1'b0;
+wire cmd_div = (cmd == 7'd2) ? 1'b1 : 1'b0;
+wire cmd_log = (cmd == 7'd3) ? 1'b1 : 1'b0;
+wire cmd_exp = (cmd == 7'd4) ? 1'b1 : 1'b0;
+wire cmd_dotprod_load = (cmd == 7'd5) ? 1'b1 : 1'b0;
+wire cmd_dotprod_run = (cmd == 7'd6) ? 1'b1 : 1'b0;
+wire valid_insn  = (pcpi_insn[6:0] == OPCODE[6:0]) ? pcpi_valid : 0;
+assign pcpi_wait = valid_insn && (~pcpi_ready);
+assign pcpi_wr = 1;
+wire pcpi_ready_log;
+wire pcpi_ready_add;
+wire pcpi_ready_exp;
+wire pcpi_ready_mul;
+wire pcpi_ready_div;
+wire pcpi_ready_dotprod_load;
+wire pcpi_ready_dotprod_run;
+wire [31:0] pcpi_rd_add;
+wire [31:0] pcpi_rd_log;
+wire [31:0] pcpi_rd_exp;
+wire [31:0] pcpi_rd_mul;
+wire [31:0] pcpi_rd_div;
+wire [31:0] pcpi_rd_dotprod_load;
+wire [31:0] pcpi_rd_dotprod_run;
+assign pcpi_ready = cmd_add ? pcpi_ready_add : 
+									 (cmd_log ? pcpi_ready_log : 
+									 (cmd_mul ? pcpi_ready_mul : 
+									 (cmd_exp ? pcpi_ready_exp : 
+									 (cmd_div ? pcpi_ready_div : 
+									 (cmd_dotprod_load ? pcpi_ready_dotprod_load : 
+									 (cmd_dotprod_run ? pcpi_ready_dotprod_run :
+									  0))))));
+
+assign pcpi_rd = cmd_add ? pcpi_rd_add : 
+								(cmd_log ? pcpi_rd_log : 
+								(cmd_mul ? pcpi_rd_mul : 
+								(cmd_exp ? pcpi_rd_exp : 
+								(cmd_div ? pcpi_rd_div : 
+								(cmd_dotprod_load ? pcpi_rd_dotprod_load : 
+								(cmd_dotprod_run ? pcpi_rd_dotprod_run : 
+								0))))));
+
+assign pcpi_ready_dotprod_load = (valid_insn && cmd_dotprod_load);
+assign pcpi_rd_dotprod_load = 0;
+
+reg [1023:0] muladd_buff;
+wire [512:0] add16_buff;
+wire [256:0] add8_buff;
+wire [128:0] add4_buff;
+wire [64:0] add2_buff;
+
+wire [15:0] mul_to_add16;
+wire [7:0] add16_to_add8;
+wire [3:0] add8_to_add4;
+wire [1:0] add4_to_add2;
+
+
+
+fp32_add fpadd(
+	.clk(clk), 
+	.lhs_valid(valid_insn && cmd_add), 
+	.lhs_data(pcpi_rs1), 
+  	.rhs_valid(valid_insn && cmd_add), 
+  	.rhs_data(pcpi_rs2), 
+  	.result_valid(pcpi_ready_add), 
+  	.result_data(pcpi_rd_add));
+
+
+fp32_mul fpmul(
+	.clk(clk), 
+	.lhs_valid(valid_insn && cmd_mul), 
+	.lhs_data(pcpi_rs1), 
+  	.rhs_valid(valid_insn && cmd_mul), 
+  	.rhs_data(pcpi_rs2), 
+  	.result_valid(pcpi_ready_mul), 
+  	.result_data(pcpi_rd_mul));
+
+
+fp32_div fpdiv(
+	.clk(clk), 
+	.lhs_valid(valid_insn && cmd_div), 
+	.lhs_data(pcpi_rs1), 
+  	.rhs_valid(valid_insn && cmd_div), 
+  	.rhs_data(pcpi_rs2), 
+  	.result_valid(pcpi_ready_div), 
+  	.result_data(pcpi_rd_div));
+
+
+fp32_log fplog(
+	.clk(clk), 
+	.in_valid(valid_insn && cmd_log), 
+	.in_data(pcpi_rs1), 
+  	.result_valid(pcpi_ready_log), 
+  	.result_data(pcpi_rd_log));
+
+
+fp32_exp fpexp(
+	.clk(clk), 
+	.in_valid(valid_insn && cmd_exp), 
+	.in_data(pcpi_rs1), 
+  	.result_valid(pcpi_ready_exp), 
+  	.result_data(pcpi_rd_exp));
+
+
+initial muladd_buff = 0;
+always @(posedge clk) begin
+    if (cmd_dotprod_load && valid_insn) begin
+        muladd_buff <= {muladd_buff[959:0], pcpi_rs1, pcpi_rs2};
+        end
+end
+
+
+genvar i;
+generate
+    for (i = 0; i < 16; i = i + 1) begin : gen_fpmuladd_mul
+        fp32_mul fpmuladd_mul(
+            .clk(clk), 
+            .lhs_valid(valid_insn && cmd_dotprod_run), 
+            .lhs_data(muladd_buff[(i*64+32)+:32]), 
+            .rhs_valid(valid_insn && cmd_dotprod_run), 
+            .rhs_data(muladd_buff[i*64+:32]), 
+            .result_valid(mul_to_add16[i]), 
+            .result_data(add16_buff[i*32+:32])
+        );
+    end
+endgenerate
+generate
+    for (i = 0; i < 8; i = i + 1) begin : gen_fpmuladd_add16_to_8
+        fp32_add fpmuladd_add(
+            .clk(clk), 
+            .lhs_valid(mul_to_add16[0]), 
+            .lhs_data(add16_buff[(i*64+32)+:32]), 
+            .rhs_valid(mul_to_add16[0]), 
+            .rhs_data(add16_buff[i*64+:32]), 
+            .result_valid(add16_to_add8[i]), 
+            .result_data(add8_buff[i*32+:32])
+        );
+    end
+endgenerate
+generate
+    for (i = 0; i < 4; i = i + 1) begin : gen_fpmuladd_add8_to_4
+        fp32_add fpmuladd_add(
+            .clk(clk), 
+            .lhs_valid(add16_to_add8[0]), 
+            .lhs_data(add8_buff[(i*64+32)+:32]), 
+            .rhs_valid(add16_to_add8[0]), 
+            .rhs_data(add8_buff[i*64+:32]), 
+            .result_valid(add8_to_add4[i]), 
+            .result_data(add4_buff[i*32+:32])
+        );
+    end
+endgenerate
+generate
+    for (i = 0; i < 2; i = i + 1) begin : gen_fpmuladd_add4_to_2
+        fp32_add fpmuladd_add(
+            .clk(clk), 
+            .lhs_valid(add8_to_add4[0]), 
+            .lhs_data(add4_buff[(i*64+32)+:32]), 
+            .rhs_valid(add8_to_add4[0]), 
+            .rhs_data(add4_buff[i*64+:32]), 
+            .result_valid(add4_to_add2[i]), 
+            .result_data(add2_buff[i*32+:32])
+        );
+    end
+endgenerate
+fp32_add fpmuladd_add14(
+    .clk(clk), 
+    .lhs_valid(add4_to_add2[0]), 
+    .lhs_data(add2_buff[63:32]), 
+    .rhs_valid(add4_to_add2[0]), 
+    .rhs_data(add2_buff[31:0]), 
+    .result_valid(pcpi_ready_dotprod_run), 
+    .result_data(pcpi_rd_dotprod_run)
+);
+
+endmodule
+
+
+
+
+module pcpi_delay(
+input clk,
+input        	pcpi_valid,
+input [31:0] 	pcpi_insn,
+input [31:0] 	pcpi_rs1,
+input [31:0] 	pcpi_rs2,
+output       	pcpi_wr,
+output  [31:0] 	pcpi_rd,
+output       	pcpi_wait,
+output 	    	pcpi_ready
+);
+
+parameter OPCODE = 127;
+
+reg [31:0] counter;
+
+wire valid_insn  = (pcpi_insn[6:0] == OPCODE[6:0]) ? pcpi_valid : 0;
+assign pcpi_wait = (counter < pcpi_rs1) ? 1'b1 : 1'b0;
+assign pcpi_ready = (counter >= pcpi_rs1) ? 1'b1 : 1'b0;
+assign pcpi_rd  = counter;
+assign pcpi_wr = 0;
+
+always @(posedge clk) begin
+	if (valid_insn)
+		counter <= (counter < pcpi_rs1) ? counter + 1 : counter;
+	else
+		counter <= 0;
+end
+endmodule
+
+module finn_rv32_pcpi_wrapper(
+input clk,
+input        	pcpi_valid,
+input [31:0] 	pcpi_insn,
+input [31:0] 	pcpi_rs1,
+input [31:0] 	pcpi_rs2,
+output       	pcpi_wr,
+output  [31:0] 	pcpi_rd,
+output       	pcpi_wait,
+output 	    	pcpi_ready
+);
+
+parameter OPCODE = 127;
+parameter INPUT_WIDTH_BYTES = 49;
+
+wire [7:0] dout_tdata;
+wire dout_tready;
+wire dout_tvalid;
+reg [(INPUT_WIDTH_BYTES*8)-1:0] din_tdata;
+wire din_tready;
+reg din_tvalid;
+
+wire [2:0] cmd = pcpi_insn[14:12];
+wire cmd_reset = (cmd == 3'd0) ? 1'b1 : 1'b0;
+wire cmd_poll = (cmd == 3'd1) ? 1'b1 : 1'b0;
+wire cmd_push = (cmd == 3'd2) ? 1'b1 : 1'b0;
+wire cmd_load = (cmd == 3'd3) ? 1'b1 : 1'b0;
+wire cmd_pop = (cmd == 3'd4) ? 1'b1 : 1'b0;
+wire valid_insn  = (pcpi_insn[6:0] == OPCODE[6:0]) ? pcpi_valid : 0;
+assign pcpi_wait = 0;
+assign pcpi_wr = valid_insn;
+assign pcpi_ready = valid_insn;
+assign pcpi_rd = {22'd0, din_tready, dout_tvalid, dout_tdata};
+
+always @(posedge clk) begin	
+    din_tvalid <= ((valid_insn && cmd_reset) || (din_tvalid && din_tready)) ? 0 : ((valid_insn && cmd_load) ? 1 : din_tvalid);
+    din_tdata <= (valid_insn && cmd_push) ? {din_tdata[(INPUT_WIDTH_BYTES*8)-64-1:0],pcpi_rs2, pcpi_rs1}: din_tdata;
+end
+
+
+finn_design_wrapper finn_design_wrapper (
+  .ap_clk                (clk               ),//i
+  .ap_rst_n              ((valid_insn && cmd_reset) ? 1'b0 : 1'b1),//i
+
+  .m_axis_0_tdata        (dout_tdata           ),//o
+  .m_axis_0_tready       (valid_insn && cmd_pop),//i
+  .m_axis_0_tvalid       (dout_tvalid          ),//o
+
+  .s_axis_0_tdata        (din_tdata           ),//i
+  .s_axis_0_tready       (din_tready		  ),//o
+  .s_axis_0_tvalid       (din_tvalid      ) //i
+);
+
+endmodule
+
+
+module laplacian_rgb565_rv32_pcpi_full(
+input clk,
+input        	pcpi_valid,
+input [31:0] 	pcpi_insn,
+input [31:0] 	pcpi_rs1,
+input [31:0] 	pcpi_rs2,
+output       	pcpi_wr,
+output  [31:0] 	pcpi_rd,
+output       	pcpi_wait,
+output 	    	pcpi_ready,
+output uart_tx,
+output spi_sck,
+output spi_mosi,
+output spi_cs,
+input spi_miso,
+output reg busy
+);
+
+
+parameter OPCODE = 127;
+parameter IMAGE_WIDTH = 320;
+parameter IMAGE_HEIGHT = 240;
+parameter UART_TX_CLKS_PER_BIT  = 16'd83;
+parameter SPI_CLOCK_DIVISOR = 0;
+
+
+wire [2:0] cmd = pcpi_insn[14:12];
+wire cmd_reset = (cmd == 3'd0) ? 1'b1 : 1'b0;
+wire cmd_start = (cmd == 3'd3) ? 1'b1 : 1'b0;
+wire cmd_poll = (cmd == 3'd4) ? 1'b1 : 1'b0;
+wire cmd_set_threshold = (cmd == 3'd1) ? 1'b1 : 1'b0;
+wire cmd_get_capture_ticks = (cmd == 3'd5) ? 1'b1 : 1'b0;
+wire cmd_get_process_ticks = (cmd == 3'd6) ? 1'b1 : 1'b0;
+wire cmd_get_transmit_ticks = (cmd == 3'd7) ? 1'b1 : 1'b0;
+
+wire valid_insn;
+wire [15:0] Gray_tl;
+wire [15:0] Gray_tc;
+wire [15:0] Gray_tr;
+wire [15:0] Gray_cl;
+wire [15:0] Gray_cc;
+wire [15:0] Gray_cr;
+wire [15:0] Gray_bl;
+wire [15:0] Gray_bc;
+wire [15:0] Gray_br;
+wire [15:0] pixel;
+wire [15:0] pixel_overlayed;
+wire valid_data;
+wire clk_spi;
+wire rst_spi;
+wire [7:0] spi_rx_byte;
+wire spi_busy;
+wire spi_finish;
+wire uart_busy;
+wire uart_finish;
+wire isEdge;
+
+reg [31:0] capture_ticks;
+reg [31:0] process_ticks;
+reg [31:0] transmit_ticks;
+
+reg [(3*IMAGE_WIDTH*16)+1:0] array;
+reg [15:0] col_counter;
+reg [15:0] row_counter;
+reg [15:0] threshold;
+reg [31:0] div_clk;
+reg [7:0] state;
+reg uart_start_trigger;
+reg [7:0] uart_tx_byte;
+reg [7:0] spi_tx_data;
+reg spi_start_trigger;
+reg [3:0] bit_counter;
+
+assign pcpi_wait = 0;
+assign pcpi_wr = valid_insn;
+assign pcpi_ready = valid_insn;
+assign valid_insn = (pcpi_insn[6:0] == OPCODE[6:0]) ? pcpi_valid : 0;
+assign pixel = ((row_counter == 1) || (row_counter == IMAGE_HEIGHT) || (col_counter ==0) || (col_counter == 1)) ?  array[(16*IMAGE_WIDTH)+:16] : pixel_overlayed;
+assign isEdge = (pixel == 16'b1111100000000000) ? 1'b1 :  1'b0;
+assign pcpi_rd = (valid_insn && cmd_get_capture_ticks) ? capture_ticks : ((valid_insn && cmd_get_process_ticks) ? process_ticks : ((valid_insn && cmd_get_transmit_ticks) ? transmit_ticks : {31'd0,busy}));
+assign valid_data = ((row_counter > 0) && (row_counter <= IMAGE_HEIGHT)) ? 1'b1 : 1'b0;
+assign rst_spi = (busy) ? 0 : 1;
+
+rgb2gray gtl(array[16*(IMAGE_WIDTH+IMAGE_WIDTH+1)+:16],Gray_tl);
+rgb2gray gtc(array[16*(IMAGE_WIDTH+IMAGE_WIDTH)+:16],Gray_tc);
+rgb2gray gtb(array[16*(IMAGE_WIDTH+IMAGE_WIDTH-1)+:16],Gray_tr);
+rgb2gray gcl(array[16*(IMAGE_WIDTH+1)+:16],Gray_cl);
+rgb2gray gcc(array[16*(IMAGE_WIDTH)+:16],Gray_cc);
+rgb2gray gcr(array[16*(IMAGE_WIDTH-1)+:16],Gray_cr);
+rgb2gray gbl(array[16*(2)+:16],Gray_bl);
+rgb2gray gbc(array[16*(1)+:16],Gray_bc);
+rgb2gray gbr(array[16*(0)+:16],Gray_br);
+laplacian_filter lf(pixel_overlayed, array[16*(IMAGE_WIDTH)+:16], threshold, Gray_tl,Gray_tc,Gray_tr,Gray_cl,Gray_cc,Gray_cr,Gray_bl,Gray_bc,Gray_br);
+
+
+
+uart_tx  #(.CLKS_PER_BIT(UART_TX_CLKS_PER_BIT)) tx(
+	.i_Clock(clk),
+	.i_Tx_DV(uart_start_trigger),
+	.i_Tx_Byte(uart_tx_byte), 
+	.o_Tx_Active(uart_busy),
+	.o_Tx_Serial(uart_tx),
+	.o_Tx_Done(uart_finish)
+);
+
+
+generate 
+	if (SPI_CLOCK_DIVISOR > 0) begin
+		initial div_clk <= 0;
+		assign clk_spi = div_clk[SPI_CLOCK_DIVISOR-1];  
+		always @(posedge clk) begin
+		    div_clk <= div_clk + 32'd1;
+		end
+		spi_burst_read SPI(
+			.clk(clk_spi),
+			.rst(rst),
+			.spi_clk(spi_sck),
+			.spi_miso(spi_miso),
+			.spi_mosi(spi_mosi),
+			.spi_cs(spi_cs),
+
+			.rx_data(spi_rx_byte),
+			.busy(spi_busy),
+			.tx_data(spi_tx_data),
+			.trigger(spi_start_trigger),
+			.finish(spi_finish)
+		);
+	end else begin
+		spi_burst_read SPI(
+			.clk(clk),
+			.rst(rst),
+			.spi_clk(spi_sck),
+			.spi_miso(spi_miso),
+			.spi_mosi(spi_mosi),
+			.spi_cs(spi_cs),
+
+			.rx_data(spi_rx_byte),
+			.busy(spi_busy),
+			.tx_data(spi_tx_data),
+			.trigger(spi_start_trigger),
+			.finish(spi_finish)
+		);
+	end
+endgenerate
+
+
+always @(posedge clk) begin	
+	if (valid_insn && cmd_set_threshold) begin
+		threshold <= pcpi_rs1[15:0];
+	end
+
+	if (valid_insn && cmd_reset) begin
+		col_counter <= 0;
+		row_counter <= 0;
+		busy <= 0;
+		state <= 0;
+		uart_start_trigger <= 0;
+		uart_tx_byte <= 0;
+		spi_tx_data <= 0;
+		spi_start_trigger <= 0;
+		capture_ticks <= 0;
+		process_ticks <= 0;
+		transmit_ticks <= 0;
+	end
+
+	if (valid_insn && cmd_start) begin
+		busy <= 1'b1;
+		state <= 0;
+	end
+
+	if (busy && ((state == 0) || (state == 1) || (state == 3) || (state == 6) || (state == 7) || (state == 8) || (state == 9))) 
+		capture_ticks <= capture_ticks + 1;
+
+	if (busy && (((state == 4) && (bit_counter[3])) || (state == 5))) 
+		transmit_ticks <= transmit_ticks + 1;
+
+	if (busy && ((state == 10))) 
+		process_ticks <= process_ticks + 1;
+
+	if (busy) begin
+		if (row_counter > IMAGE_HEIGHT) begin
+			col_counter <= 0;
+			row_counter <= 0;
+			busy <= 0;
+			state <= 0;
+			uart_start_trigger <= 0;
+			uart_tx_byte <= 0;
+			spi_tx_data <= 0;
+			spi_start_trigger <= 0;
+			bit_counter <= 0;
+		end else if (state == 0) begin // sending burst fifo command
+			spi_start_trigger <= 1;
+			spi_tx_data <= 8'h3C;
+			if (spi_busy) begin
+				state <= 3; 
+				spi_start_trigger <= 0;
+				spi_tx_data <= 0;	
+			end
+		end else if (state == 3) begin // checking if done
+			if (!spi_busy) begin
+				state <= 4;
+				uart_start_trigger <= 0;
+				uart_tx_byte <= 0;
+				spi_tx_data <= 0;
+				spi_start_trigger <= 0;
+				bit_counter <= 0;
+			end
+		end else if (state == 4) begin // base state of fsm - will return here after every pixel processed
+			if (bit_counter[3]) begin // check if a binary image vector is ready to transmit
+				if (!uart_busy) begin // check if uart is ready
+					bit_counter <= 0;
+					uart_start_trigger <= 1;
+					state <= 5;
+				end
+			end else begin	// if not uart tx needed, get and process the next pixels
+				spi_start_trigger <= 1;
+				state <= 6;
+			end
+		end else if (state == 5) begin // if uart tx started, get and process the next pixels
+			if (uart_busy) begin 
+					uart_start_trigger <= 0;
+					spi_start_trigger <= 1;
+					state <= 6;
+			end
+		end else if (state == 6) begin // check if spi started
+			if (spi_busy) begin 
+					spi_start_trigger <= 0;
+					state <= 7;
+			end
+		end else if (state == 7) begin // check if spi rx available - shift into pixel array
+			if (!spi_busy) begin 
+					array<= {array[(3*IMAGE_WIDTH*16)-1-8:0],spi_rx_byte};
+					spi_start_trigger <= 1;
+					state <= 8;
+			end
+		end else if (state == 8) begin // check if spi started
+			if (spi_busy) begin 
+					spi_start_trigger <= 0;
+					state <= 9;
+			end
+		end else if (state == 9) begin // check if spi rx available - shift into pixel array
+			if (!spi_busy) begin 
+					array<= {array[(3*IMAGE_WIDTH*16)-1-8:0],spi_rx_byte};
+					state <= 10;
+			end
+		end else if (state == 10) begin // update uart_tx_byte and counters
+			if (valid_data) begin
+				uart_tx_byte <= {uart_tx_byte[6:0],isEdge};
+				bit_counter <= bit_counter + 4'd1;
+			end
+			col_counter <= col_counter + 1;
+			if (col_counter == (IMAGE_WIDTH-1)) begin
+				row_counter <= row_counter + 1'd1;
+				col_counter <= 0;
+			end
+			state <= 4;
+			spi_start_trigger <= 0;
+			uart_start_trigger <= 0;
+		end
+	end
+end
+endmodule
+
+
+
+
+
+
+module laplacian_rgb565_rv32_pcpi(
+input clk,
+input        	pcpi_valid,
+input [31:0] 	pcpi_insn,
+input [31:0] 	pcpi_rs1,
+input [31:0] 	pcpi_rs2,
+output       	pcpi_wr,
+output  [31:0] 	pcpi_rd,
+output       	pcpi_wait,
+output 	    	pcpi_ready
+);
+
+parameter OPCODE = 127;
+parameter IMAGE_WIDTH = 320;
+parameter IMAGE_HEIGHT = 240;
+
+wire [2:0] cmd = pcpi_insn[14:12];
+wire cmd_reset = (cmd == 3'd0) ? 1'b1 : 1'b0;
+wire cmd_push = (cmd == 3'd2) ? 1'b1 : 1'b0;
+wire cmd_set_threshold = (cmd == 3'd1) ? 1'b1 : 1'b0;
+
+wire valid_insn;
+wire [15:0] Gray_tl;
+wire [15:0] Gray_tc;
+wire [15:0] Gray_tr;
+wire [15:0] Gray_cl;
+wire [15:0] Gray_cc;
+wire [15:0] Gray_cr;
+wire [15:0] Gray_bl;
+wire [15:0] Gray_bc;
+wire [15:0] Gray_br;
+wire [15:0] pixel;
+wire [15:0] pixel_overlayed;
+
+reg [(3*IMAGE_WIDTH*16)+1:0] array;
+reg [15:0] col_counter;
+reg [15:0] row_counter;
+reg [15:0] threshold;
+reg valid_data;
+
+assign pcpi_wait = 0;
+assign pcpi_wr = valid_insn;
+assign pcpi_ready = valid_insn;
+assign valid_insn = (pcpi_insn[6:0] == OPCODE[6:0]) ? pcpi_valid : 0;
+assign pixel = ((row_counter == 1) || (row_counter == IMAGE_HEIGHT) || (col_counter ==0) || (col_counter == 1)) ?  array[(16*IMAGE_WIDTH)+:16] : pixel_overlayed;
+//(((col_counter > 0) && (col_counter < IMAGE_WIDTH-1)) && ((row_counter > 1) && (row_counter < IMAGE_HEIGHT))) ? pixel_overlayed : array[IMAGE_WIDTH];
+assign pcpi_rd = {15'd0,(row_counter >= 1) ? 1'b1: 1'b0,pixel};
+
+rgb2gray gtl(array[16*(IMAGE_WIDTH+IMAGE_WIDTH+1)+:16],Gray_tl);
+rgb2gray gtc(array[16*(IMAGE_WIDTH+IMAGE_WIDTH)+:16],Gray_tc);
+rgb2gray gtb(array[16*(IMAGE_WIDTH+IMAGE_WIDTH-1)+:16],Gray_tr);
+rgb2gray gcl(array[16*(IMAGE_WIDTH+1)+:16],Gray_cl);
+rgb2gray gcc(array[16*(IMAGE_WIDTH)+:16],Gray_cc);
+rgb2gray gcr(array[16*(IMAGE_WIDTH-1)+:16],Gray_cr);
+rgb2gray gbl(array[16*(2)+:16],Gray_bl);
+rgb2gray gbc(array[16*(1)+:16],Gray_bc);
+rgb2gray gbr(array[16*(0)+:16],Gray_br);
+laplacian_filter lf(pixel_overlayed, array[16*(IMAGE_WIDTH)+:16], threshold, Gray_tl,Gray_tc,Gray_tr,Gray_cl,Gray_cc,Gray_cr,Gray_bl,Gray_bc,Gray_br);
+
+
+
+integer i;
+always @(posedge clk) begin
+	
+	if (valid_insn && cmd_set_threshold) begin
+		threshold <= pcpi_rs1[15:0];
+	end
+	if (valid_insn && cmd_reset) begin
+		col_counter <= 0;
+		row_counter <= 0;
+		valid_data <= 0;
+	end
+	if (valid_insn && cmd_push) begin
+		valid_data <= ((row_counter > 0) && (row_counter <= IMAGE_HEIGHT)) ? 1'b1 : 1'b0;
+		array<= {array[(3*IMAGE_WIDTH*16)-1-16:0],pcpi_rs1[15:0]};
+		if (col_counter == (IMAGE_WIDTH-1)) begin
+			row_counter <= row_counter + 1'd1;
+			col_counter <= 0;
+		end else begin
+			col_counter <= col_counter + 1;
+		end
+	end
+end
+endmodule
+
+
+module rgb2gray(input [15:0] pixel, output [15:0] gray);
+	wire [5:0] R_s = {pixel[15:11],1'b0};
+	wire [5:0] G_s = pixel[10:5];
+	wire [5:0] B_s = {pixel[4:0],1'b0};
+	wire [7:0] Gr = R_s+G_s+B_s;
+	assign gray = {8'd0,Gr};
+endmodule
+
+module laplacian_filter(pixel_overlayed,pixel_rgb,threshold,tl,tc,tr,cl,cc,cr,bl,bc,br);
+	output [15:0] pixel_overlayed;
+	input [15:0] pixel_rgb;
+	input [15:0] threshold;
+	input [15:0] tl;
+	input [15:0] tc;
+	input [15:0] tr;
+	input [15:0] cl;
+	input [15:0] cc;
+	input [15:0] cr;
+	input [15:0] bl;
+	input [15:0] bc;
+	input [15:0] br;
+	wire [15:0] tl_neg = (~tl) + 16'd1;
+	wire [15:0] tc_neg = (~tc) + 16'd1;
+	wire [15:0] tr_neg = (~tr) + 16'd1;
+	wire [15:0] cl_neg = (~cl) + 16'd1;
+	wire [15:0] cc_times_8 = {cc[12:0],3'd0};
+	wire [15:0] cr_neg = (~cr) + 16'd1;
+	wire [15:0] bl_neg = (~bl) + 16'd1;
+	wire [15:0] bc_neg = (~bc) + 16'd1;
+	wire [15:0] br_neg = (~br) + 16'd1;
+	wire [15:0] lp = tl_neg + tc_neg + tr_neg + cl_neg + cc_times_8 + cr_neg + bl_neg + bc_neg + br_neg; 
+	wire [15:0] mod_lp = lp[15] ? (~lp) + 16'd1 : lp;
+	assign pixel_overlayed = mod_lp > threshold ? 16'b1111100000000000 : pixel_rgb;
+endmodule

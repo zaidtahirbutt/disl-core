@@ -1,0 +1,57 @@
+#-----------------------------------------------------------
+# Vivado v2021.1 (64-bit)
+# SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+# IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+# Start of session at: Thu Nov 30 01:29:30 2023
+# Process ID: 163392
+# Current directory: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top
+# Command line: vivado
+# Log file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/vivado.log
+# Journal file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project /home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T23_SYN/edgetestbed_a100T23_SYN.xpr
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/tools/Xilinx/Vivado/2021.1/data/ip'.
+INFO: [IP_Flow 19-3899] Cannot get the environment domain name variable for the component vendor name. Setting the vendor name to 'user.org'.
+open_project: Time (s): cpu = 00:00:41 ; elapsed = 00:00:31 . Memory (MB): peak = 7495.344 ; gain = 104.023 ; free physical = 2316 ; free virtual = 6990
+update_compile_order -fileset sources_1
+update_compile_order -fileset sim_1
+update_compile_order -fileset sim_1
+open_run impl_1
+INFO: [Device 21-403] Loading part xc7a100tcsg324-1
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:01 . Memory (MB): peak = 7558.391 ; gain = 0.000 ; free physical = 2106 ; free virtual = 6789
+INFO: [Netlist 29-17] Analyzing 3867 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2021.1
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+Reading XDEF placement.
+Reading placer database...
+Reading XDEF routing.
+Read XDEF File: Time (s): cpu = 00:00:08 ; elapsed = 00:00:07 . Memory (MB): peak = 8067.746 ; gain = 48.398 ; free physical = 1403 ; free virtual = 6086
+Restored from archive | CPU: 8.390000 secs | Memory: 48.228249 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:08 ; elapsed = 00:00:07 . Memory (MB): peak = 8067.746 ; gain = 48.398 ; free physical = 1403 ; free virtual = 6086
+Netlist sorting complete. Time (s): cpu = 00:00:00.03 ; elapsed = 00:00:00.03 . Memory (MB): peak = 8067.746 ; gain = 0.000 ; free physical = 1407 ; free virtual = 6091
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2091 instances were transformed.
+  CFGLUT5 => CFGLUT5 (SRL16E, SRLC32E): 860 instances
+  IOBUFDS_INTERMDISABLE => IOBUFDS_INTERMDISABLE (IBUFDS_INTERMDISABLE_INT(x2), INV, OBUFTDS(x2)): 2 instances
+  IOBUF_INTERMDISABLE => IOBUF_INTERMDISABLE (IBUF_INTERMDISABLE, OBUFT): 16 instances
+  OBUFDS => OBUFDS_DUAL_BUF (INV, OBUFDS(x2)): 1 instance 
+  RAM128X1D => RAM128X1D (MUXF7(x2), RAMD64E(x4)): 2 instances
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 1029 instances
+  RAM32M => RAM32M (RAMD32(x6), RAMS32(x2)): 96 instances
+  RAM32M => RAM32M (inverted pins: WCLK) (RAMD32(x6), RAMS32(x2)): 1 instance 
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 6 instances
+  RAM32X1D => RAM32X1D (inverted pins: WCLK) (RAMD32(x2)): 2 instances
+  RAM64M => RAM64M (RAMD64E(x4)): 74 instances
+  RAM64X1D => RAM64X1D (RAMD64E(x2)): 2 instances
+
+open_run: Time (s): cpu = 00:01:43 ; elapsed = 00:01:06 . Memory (MB): peak = 8277.992 ; gain = 719.602 ; free physical = 1203 ; free virtual = 5890

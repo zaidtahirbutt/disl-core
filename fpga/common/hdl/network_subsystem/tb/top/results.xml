@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1726172421" />
+    <testcase classname="test_top" file="/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/test_top.py" lineno="1069" name="run_test" ratio_time="10954.493968327171" sim_time_ns="3131136.001" time="285.8311858177185" />
+  </testsuite>
+</testsuites>

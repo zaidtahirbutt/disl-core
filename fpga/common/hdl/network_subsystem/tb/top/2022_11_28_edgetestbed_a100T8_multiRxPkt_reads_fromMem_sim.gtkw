@@ -1,0 +1,123 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Fri Dec  2 13:45:13 2022
+[*]
+[dumpfile] "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/top.fst"
+[dumpfile_mtime] "Thu Dec  1 19:45:30 2022"
+[dumpfile_size] 923954
+[savefile] "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/2022_11_28_edgetestbed_a100T8_multiRxPkt_reads_fromMem_sim.gtkw"
+[timestart] 0
+[size] 1846 886
+[pos] -1 -1
+*-30.665154 3209004000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.eth_network_interface_controller.
+[sst_width] 426
+[signals_width] 483
+[sst_expanded] 1
+[sst_vpaned_height] 243
+@28
+top.clk
+@c00022
+[color] 3
+top.led[3:0]
+@28
+(0)top.led[3:0]
+(1)top.led[3:0]
+(2)top.led[3:0]
+(3)top.led[3:0]
+@1401200
+-group_end
+@200
+-UART 
+@22
+[color] 5
+top.uart.axi_wdata[31:0]
+@28
+[color] 5
+top.uart.axi_wvalid
+@200
+-RISC-V 
+@22
+top.cpu.mem_axi_araddr[31:0]
+@28
+top.cpu.mem_axi_arready
+top.cpu.mem_axi_arvalid
+@22
+top.cpu.mem_axi_rdata[31:0]
+@28
+top.cpu.mem_axi_rready
+top.cpu.mem_axi_rvalid
+@22
+top.cpu.mem_axi_awaddr[31:0]
+@28
+top.cpu.mem_axi_awready
+top.cpu.mem_axi_awvalid
+@22
+top.cpu.mem_axi_wdata[31:0]
+@28
+top.cpu.mem_axi_wready
+@22
+top.cpu.mem_axi_wstrb[3:0]
+@28
+top.cpu.mem_axi_wvalid
+top.cpu.mem_axi_bready
+top.cpu.mem_axi_bvalid
+@201
+-Network to Memory Module
+@28
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.clk
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_avail_bram_reg
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.net_csr1
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.net_csr2
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.net_csr3
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.net_csr4
+@24
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.mem_state_reg[7:0]
+@28
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.state_reg[2:0]
+@22
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.write_fsm_state_reg[3:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_mem_base_addr_reg[31:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_alloc_mem_size_reg[31:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_alloc_mem_words_size[31:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.total_mem_used_rx_pkts_reg[31:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.total_mem_words_used_rx_pkts_reg[31:0]
+@28
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.desc_table_rx_pkt_full
+@24
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_len_counter_reg[11:0]
+@22
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.desc_table_rx_pkt_start_mem_addr_next[31:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.total_mem_words_used_rx_pkts_reg[31:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.eth_addr_word_going_to_mem_reg[31:0]
+@28
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.eth_mem_write_grant
+@22
+top.eth_network_interface_controller.eth_fifo_to_bram.last_mem_wr_addr_reg[31:0]
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.rd_fifo_ptr_rx_pkt_reg[6:0]
+[color] 6
+top.eth_network_interface_controller.eth_fifo_to_bram.wr_fifo_ptr_rx_pkt_reg[6:0]
+[pattern_trace] 1
+[pattern_trace] 0

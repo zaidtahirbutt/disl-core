@@ -1,0 +1,20 @@
+[CLOCK]
+	OSCILLATOR_CLOCK_PERIOD_NS = 10
+
+[MODULES]
+	[MODULES.jtag_chip_manager]
+		JTAG_USER_REG_ID = 4
+	[MODULES.ddr4_mig]
+		USER_ADDR_WIDTH = 32
+		USER_MASK_WIDTH = 64
+		USER_DATA_WIDTH = 512
+	    CKE_BITS = 1
+	    CK_BITS = 1
+	    CS_BITS = 1
+	    DDR_BA_WIDTH = 2
+	    DDR_BG_WIDTH = 2
+	    DDR_ADDR_BITS = 17
+	    ODT_BITS = 1
+	    DM_BITS = 8
+	    DQS_BITS = 8
+	    DQ_BITS = 64

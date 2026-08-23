@@ -1,0 +1,408 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Thu Nov  9 11:50:56 2023
+[*]
+[dumpfile] "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/top.fst"
+[dumpfile_mtime] "Tue Nov  7 21:44:09 2023"
+[dumpfile_size] 1444314
+[savefile] "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/tutu.gtkw"
+[timestart] 514162100
+[size] 1846 886
+[pos] -1 -1
+*-16.522879 514336000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.eth_network_interface_controller.
+[treeopen] top.eth_network_interface_controller.eth_fifo_to_bram.
+[sst_width] 403
+[signals_width] 685
+[sst_expanded] 1
+[sst_vpaned_height] 243
+@28
+top.clk
+top.ui_rst2
+top.phy_rx_dv
+@22
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_w_state_reg[3:0]
+@24
+[color] 4
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_rdptr_plus_rxpkt_len_words_counter_next[8:0]
+@28
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_w_dw_complete_flag_next
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_w_dw_complete_flag_reg
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_mem_write_MSB_LSB_word_flag_reg
+@24
+[color] 5
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_rdptr_plus_rxpkt_len_words_counter_reg[8:0]
+@28
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_rd_ptr_rollover_flag_reg
+[color] 2
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_mem_data_word_en
+@22
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_mem_data_word_reg[31:0]
+@24
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_len_words_counter_next[9:0]
+[color] 6
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_rd_ptr_reg[8:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_len_total_words_reg[9:0]
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_len_words_counter_reg[9:0]
+@28
+[color] 2
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_inc_wr_ptr_flag_reg
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_halt_combined_global[1:0]
+@24
+[color] 5
+top.eth_network_interface_controller.eth_fifo_to_bram.wr_ptr_decs_table_fifo_VeBPF_rx_pkt_reg[2:0]
+@28
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_avail_bram_reg
+@200
+-WR PTR BELOW
+@24
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_wr_ptr_reg[8:0]
+[color] 6
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_rd_ptr_reg[8:0]
+@28
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_fifo_FULL_next
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_fifo_EMPTY_next
+@c00420
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+@28
+(0)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(1)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(2)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(3)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(4)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(5)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(6)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(7)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(8)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+(9)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_LOW[9:0]
+@1401200
+-group_end
+@c00024
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+@28
+(0)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(1)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(2)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(3)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(4)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(5)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(6)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(7)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+(8)top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_HIGH[8:0]
+@1401200
+-group_end
+@24
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_bram_fifo_wr_ptr_DELTA_COMB[8:0]
+@28
+[color] 5
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_wr_ptr_rollover_flag_reg
+[color] 2
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_rd_ptr_rollover_flag_reg
+@24
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_len_total_words_reg[9:0]
+[color] 5
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_len_words_counter_next[9:0]
+@28
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_rd_ptr_rollover_flag_next
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_w_dw_complete_flag_next
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_w_dw_complete_flag_reg
+@200
+-VeBPF Sigs xP
+@24
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_mem_adr_next[10:0]
+@22
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_mem_64bit_wdata_next[63:0]
+@24
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_rdptr_plus_rxpkt_len_words_counter_next[8:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_RdPtr_desc_table_rx_pkt_len_words_reg[9:0]
+@28
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_w_dw_complete_flag_next
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_data_mem_write_MSB_LSB_word_flag_reg
+@24
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_len_words_counter_next[9:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_len_total_words_reg[9:0]
+@28
+[color] 5
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_wr_ptr_rollover_flag_reg
+@24
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_len_words_counter_reg[9:0]
+[color] 2
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_wrptr_plus_rxpkt_len_words_counter_next[8:0]
+@28
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.increment_rx_pkt_word_addr_reg
+top.eth_network_interface_controller.eth_fifo_to_bram.clk
+[color] 1
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_data_transfer_en_next
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_wr_ptr_rollover_flag_reg
+@24
+[color] 2
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_len_words_counter_reg[9:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_len_counter_reg[11:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_len_counter_next[11:0]
+@28
+[color] 5
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_wr_ptr_rollover_flag_reg
+@24
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.max_rx_pkt_hdr_word_size_reg[7:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.max_rx_pkt_hdr_word_size_next[7:0]
+@28
+[color] 2
+top.eth_network_interface_controller.eth_fifo_to_bram.increment_rx_pkt_word_addr_reg
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_rd_ptr_rollover_flag_reg
+@22
+[color] 2
+top.eth_network_interface_controller.eth_fifo_to_bram.max_rx_pkt_hdr_word_size_next[7:0]
+@24
+[color] 7
+top.eth_network_interface_controller.eth_fifo_to_bram.desc_table_VeBPF_rx_pkt_len_total_words_next[9:0]
+@28
+top.eth_network_interface_controller.eth_fifo_to_bram.s_axis_tlast
+@24
+top.eth_network_interface_controller.eth_fifo_to_bram.wr_fifo_ptr_rx_pkt_reg[2:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.rd_fifo_ptr_rx_pkt_reg[2:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.rx_pkt_len_words_counter_reg[9:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_wrptr_plus_rxpkt_len_words_counter_next[8:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_wrptr_plus_rxpkt_len_words_counter_reg[8:0]
+@28
+top.eth_network_interface_controller.eth_fifo_to_bram.clk
+@24
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rx_pkt_hdr_bram_wr_ptr_reg[8:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.max_rx_pkt_hdr_word_size_next[7:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_wrptr_plus_rxpkt_len_words_counter_next[8:0]
+@25
+top.eth_network_interface_controller.eth_fifo_to_bram.VeBPF_rxpkt_hdr_bram_fifo_wrptr_plus_rxpkt_len_words_counter_reg[8:0]
+@28
+[color] 5
+top.eth_network_interface_controller.eth_fifo_to_bram.s_axis_tready
+@24
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.state_reg[2:0]
+@28
+top.eth_network_interface_controller.eth_fifo_to_bram.s_axis_tvalid
+@22
+top.eth_network_interface_controller.eth_fifo_to_bram.s_axis_tdata[7:0]
+@c00022
+[color] 7
+top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+@28
+[color] 1
+(0)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(1)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(2)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(3)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(4)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(5)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(6)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(7)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(8)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(9)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(10)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(11)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(12)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(13)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(14)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(15)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(16)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(17)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(18)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(19)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(20)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(21)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(22)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(23)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(24)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(25)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(26)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(27)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(28)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(29)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(30)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+[color] 1
+(31)top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_next[31:0]
+@1401200
+-group_end
+@22
+[color] 3
+top.eth_network_interface_controller.eth_fifo_to_bram.mem_data_word_reg[31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[0][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[1][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[2][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[3][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[4][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[5][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[6][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[7][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[8][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[9][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[10][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[11][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[12][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[13][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[14][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[15][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[16][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[17][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[18][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[19][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[20][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[21][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[22][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[23][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[24][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[25][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[26][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[27][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[28][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[29][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[30][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[31][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[32][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[33][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[34][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[35][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[36][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[37][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[38][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[39][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[40][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[41][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[42][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[43][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[44][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[45][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[46][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[47][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[48][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[49][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[50][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[51][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[52][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[53][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[54][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[55][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[56][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[57][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[58][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[59][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[60][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[61][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[62][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[63][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[64][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[65][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[66][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[67][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[68][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[69][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[70][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[71][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[72][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[73][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[74][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[75][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[76][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[77][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[78][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[79][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[80][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[81][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[82][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[83][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[84][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[85][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[86][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[87][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[88][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[89][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[90][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[91][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[92][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[93][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[94][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[95][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[96][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[97][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[98][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[99][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[100][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[101][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[102][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[103][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[104][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[105][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[106][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[107][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[108][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[109][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[110][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[111][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[112][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[113][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[114][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[115][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[116][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[117][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[118][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[119][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[120][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[121][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[122][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[123][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[124][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[125][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[126][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[127][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[128][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[129][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[130][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[131][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[132][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[133][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[134][31:0]
+top.eth_network_interface_controller.eth_fifo_to_bram.\VeBPF_rx_pkt_hdr_bram_fifo[135][31:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,58 @@
+{
+	"DEFAULT": {
+		"CONTAINER_NAME":"disl_container",
+		"IMAGE_NAME":"disl",
+		"SYSTEM":"edgetestbed_jtag_uartprog_no_dram",
+		"SYSTEM_DIR":"../../examples/edgetestbed",
+		"BUILD_DIR":"../../build",
+		"BOARD":"cmoda735t"
+	},
+	"DEMO1": {
+		"CONTAINER_NAME":"disl_container",
+		"IMAGE_NAME":"disl",
+		"SYSTEM":"edgetestbed_jtag_uartprog_no_dram",
+		"SYSTEM_DIR":"../../examples/edgetestbed",
+		"BUILD_DIR":"../../build",
+		"BOARD":"cmoda735t"
+	},
+	"DEMO2": {
+		"CONTAINER_NAME":"disl_container",
+		"IMAGE_NAME":"disl",
+		"SYSTEM":"edgetestbed_arducam_jtag_uartprog_no_dram",
+		"SYSTEM_DIR":"../../examples/edgetestbed",
+		"BUILD_DIR":"../../build",
+		"BOARD":"cmoda735t"
+	},
+	"DEMO3": {
+		"CONTAINER_NAME":"disl_container",
+		"IMAGE_NAME":"disl",
+		"SYSTEM":"edgetestbed_arducam_jtag_uartprog_no_dram",
+		"SYSTEM_DIR":"../../examples/edgetestbed",
+		"BUILD_DIR":"../../build",
+		"BOARD":"cmoda735t"
+	},
+	"DEMO4": {
+		"CONTAINER_NAME":"disl_container",
+		"IMAGE_NAME":"disl",
+		"SYSTEM":"edgetestbed_arducam_jtag_uartprog_no_dram_jpeg",
+		"SYSTEM_DIR":"../../examples/edgetestbed",
+		"BUILD_DIR":"../../build",
+		"BOARD":"cmoda735t"
+	},
+	"DEMO5": {
+		"CONTAINER_NAME":"disl_container",
+		"IMAGE_NAME":"disl",
+		"SYSTEM":"edgetestbed_arducam_jtag_uartprog_no_dram_jpeg_cnn",
+		"SYSTEM_DIR":"../../examples/edgetestbed",
+		"BUILD_DIR":"../../build",
+		"BOARD":"cmoda735t"
+	},
+	"DEMO6": {
+		"CONTAINER_NAME":"disl_container",
+		"IMAGE_NAME":"disl",
+		"SYSTEM":"edgetestbed_arducam_jtag_uartprog_jpeg_cnn",
+		"SYSTEM_DIR":"../../examples/edgetestbed",
+		"BUILD_DIR":"../../build",
+		"BOARD":"artya735t"
+	}
+}

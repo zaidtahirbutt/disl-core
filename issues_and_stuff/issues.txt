@@ -1,0 +1,11 @@
+Corrected paths for Arty100t
+
+Need to make a build folder manually, otherwise it gives out an unrelated error
+
+Need to rename the DESCRIPTION of the system.tml file to the name of the build folder you mention while building the project.
+    Forexample, in examples we have edgetestbed/edgetestbed_jtag_uartprog_artya7100t example and I modified its system.tml as follows:
+        [DESCRIPTION]
+            NAME = "edgetestbed_jtag_uartprog_artya7100t"
+    Note that the DESCRIPTION.NAME has to be the same as the example folder
+    The command I used to build the project mentioned above:
+        [zaidt@dhcp-acadmin-128-197-176-198 build_edgetestbed_jtag_uartprog_artya7100t_v1_2024_9_4]$ python configure.py --example_dir ./examples/edgetestbed --example edgetestbed_jtag_uartprog_artya7100t --board artya7100t --build_dir ./build/build_edgetestbed_jtag_uartprog_artya7100t_v1_2024_9_4

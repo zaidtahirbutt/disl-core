@@ -1,0 +1,132 @@
+#-----------------------------------------------------------
+# Vivado v2021.1 (64-bit)
+# SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+# IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+# Start of session at: Mon Nov 20 11:29:17 2023
+# Process ID: 26167
+# Current directory: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top
+# Command line: vivado
+# Log file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/vivado.log
+# Journal file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+disconnect_hw_server localhost:3121
+connect_hw_server -allow_non_jtag
+open_hw_target
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+disconnect_hw_server localhost:3121
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+set_property PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+display_hw_ila_data [ get_hw_ila_data hw_ila_data_1 -of_objects [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+disconnect_hw_server localhost:3121
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+set_property PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+display_hw_ila_data [ get_hw_ila_data hw_ila_data_1 -of_objects [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+disconnect_hw_server localhost:3121
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+set_property PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+disconnect_hw_server localhost:3121
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+set_property PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+display_hw_ila_data [ get_hw_ila_data hw_ila_data_1 -of_objects [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]

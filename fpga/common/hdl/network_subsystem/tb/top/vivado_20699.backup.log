@@ -1,0 +1,668 @@
+#-----------------------------------------------------------
+# Vivado v2021.1 (64-bit)
+# SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+# IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+# Start of session at: Thu Oct 27 23:25:00 2022
+# Process ID: 20699
+# Current directory: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/fpga_core
+# Command line: vivado
+# Log file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/fpga_core/vivado.log
+# Journal file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/fpga_core/vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project /home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.xpr
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/tools/Xilinx/Vivado/2021.1/data/ip'.
+INFO: [IP_Flow 19-3899] Cannot get the environment domain name variable for the component vendor name. Setting the vendor name to 'user.org'.
+open_project: Time (s): cpu = 00:00:37 ; elapsed = 00:00:21 . Memory (MB): peak = 7541.645 ; gain = 104.156 ; free physical = 4260 ; free virtual = 10050
+update_compile_order -fileset sources_1
+launch_simulation
+Command: launch_simulation 
+INFO: [Vivado 12-12493] Simulation top is 'tb_top'
+INFO: [Vivado 12-5698] Checking validity of IPs in the design for the 'XSim' simulator...
+INFO: [Vivado 12-5682] Launching behavioral simulation in '/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.sim/sim_1/behav/xsim'
+INFO: [Vivado 12-4795] Using compiled simulation libraries for IPs
+INFO: [IP_Flow 19-3899] Cannot get the environment domain name variable for the component vendor name. Setting the vendor name to 'user.org'.
+INFO: [SIM-utils-51] Simulation object is 'sim_1'
+INFO: [SIM-utils-72] Using boost library from '/tools/Xilinx/Vivado/2021.1/tps/boost_1_72_0'
+INFO: [USF-XSim-7] Finding pre-compiled libraries...
+INFO: [USF-XSim-11] File '/tools/Xilinx/Vivado/2021.1/data/xsim/xsim.ini' copied to run dir:'/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.sim/sim_1/behav/xsim'
+INFO: [SIM-utils-54] Inspecting design source files for 'tb_top' in fileset 'sim_1'...
+INFO: [USF-XSim-97] Finding global include files...
+INFO: [USF-XSim-98] Fetching design files from 'sim_1'...
+INFO: [USF-XSim-2] XSim::Compile design
+INFO: [USF-XSim-61] Executing 'COMPILE and ANALYZE' step in '/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.sim/sim_1/behav/xsim'
+xvlog --incr --relax -prj tb_top_vlog.prj
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.gen/sources_1/ip/vio_0/sim/vio_0.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module vio_0
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_BRAMCACHE_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_read_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_read_address_0_Arbiter
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_read_address_1_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_BRAMCACHE_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_write_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_write_address_0_Arbiter
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_write_address_1_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_BRAMCACHE_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_write_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_write_data_0_Arbiter
+INFO: [VRFC 10-311] analyzing module DISLiPort_BRAMCACHE_0_write_data_1_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_CONFIG_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_CONFIG_0_read_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_CONFIG_0_read_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_CONFIG_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_CONFIG_0_write_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_CONFIG_0_write_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_CONFIG_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_CONFIG_0_write_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_CONFIG_0_write_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_CPU_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_CPU_0_read_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_CPU_0_read_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_CPU_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_CPU_0_write_response
+INFO: [VRFC 10-311] analyzing module DISLiPort_CPU_0_write_response_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_GPIO_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_GPIO_0_read_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_GPIO_0_read_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_GPIO_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_GPIO_0_write_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_GPIO_0_write_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_GPIO_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_GPIO_0_write_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_GPIO_0_write_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_MEMMAP_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_0_read_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_0_read_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_MEMMAP_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_0_write_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_0_write_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_MEMMAP_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_0_write_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_0_write_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_MEMMAP_1_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_1_read_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_1_read_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_MEMMAP_1_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_1_write_response
+INFO: [VRFC 10-311] analyzing module DISLiPort_MEMMAP_1_write_response_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_NETWORK_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_0_read_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_0_read_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_NETWORK_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_0_write_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_0_write_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_NETWORK_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_0_write_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_0_write_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_NETWORK_1_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_1_read_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_1_read_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_NETWORK_1_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_1_write_response
+INFO: [VRFC 10-311] analyzing module DISLiPort_NETWORK_1_write_response_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_TIMER_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_TIMER_0_read_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_TIMER_0_read_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_TIMER_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_TIMER_0_write_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_TIMER_0_write_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_TIMER_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_TIMER_0_write_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_TIMER_0_write_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_UART_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_UART_0_read_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_UART_0_read_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_UART_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_UART_0_write_address
+INFO: [VRFC 10-311] analyzing module DISLiPort_UART_0_write_address_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_UART_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLiPort_UART_0_write_data
+INFO: [VRFC 10-311] analyzing module DISLiPort_UART_0_write_data_0_Arbiter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_BRAMCACHE_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_BRAMCACHE_0_read_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_BRAMCACHE_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_BRAMCACHE_0_write_response
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_CONFIG_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_CONFIG_0_read_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_CONFIG_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_CONFIG_0_write_response
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_CPU_0_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_CPU_0_read_address
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_CPU_0_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_CPU_0_write_address
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_CPU_0_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_CPU_0_write_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_GPIO_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_GPIO_0_read_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_GPIO_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_GPIO_0_write_response
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_MEMMAP_0_read_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_MEMMAP_0_write_response
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_MEMMAP_1_read_address
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_MEMMAP_1_write_address
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_MEMMAP_1_write_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_NETWORK_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_NETWORK_0_read_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_NETWORK_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_NETWORK_0_write_response
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_NETWORK_1_read_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_NETWORK_1_read_address
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_NETWORK_1_write_address.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_NETWORK_1_write_address
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_NETWORK_1_write_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_NETWORK_1_write_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_TIMER_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_TIMER_0_read_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_TIMER_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_TIMER_0_write_response
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_UART_0_read_data.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_UART_0_read_data
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_UART_0_write_response.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DISLoPort_UART_0_write_response
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/smartswitch_subsystem/hdl/OHEDemux.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module OHEDemux
+INFO: [VRFC 10-311] analyzing module tb_OHEDemux
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/smartswitch_subsystem/hdl/OHEMux.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module OHEMux
+INFO: [VRFC 10-311] analyzing module tb_OHEMUX
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/smartswitch_subsystem/hdl/SimpleMux.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module SimpleMux
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/axis/rtl/axis_adapter.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module axis_adapter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/axis/rtl/axis_async_fifo.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module axis_async_fifo
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/axis/rtl/axis_async_fifo_adapter.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module axis_async_fifo_adapter
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/axis/rtl/axis_fifo.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module axis_fifo
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/axis_gmii_rx.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module axis_gmii_rx
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/axis_gmii_tx.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module axis_gmii_tx
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/memory_subsystem/hdl/bram_axi_cachecontroller.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module bram_axi_cachecontroller
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/boards/digilent_artya100t/sim/ddr3.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module ddr3
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/axis/rtl/eth_fifo_axis_to_bram_axi.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module eth_fifo_axis_to_bram_axi
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_1g.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module eth_mac_1g
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module eth_mac_mii
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii_fifo.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module eth_mac_mii_fifo
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module eth_nic_100m_mmi
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/fifo.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fifo
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/gpio_axi.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module gpio_axi
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/lfsr.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module lfsr
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/mii_phy_if.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module mii_phy_if
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/mmap_axi.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module mmap_axi
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/rv_axi.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module picorv32
+INFO: [VRFC 10-311] analyzing module picorv32_regs
+INFO: [VRFC 10-311] analyzing module picorv32_pcpi_mul
+INFO: [VRFC 10-311] analyzing module picorv32_pcpi_fast_mul
+INFO: [VRFC 10-311] analyzing module picorv32_pcpi_div
+INFO: [VRFC 10-311] analyzing module picorv32_axi
+INFO: [VRFC 10-311] analyzing module picorv32_axi_adapter
+INFO: [VRFC 10-311] analyzing module picorv32_wb
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module smart_switch
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:254]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:255]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:270]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:271]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:272]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:273]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:274]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:275]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:276]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:277]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:278]
+WARNING: [VRFC 10-8497] literal value 'd13 truncated to fit in 3 bits [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:279]
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/ssio_sdr_in.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module ssio_sdr_in
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/timer_axi.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module timer_axi
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/uart_axi.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module uart_axi
+INFO: [VRFC 10-311] analyzing module uart_tx
+INFO: [VRFC 10-311] analyzing module uart_rx
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/zaidtahir/projects/Git_synched_repos/DISL/tests/edgetestbed_a100T4_sim/hdl/top.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module top
+INFO: [VRFC 10-311] analyzing module tb_top
+Waiting for jobs to finish...
+No pending jobs, compilation finished.
+INFO: [USF-XSim-69] 'compile' step finished in '3' seconds
+INFO: [USF-XSim-3] XSim::Elaborate design
+INFO: [USF-XSim-61] Executing 'ELABORATE' step in '/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.sim/sim_1/behav/xsim'
+xelab -wto 96fdb6e601894e7f913da7964287ac56 --incr --debug typical --relax --mt 8 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot tb_top_behav xil_defaultlib.tb_top xil_defaultlib.glbl -log elaborate.log
+Vivado Simulator v2021.1
+Copyright 1986-1999, 2001-2021 Xilinx, Inc. All Rights Reserved.
+Running: /tools/Xilinx/Vivado/2021.1/bin/unwrapped/lnx64.o/xelab -wto 96fdb6e601894e7f913da7964287ac56 --incr --debug typical --relax --mt 8 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot tb_top_behav xil_defaultlib.tb_top xil_defaultlib.glbl -log elaborate.log 
+Using 8 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+WARNING: [VRFC 10-3091] actual bit length 4 differs from formal bit length 3 for port 'MEMMAP_1_read_address_iaddr' [/home/zaidtahir/projects/Git_synched_repos/DISL/tests/edgetestbed_a100T4_sim/hdl/top.v:466]
+WARNING: [VRFC 10-3091] actual bit length 4 differs from formal bit length 3 for port 'MEMMAP_1_write_address_iaddr' [/home/zaidtahir/projects/Git_synched_repos/DISL/tests/edgetestbed_a100T4_sim/hdl/top.v:467]
+WARNING: [VRFC 10-3091] actual bit length 4 differs from formal bit length 3 for port 'MEMMAP_1_write_data_iaddr' [/home/zaidtahir/projects/Git_synched_repos/DISL/tests/edgetestbed_a100T4_sim/hdl/top.v:468]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:260]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:261]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:262]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:263]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:264]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:265]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:266]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:267]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:268]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:269]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:270]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_read_address.v:73]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 6 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_read_address.v:80]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:271]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_write_address.v:73]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 6 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_write_address.v:80]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:272]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_write_data.v:73]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 6 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLoPort_MEMMAP_1_write_data.v:80]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:273]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_MEMMAP_1_read_data.v:97]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:274]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'in' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/DISLiPort_MEMMAP_1_write_response.v:97]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:280]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:281]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:282]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:283]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:284]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:285]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:286]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:287]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:288]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:289]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:290]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:291]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:292]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:293]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:294]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:295]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:296]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:297]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:298]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:299]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:300]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:301]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:302]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:303]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:304]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:305]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:306]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:307]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:308]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 'select' [/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/build/smartswitch.v:309]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 'ifg_delay' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:413]
+WARNING: [VRFC 10-3091] actual bit length 4 differs from formal bit length 8 for port 'gmii_rxd' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii.v:150]
+WARNING: [VRFC 10-3091] actual bit length 4 differs from formal bit length 8 for port 'gmii_txd' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii.v:153]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tid' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii_fifo.v:257]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tdest' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii_fifo.v:258]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 's_axis_tkeep' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii_fifo.v:304]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tid' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii_fifo.v:308]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tdest' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii_fifo.v:309]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 's_axis_tkeep' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:655]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tid' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:659]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tdest' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:660]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 1 for port 's_axis_tkeep' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:715]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tid' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:719]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 8 for port 's_axis_tdest' [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:720]
+WARNING: [VRFC 10-5021] port 'phy_rx_clk' is not connected on this instance [/home/zaidtahir/projects/Git_synched_repos/DISL/tests/edgetestbed_a100T4_sim/hdl/top.v:990]
+WARNING: [VRFC 10-5021] port 'btn' is not connected on this instance [/home/zaidtahir/projects/Git_synched_repos/DISL/tests/edgetestbed_a100T4_sim/hdl/top.v:584]
+WARNING: [VRFC 10-5021] port 'pcpi_wr' is not connected on this instance [/home/zaidtahir/projects/Git_synched_repos/DISL/tests/edgetestbed_a100T4_sim/hdl/top.v:776]
+WARNING: [VRFC 10-5021] port 'tx_axis_tkeep' is not connected on this instance [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/eth_nic_100m_mmi.v:368]
+WARNING: [VRFC 10-5021] port 'tx_ptp_ts' is not connected on this instance [/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/hdl/lib/eth/rtl/eth_mac_mii.v:132]
+Completed static elaboration
+Starting simulation data flow analysis
+WARNING: [XSIM 43-4099] "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/fifo.v" Line 1. Module fifo_default doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/softcore_subsystem/riscv32i/hdl/fifo.v" Line 1. Module fifo_default doesn't have a timescale but at least one module in design has a timescale.
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.SimpleMux(INPUTS=2,SIZE=3)
+Compiling module xil_defaultlib.DISLoPort_CPU_0_read_address_def...
+Compiling module xil_defaultlib.DISLoPort_CPU_0_write_address_de...
+Compiling module xil_defaultlib.DISLoPort_CPU_0_write_data_defau...
+Compiling module xil_defaultlib.DISLiPort_CPU_0_read_data_defaul...
+Compiling module xil_defaultlib.DISLiPort_CPU_0_write_response_d...
+Compiling module xil_defaultlib.DISLoPort_MEMMAP_0_read_data_def...
+Compiling module xil_defaultlib.DISLoPort_MEMMAP_0_write_respons...
+Compiling module xil_defaultlib.DISLiPort_MEMMAP_0_read_address_...
+Compiling module xil_defaultlib.DISLiPort_MEMMAP_0_write_address...
+Compiling module xil_defaultlib.DISLiPort_MEMMAP_0_write_data_de...
+Compiling module xil_defaultlib.OHEDemux(NUM_OUTPUTS=6,DATA_SIZE...
+Compiling module xil_defaultlib.OHEDemux(NUM_OUTPUTS=6)
+Compiling module xil_defaultlib.OHEMux(NUM_INPUTS=6,DATA_SIZE=1)
+Compiling module xil_defaultlib.DISLoPort_MEMMAP_1_read_address_...
+Compiling module xil_defaultlib.DISLoPort_MEMMAP_1_write_address...
+Compiling module xil_defaultlib.OHEDemux(NUM_OUTPUTS=6,DATA_SIZE...
+Compiling module xil_defaultlib.DISLoPort_MEMMAP_1_write_data_de...
+Compiling module xil_defaultlib.DISLiPort_MEMMAP_1_read_data_0_A...
+Compiling module xil_defaultlib.OHEMux(NUM_INPUTS=6,DATA_SIZE=32...
+Compiling module xil_defaultlib.OHEMux(NUM_INPUTS=6,DATA_SIZE=3)
+Compiling module xil_defaultlib.DISLiPort_MEMMAP_1_read_data_def...
+Compiling module xil_defaultlib.DISLiPort_MEMMAP_1_write_respons...
+Compiling module xil_defaultlib.OHEMux(NUM_INPUTS=6,DATA_SIZE=2)
+Compiling module xil_defaultlib.DISLiPort_MEMMAP_1_write_respons...
+Compiling module xil_defaultlib.DISLoPort_BRAMCACHE_0_read_data_...
+Compiling module xil_defaultlib.DISLoPort_BRAMCACHE_0_write_resp...
+Compiling module xil_defaultlib.DISLiPort_BRAMCACHE_0_read_addre...
+Compiling module xil_defaultlib.DISLiPort_BRAMCACHE_0_write_addr...
+Compiling module xil_defaultlib.DISLiPort_BRAMCACHE_0_write_data...
+Compiling module xil_defaultlib.DISLoPort_NETWORK_0_read_data_de...
+Compiling module xil_defaultlib.DISLoPort_NETWORK_0_write_respon...
+Compiling module xil_defaultlib.DISLiPort_NETWORK_0_read_address...
+Compiling module xil_defaultlib.DISLiPort_NETWORK_0_write_addres...
+Compiling module xil_defaultlib.DISLiPort_NETWORK_0_write_data_d...
+Compiling module xil_defaultlib.DISLoPort_NETWORK_1_read_address...
+Compiling module xil_defaultlib.DISLoPort_NETWORK_1_write_addres...
+Compiling module xil_defaultlib.DISLoPort_NETWORK_1_write_data_d...
+Compiling module xil_defaultlib.DISLiPort_NETWORK_1_read_data_de...
+Compiling module xil_defaultlib.DISLiPort_NETWORK_1_write_respon...
+Compiling module xil_defaultlib.DISLoPort_GPIO_0_read_data_defau...
+Compiling module xil_defaultlib.DISLoPort_GPIO_0_write_response_...
+Compiling module xil_defaultlib.DISLiPort_GPIO_0_read_address_de...
+Compiling module xil_defaultlib.DISLiPort_GPIO_0_write_address_d...
+Compiling module xil_defaultlib.DISLiPort_GPIO_0_write_data_defa...
+Compiling module xil_defaultlib.DISLoPort_UART_0_read_data_defau...
+Compiling module xil_defaultlib.DISLoPort_UART_0_write_response_...
+Compiling module xil_defaultlib.DISLiPort_UART_0_read_address_de...
+Compiling module xil_defaultlib.DISLiPort_UART_0_write_address_d...
+Compiling module xil_defaultlib.DISLiPort_UART_0_write_data_defa...
+Compiling module xil_defaultlib.DISLoPort_CONFIG_0_read_data_def...
+Compiling module xil_defaultlib.DISLoPort_CONFIG_0_write_respons...
+Compiling module xil_defaultlib.DISLiPort_CONFIG_0_read_address_...
+Compiling module xil_defaultlib.DISLiPort_CONFIG_0_write_address...
+Compiling module xil_defaultlib.DISLiPort_CONFIG_0_write_data_de...
+Compiling module xil_defaultlib.DISLoPort_TIMER_0_read_data_defa...
+Compiling module xil_defaultlib.DISLoPort_TIMER_0_write_response...
+Compiling module xil_defaultlib.DISLiPort_TIMER_0_read_address_d...
+Compiling module xil_defaultlib.DISLiPort_TIMER_0_write_address_...
+Compiling module xil_defaultlib.DISLiPort_TIMER_0_write_data_def...
+Compiling module xil_defaultlib.smart_switch
+Compiling module xil_defaultlib.ssio_sdr_in(CLOCK_INPUT_STYLE="B...
+Compiling module xil_defaultlib.mii_phy_if(CLOCK_INPUT_STYLE="BU...
+Compiling module xil_defaultlib.lfsr(LFSR_WIDTH=32,LFSR_CONFIG="...
+Compiling module xil_defaultlib.axis_gmii_rx(USER_WIDTH=1)
+Compiling module xil_defaultlib.axis_gmii_tx(PTP_TAG_ENABLE=0,US...
+Compiling module xil_defaultlib.eth_mac_1g_default
+Compiling module xil_defaultlib.eth_mac_mii(CLOCK_INPUT_STYLE="B...
+Compiling module xil_defaultlib.axis_async_fifo(KEEP_ENABLE=32'b...
+Compiling module xil_defaultlib.axis_async_fifo_adapter(S_KEEP_E...
+Compiling module xil_defaultlib.axis_async_fifo(KEEP_ENABLE=32'b...
+Compiling module xil_defaultlib.axis_async_fifo_adapter(S_KEEP_E...
+Compiling module xil_defaultlib.eth_mac_mii_fifo(CLOCK_INPUT_STY...
+Compiling module xil_defaultlib.axis_fifo(DEPTH=8192,KEEP_ENABLE...
+Compiling module xil_defaultlib.eth_fifo_axis_to_bram_axi_defaul...
+Compiling module xil_defaultlib.eth_nic_100m_mmi
+Compiling module xil_defaultlib.bram_axi_cachecontroller(ADDR_WI...
+Compiling module xil_defaultlib.mmap_axi
+Compiling module xil_defaultlib.gpio_axi
+Compiling module xil_defaultlib.timer_axi
+Compiling module xil_defaultlib.picorv32_axi_adapter
+Compiling module xil_defaultlib.picorv32(ENABLE_COUNTERS=1'b0,EN...
+Compiling module xil_defaultlib.picorv32_axi(ENABLE_COUNTERS=1'b...
+Compiling module xil_defaultlib.fifo_default
+Compiling module xil_defaultlib.uart_rx
+Compiling module xil_defaultlib.uart_tx
+Compiling module xil_defaultlib.uart_axi
+Compiling module xil_defaultlib.top_default
+Compiling module xil_defaultlib.ddr3_default
+Compiling module xil_defaultlib.tb_top
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot tb_top_behav
+
+****** Webtalk v2021.1 (64-bit)
+  **** SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+  **** IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+    ** Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+
+source /home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.sim/sim_1/behav/xsim/xsim.dir/tb_top_behav/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-186] '/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.sim/sim_1/behav/xsim/xsim.dir/tb_top_behav/webtalk/usage_statistics_ext_xsim.xml' has been successfully sent to Xilinx on Thu Oct 27 23:27:32 2022. For additional details about this file, please refer to the WebTalk help file at /tools/Xilinx/Vivado/2021.1/doc/webtalk_introduction.html.
+INFO: [Common 17-206] Exiting Webtalk at Thu Oct 27 23:27:32 2022...
+run_program: Time (s): cpu = 00:00:26 ; elapsed = 00:00:16 . Memory (MB): peak = 7696.992 ; gain = 0.000 ; free physical = 2320 ; free virtual = 8121
+INFO: [USF-XSim-69] 'elaborate' step finished in '16' seconds
+INFO: [USF-XSim-4] XSim::Simulate design
+INFO: [USF-XSim-61] Executing 'SIMULATE' step in '/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.sim/sim_1/behav/xsim'
+INFO: [USF-XSim-98] *** Running xsim
+   with args "tb_top_behav -key {Behavioral:sim_1:Functional:tb_top} -tclbatch {tb_top.tcl} -view {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/tb_top_behav.wcfg} -log {simulate.log}"
+INFO: [USF-XSim-8] Loading simulator feature
+Time resolution is 1 ps
+open_wave_config /home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/tb_top_behav.wcfg
+source tb_top.tcl
+# set curr_wave [current_wave_config]
+# if { [string length $curr_wave] == 0 } {
+#   if { [llength [get_objects]] > 0} {
+#     add_wave /
+#     set_property needs_save false [current_wave_config]
+#   } else {
+#      send_msg_id Add_Wave-1 WARNING "No top level signals found. Simulator will start without a wave window. If you want to open a wave window go to 'File->New Waveform Configuration' or type 'create_wave_config' in the TCL console."
+#   }
+# }
+# run 1000ns
+rdata:
+          0:10000137 
+
+          1:25d000ef 
+
+          2:000000ef 
+
+          3:00052503 
+
+          4:0005a783 
+
+          5:00f54863 
+
+          6:40f50533 
+
+          7:00a03533 
+
+          8:00008067 
+
+          9:fff00513 
+
+         10:00008067 
+
+         11:100007b7 
+
+         12:00a7a023 
+
+         13:00008067 
+
+         14:100007b7 
+
+         15:0007a503 
+
+         16:00008067 
+
+         17:100007b7 
+
+         18:00a7ac23 
+
+         19:00008067 
+
+         20:100007b7 
+
+         21:0187a503 
+
+         22:00008067 
+
+         23:100007b7 
+
+         24:01c7a503 
+
+         25:00008067 
+
+         26:01851513 
+
+         27:00259593 
+
+         28:00b56533 
+
+         29:800007b7 
+
+         30:00a787b3 
+
+         31:00c7a023 
+
+         32:00008067 
+
+         33:100007b7 
+
+         34:01c7a683 
+
+         35:10000737 
+
+         36:01c72783 
+
+         37:40d787b3 
+
+         38:fea7cce3 
+
+         39:00008067 
+
+         40:00054783 
+
+         41:00078e63 
+
+         42:00150513 
+
+         43:10000737 
+
+         44:00f72c23 
+
+         45:00054783 
+
+         46:00150513 
+
+         47:fe079ae3 
+
+         48:00008067 
+
+         49:1c050263 
+
+         50:fc010113 
+
+         51:02812c23 
+
+         52:02112e23 
+
+         53:00050413 
+
+         54:18054e63 
+
+         55:00a00593 
+
+         56:00040513 
+
+         57:0a5000ef 
+
+         58:00050793 
+
+         59:00a00593 
+
+         60:00040513 
+
+         61:00f12423 
+
+         62:00d000ef 
+
+         63:00a00593 
+
+         64:00050413 
+
+         65:085000ef 
+
+         66:00050793 
+
+         67:00a00593 
+
+         68:00040513 
+
+         69:00f12623 
+
+         70:7ec000ef 
+
+         71:00a00593 
+
+         72:00050413 
+
+         73:065000ef 
+
+         74:00050793 
+
+         75:00a00593 
+
+         76:00040513 
+
+         77:00f12823 
+
+         78:7cc000ef 
+
+         79:00a00593 
+
+         80:00050413 
+
+         81:045000ef 
+
+         82:00050793 
+
+         83:00a00593 
+
+         84:00040513 
+
+         85:00f12a23 
+
+         86:7ac000ef 
+
+         87:00a00593 
+
+         88:00050413 
+
+         89:025000ef 
+
+         90:00050793 
+
+         91:00a00593 
+
+         92:00040513 
+
+tb_top.sdramddr3_0.file_io_open: at time                    0 WARNING: no +model_data option specified, using /tmp.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.0.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.1.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.2.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.3.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.4.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.5.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.6.
+tb_top.sdramddr3_0.open_bank_file: at time 0 INFO: opening /tmp/tb_top.sdramddr3_0.open_bank_file.7.
+xsim: Time (s): cpu = 00:00:16 ; elapsed = 00:00:07 . Memory (MB): peak = 7696.992 ; gain = 0.000 ; free physical = 1910 ; free virtual = 7711
+INFO: [USF-XSim-96] XSim completed. Design snapshot 'tb_top_behav' loaded.
+INFO: [USF-XSim-97] XSim simulation ran for 1000ns
+launch_simulation: Time (s): cpu = 00:00:57 ; elapsed = 00:00:34 . Memory (MB): peak = 7696.992 ; gain = 0.000 ; free physical = 1910 ; free virtual = 7711
+run 50 us
+close_sim
+INFO: [Simtcl 6-16] Simulation closed
+close_sim: Time (s): cpu = 00:00:09 ; elapsed = 00:00:07 . Memory (MB): peak = 7806.105 ; gain = 0.000 ; free physical = 3772 ; free virtual = 9528
+exit
+INFO: [Common 17-206] Exiting Vivado at Fri Oct 28 08:45:55 2022...

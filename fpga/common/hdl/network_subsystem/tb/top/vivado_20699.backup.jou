@@ -1,0 +1,19 @@
+#-----------------------------------------------------------
+# Vivado v2021.1 (64-bit)
+# SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+# IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+# Start of session at: Thu Oct 27 23:25:00 2022
+# Process ID: 20699
+# Current directory: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/fpga_core
+# Command line: vivado
+# Log file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/fpga_core/vivado.log
+# Journal file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/fpga_core/vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project /home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/edgetestbed_a100T4_sim.xpr
+update_compile_order -fileset sources_1
+launch_simulation
+open_wave_config /home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T4_sim/tb_top_behav.wcfg
+source tb_top.tcl
+run 50 us
+close_sim

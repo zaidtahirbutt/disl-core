@@ -1,0 +1,79 @@
+#-----------------------------------------------------------
+# Vivado v2021.1 (64-bit)
+# SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+# IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+# Start of session at: Thu Nov  9 10:41:07 2023
+# Process ID: 51947
+# Current directory: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top
+# Command line: vivado
+# Log file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/vivado.log
+# Journal file: /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_hw_manager
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/tools/Xilinx/Vivado/2021.1/data/ip'.
+open_hw_manager: Time (s): cpu = 00:00:16 ; elapsed = 00:00:08 . Memory (MB): peak = 7462.922 ; gain = 63.109 ; free physical = 3507 ; free virtual = 5284
+connect_hw_server -allow_non_jtag
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+INFO: [Labtools 27-2222] Launching hw_server...
+INFO: [Labtools 27-2221] Launch Output:
+
+****** Xilinx hw_server v2021.1
+  **** Build date : Jun 10 2021 at 20:11:57
+    ** Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+
+
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:3042
+INFO: [Labtools 27-3417] Launching cs_server...
+INFO: [Labtools 27-2221] Launch Output:
+
+
+******** Xilinx cs_server v2021.1
+  ****** Build date   : May 26 2021-13:32:33
+    **** Build number : 2021.1.1622050353
+      ** Copyright 2017-2023 Xilinx, Inc. All Rights Reserved.
+
+
+
+connect_hw_server: Time (s): cpu = 00:00:03 ; elapsed = 00:00:07 . Memory (MB): peak = 7465.027 ; gain = 2.105 ; free physical = 3448 ; free virtual = 5291
+open_hw_target
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210319B26B7BA
+open_hw_target: Time (s): cpu = 00:00:10 ; elapsed = 00:00:10 . Memory (MB): peak = 8331.027 ; gain = 866.000 ; free physical = 1901 ; free virtual = 3745
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+INFO: [Labtools 27-1434] Device xc7a100t (JTAG device index = 0) is programmed with a design that has no supported debug core(s) in it.
+ERROR: [Labtoolstcl 44-513] HW Target shutdown. Closing target: localhost:3121/xilinx_tcf/Digilent/210319B26B7BA
+disconnect_hw_server localhost:3121
+connect_hw_server -allow_non_jtag
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:3042
+INFO: [Labtools 27-3414] Connected to existing cs_server.
+open_hw_target
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210319B26B7BA
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+INFO: [Labtools 27-1434] Device xc7a100t (JTAG device index = 0) is programmed with a design that has no supported debug core(s) in it.
+set_property PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.ltx} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+INFO: [Labtools 27-3164] End of startup status: HIGH
+program_hw_devices: Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 8404.059 ; gain = 0.000 ; free physical = 1853 ; free virtual = 3702
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+INFO: [Labtools 27-2302] Device xc7a100t (JTAG device index = 0) is programmed with a design that has 1 ILA core(s).
+refresh_hw_device: Time (s): cpu = 00:00:10 ; elapsed = 00:00:06 . Memory (MB): peak = 8417.062 ; gain = 13.004 ; free physical = 1793 ; free virtual = 3644
+display_hw_ila_data [ get_hw_ila_data hw_ila_data_1 -of_objects [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]]
+set_property TRIGGER_COMPARE_VALUE eq1'b1 [get_hw_probes eth_network_interface_controller/eth_fifo_to_bram/VeBPF_rx_pkt_hdr_bram_fifo_FULL_next -of_objects [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]]
+run_hw_ila [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]
+INFO: [Labtools 27-1964] The ILA core 'hw_ila_1' trigger was armed at 2023-Nov-09 10:52:11
+wait_on_hw_ila [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]
+display_hw_ila_data [upload_hw_ila_data [get_hw_ilas -of_objects [get_hw_devices xc7a100t_0] -filter {CELL_NAME=~"eth_network_interface_controller/eth_fifo_to_bram/ILA_DEBUG"}]]
+INFO: [Labtools 27-1966] The ILA core 'hw_ila_1' triggered at 2023-Nov-09 10:52:11
+INFO: [Labtools 27-3304] ILA Waveform data saved to file /home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/.Xil/Vivado-51947-zaidtahir-ubuntu/backup/hw_ila_data_1.ila. Use Tcl command 'read_hw_ila_data' or Vivado File->Import->Import ILA Data menu item to import the previously saved data.
+write_hw_ila_data {/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/iladata7.ila} hw_ila_data_1
+/home/zaidtahir/projects/Git_synched_repos/DISL/build/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server/edgetestbed_a100T21_SYN_builtOn_a100T14_SYN_FROM_CODES1server.runs/impl_1/iladata7.ila
+ERROR: [Labtoolstcl 44-513] HW Target shutdown. Closing target: localhost:3121/xilinx_tcf/Digilent/210319B26B7BA
+exit
+INFO: [Common 17-206] Exiting Vivado at Thu Nov  9 11:01:10 2023...
