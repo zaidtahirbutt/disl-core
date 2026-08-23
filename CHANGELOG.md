@@ -2,6 +2,21 @@
 
 All notable changes to `disl-core` are recorded here.
 
+## v0.1.2 - 2026-08-23
+
+Swapped the `VeBPF` submodule from the private `DISL_FPGA_eBPF.git` to the
+public `https://github.com/zaidtahirbutt/VeBPF.git`, pinned to tag `v1.0.0`
+(commit `ea246e5`, "Initial public release of VeBPF CPU Core"). This is the
+deferred public-URL swap from the original repo's §11 Phase 1 plan.
+
+Validated before tagging, against this exact commit: full cocotb simulation
+(`PASS`, `sim_time_ns=3131136.001`, identical to every prior run) and a
+complete Vivado 2021.1 synthesis/implementation/bitstream run on the
+`artya7100t` target -- bitstream size, LUT/Register/BRAM/DSP utilization,
+timing (WNS/TNS/failing endpoints), and DRC results are all bit-for-bit
+identical to the pre-swap baseline. The public repo's file content is
+functionally equivalent to the private one for this build.
+
 ## v0.1.1 - 2026-08-23
 
 Removed the `RISCV_C_FW_VebpfManyCore` submodule. Verified via exhaustive grep

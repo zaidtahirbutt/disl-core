@@ -1,6 +1,6 @@
-[submodule "fpga/common/hdl/network_subsystem/VeBPF"]
-	path = fpga/common/hdl/network_subsystem/VeBPF
-	url = git@github.com:zaidtahirbutt/DISL_FPGA_eBPF.git
 [submodule "host/tools/openocd_riscv"]
 	path = host/tools/openocd_riscv
 	url = https://github.com/SpinalHDL/openocd_riscv
+[submodule "fpga/common/hdl/network_subsystem/VeBPF"]
+	path = fpga/common/hdl/network_subsystem/VeBPF
+	url = https://github.com/zaidtahirbutt/VeBPF.git
