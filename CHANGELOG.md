@@ -2,6 +2,19 @@
 
 All notable changes to `disl-core` are recorded here.
 
+## v0.1.1 - 2026-08-23
+
+Removed the `RISCV_C_FW_VebpfManyCore` submodule. Verified via exhaustive grep
+that nothing in `configure.py`, `fpga/system_builder/build.py`, or any
+`system.tml`/`modules.tml` ever reads from it — it's a standalone RISC-V
+firmware build tool a developer invokes manually (`make` inside it, then
+`load.py` to upload the resulting hex), not something the system generator
+touches. Kept only where it's actually useful: as a top-level submodule of
+`VebpfManyCore` for discoverability. `VeBPF` stays in `disl-core` — confirmed
+load-bearing (`eth_nic_100m_mmi`'s `COMMON_FOLDER = ["network_subsystem"]`
+resolves its Verilog sources, including `VeBPF/cpu.v`, relative to this
+tree) — removing it would break `build.py`.
+
 ## v0.1.0 - 2026-08-23
 
 Initial designation of this fork as `disl-core` — the canonical, versioned home
