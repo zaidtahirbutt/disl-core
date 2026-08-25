@@ -154,10 +154,7 @@ except Exception as e:
 # except:
 #     error("Board not found")
 ######################## Create build directory #################
-try:
-    os.mkdir(build_dir)
-except:
-    logger("Build directory already exists")
+os.makedirs(build_dir, exist_ok=True)
 ######################## Generate system files #######################
 logger("Generating system and copying files")
 
