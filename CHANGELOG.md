@@ -2,6 +2,17 @@
 
 All notable changes to `disl-core` are recorded here.
 
+## v0.1.3 - 2026-08-25
+
+`configure.py`: `os.mkdir(build_dir)` -> `os.makedirs(build_dir, exist_ok=True)`.
+Eliminates the long-documented `issues_and_stuff/issues.txt` gotcha ("Need
+to make a build folder manually, otherwise it gives out an unrelated
+error") entirely -- `build_dir` can now be any absolute, deeply-nested, or
+externally-located path with zero pre-setup. This is what makes it safe
+for `VebpfManyCore`'s `vebpf-mc` CLI to build into an external, uniquely-
+named directory outside any git working tree. Verified with a
+multi-level-nonexistent external path before and after the fix.
+
 ## v0.1.2 - 2026-08-23
 
 Swapped the `VeBPF` submodule from the private `DISL_FPGA_eBPF.git` to the
