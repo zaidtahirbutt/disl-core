@@ -33,6 +33,18 @@ parameter VEBPF_MEMORY_DEPTH = 2**VEBPF_PROG_ADDRESS_WIDTH;  // 2**12 = 4096 // 
 parameter VIVADO_SIMULATION = 0;
 parameter VEBPF_SIMULATION = 0;
 parameter COCOTB_MANUAL_RISCV_PROG_LOADING = 0;//1;
+// Compiled eBPF rule image (Verilog $readmemh format, one 64-bit word per
+// line). Supplied by system.tml's [INSTANTIATIONS.<inst>.MEM_INIT.RULES_INIT_FILE]
+// block, which build.py resolves to an absolute path and stages into
+// <build_dir>/mem/. Simulation-only: on real hardware the rules genuinely
+// arrive over UART, which is the architecture's design rather than a
+// workaround, so there is no synthesis preload counterpart here.
+parameter RULES_INIT_FILE = "";
+// RISC-V program image for the manual/Vivado program-loading simulation branch
+// below (inactive unless VIVADO_SIMULATION or COCOTB_MANUAL_RISCV_PROG_LOADING
+// is set). Parameterized for the same reason -- it previously held an absolute
+// path into a developer home directory.
+parameter RISCV_PROG_INIT_FILE = "";
 parameter [63:0] VEBPF_CURR_RULE_START_DWORD = 64'hFFFFFFFFFFFFFFFF;
 parameter [63:0] VEBPF_CURR_RULE_END_DWORD   = 64'hFFFFFFFFFFFFFF0F;
 parameter [63:0] VEBPF_ALL_RULES_END_DWORD 	 = 64'hFFFFFFFFFFFFFFF0;
@@ -445,7 +457,8 @@ generate
 	    	// $readmemh("2024_4_12_edgetestbed_a100T27_tx_pipeline_v9_sim_also_SYN_VIVADO_sim.hex", instrs);
 
 	    // for cocotb simulation
-    	$readmemh("/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/2024_4_24_edgetestbed_a100T27_tx_pipeline_v10v2_1SIM_0DEBUG_sim_also_SYN_reducedLinker_VIVADO_sim.hex", instrs);
+    	if (RISCV_PROG_INIT_FILE != "")
+    		$readmemh(RISCV_PROG_INIT_FILE, instrs);
 
     	if (COCOTB_MANUAL_RISCV_PROG_LOADING) begin 
     		$display("\n\nCOCOTB_MANUAL_RISCV_PROG_LOADING == 1 so make sure you have the correct configurations!! \n\n");
@@ -552,7 +565,13 @@ generate
 	    // VeBPF pgm_loaderV2 exps sims
 	    // initial $readmemh("/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/VeBPF/DISL_FPGA_eBPF/DISL_Verilog_eBPF/DISL_Verilog_eBPF_tb/data30_a100T30_eBPF_firewall_pgmloader_v2/combined_compilation_pgmloader_v2/test3/sim_combined_hex.hex", instrs);
 	    // initial $readmemh("/home/zaidtahir/projects/2025_3_disl_virtio_smart_nic_v2_handoff_to_Jeffery/DISL/fpga/common/hdl/network_subsystem/VeBPF/firmware/VeBPF_firewall/sim_combined_hex.hex", instrs);
-	    initial $readmemh("../../../fpga/common/hdl/network_subsystem/VeBPF/firmware/VeBPF_firewall/sim_combined_hex.hex", instrs);
+	    // Was a hardcoded "../../../fpga/.../VeBPF_firewall/sim_combined_hex.hex".
+	    // The relative depth encoded one repo layout and silently resolved into a
+	    // different checkout elsewhere. Now parameterized via system.tml MEM_INIT.
+	    initial begin
+	        if (RULES_INIT_FILE != "")
+	            $readmemh(RULES_INIT_FILE, instrs);
+	    end
 
 	    integer i;
 

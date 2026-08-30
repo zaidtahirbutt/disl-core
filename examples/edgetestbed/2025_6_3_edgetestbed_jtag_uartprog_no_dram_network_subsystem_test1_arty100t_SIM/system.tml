@@ -53,6 +53,14 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 		PARAMETERS.VEBPF_PROG_DATA_WIDTH = 64
 		PARAMETERS.VEBPF_PROG_DATA_BYTES = 8
 		PARAMETERS.MEM_ADDR_SIZE = 32
+	# Compiled eBPF rule image loaded into every VeBPF core's program memory.
+	# Resolved and staged by build.py; replaces a hardcoded relative path that
+	# used to live inside progloader_riscv_vebpf_v2.v.
+	[INSTANTIATIONS.progloader_v2.MEM_INIT.RULES_INIT_FILE]
+		FILE         = "${DISL_ROOT}/fpga/common/hdl/network_subsystem/VeBPF/firmware/VeBPF_firewall/sim_combined_hex.hex"
+		PAD_TO_DEPTH = true
+		DEPTH_WORDS  = 4096
+		WORD_BITS    = 64
 	[INSTANTIATIONS.softcore_memory_bus_arbiter]
 		MODULE = "softcore_memory_bus_grant"
 		PARAMETERS.SIMULATION = 1
@@ -64,6 +72,18 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 		PARAMETERS.ADDR_WIDTH = 16
 		PARAMETERS.DATA_WIDTH = 32
 		PARAMETERS.SIMULATION = 1
+		# Simulation loads the image in the SIMULATION branch (after the BRAM
+		# zeroing loop), so the delay-free synthesis preload stays off here.
+		PARAMETERS.PRELOAD_MEM = 0
+	# RISC-V control-plane firmware image. Resolved and staged by build.py;
+	# replaces a hardcoded relative path that used to live inside
+	# bram_axi_cachecontroller_v2.v and silently resolved into a different
+	# repository checkout.
+	[INSTANTIATIONS.cache_bram_cachecontroller_v2.MEM_INIT.MEM_INIT_FILE]
+		FILE         = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing/2024_9_12_edgetestbed_a100T30_VeBPF_pgmLoaderV2_firewallTYPE1combinedSim_reducedLinker_1SIM_0DEBUG_SIM.hex"
+		PAD_TO_DEPTH = true
+		DEPTH_WORDS  = 16384
+		WORD_BITS    = 32
 	[INSTANTIATIONS.eth_nic]
 		MODULE  = "eth_nic_100m_mmi"
 		PARAMETERS.SIMULATION = 1

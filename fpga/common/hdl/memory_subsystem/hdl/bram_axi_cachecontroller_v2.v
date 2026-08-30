@@ -17,6 +17,18 @@ a_b_ready,a_b_valid,a_b_response
 parameter ADDR_WIDTH = 16; // Tested and Verificed in Synthesis with risc-v 2^16 = 65,536 bytes memory after synthesis
 parameter DATA_WIDTH = 32;
 parameter SIMULATION = 0;
+// Memory initialization image (Verilog $readmemh format, one word per line).
+// Supplied by system.tml's [INSTANTIATIONS.<inst>.MEM_INIT.MEM_INIT_FILE] block,
+// which build.py resolves to an absolute path and stages into <build_dir>/mem/.
+// Empty means "do not initialize" -- the historical behaviour for any example
+// that does not declare a MEM_INIT block.
+parameter MEM_INIT_FILE = "";
+// Set to 1 to also load MEM_INIT_FILE at time 0 with no delay, which is what
+// lets Vivado infer a pre-initialized BRAM so the firmware ships inside the
+// bitstream instead of needing a UART upload after every flash. Kept separate
+// from the SIMULATION path below because that one deliberately delays past the
+// zeroing loop, and a delay makes the block non-synthesizable.
+parameter PRELOAD_MEM = 0;
 parameter MEM_SIZE_BITS = 524288;  
 	// 524288 bits (64 kB) => 524288 bits >> 5 (log_base_2 DATA_WIDTH) = 16384 32bit-words (DATA_WIDTHbit-words) (64kB = 65536 bytes) = DEPTH for 32 bit word BRAM when addres width = 16bits => 2^16 = 65,536
 
@@ -143,9 +155,26 @@ initial begin
 		// 12 Sept 2024 checking if Automated VeBPF pgm_loaderV2 works.
 		// $readmemh("/home/zaidtahir/projects/Git_synched_repos/DISL/subsystems/network_subsystem/tb/top/2024_9_12_edgetestbed_a100T30_VeBPF_pgmLoaderV2_firewallTYPE1combinedSim_reducedLinker_1SIM_0DEBUG_SIM_sim.hex", mem);
 		// $readmemh("/home/zaidtahir/projects/2025_3_RISCV_C_FW_VebpfManyCore/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing/2024_9_12_edgetestbed_a100T30_VeBPF_pgmLoaderV2_firewallTYPE1combinedSim_reducedLinker_1SIM_0DEBUG_SIM.hex", mem);
-		$readmemh("../../../RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing/2024_9_12_edgetestbed_a100T30_VeBPF_pgmLoaderV2_firewallTYPE1combinedSim_reducedLinker_1SIM_0DEBUG_SIM.hex", mem);
-	end 
-end 
+		// Was a hardcoded "../../../RISCV_C_FW_VebpfManyCore/fw/.../..._SIM.hex".
+		// That path encoded the directory depth of one particular repository
+		// layout, so once this tree was reused elsewhere it silently resolved
+		// into a different checkout that happened to hold identical files.
+		// The path now arrives as a parameter from system.tml's MEM_INIT block.
+		if (MEM_INIT_FILE != "")
+			$readmemh(MEM_INIT_FILE, mem);
+	end
+end
+
+// Synthesis-time BRAM preload. Deliberately a separate block from the one
+// above: no delay and no SIMULATION guard, which is what Vivado requires to
+// infer an initialized block RAM. With SIMULATION=1 the block above already
+// loads the same image after the zeroing loop, so leave PRELOAD_MEM at 0 for
+// simulation builds and set it to 1 for synthesis builds that should carry
+// the firmware inside the bitstream.
+initial begin
+	if (PRELOAD_MEM && MEM_INIT_FILE != "")
+		$readmemh(MEM_INIT_FILE, mem);
+end
 
 integer i;
 

@@ -60,6 +60,9 @@ parser.add_argument("--board", default=DEFAULT_BOARD, help="Target board (short 
 parser.add_argument("--device", default=DEFAULT_DEVICE, help="Target FPGA device")
 parser.add_argument("--tool", default=DEFAULT_TOOL, help="Target tool")
 parser.add_argument("--src", default=DEFAULT_SRC, help="Main source file")
+parser.add_argument("--project_root", default="",
+                    help="Root that ${PROJECT_ROOT} in a system.tml MEM_INIT path resolves to "
+                         "(e.g. the consuming project's checkout). Defaults to this disl-core root.")
 parser.add_argument("-v", action="store_true", help="Print debug information")
 parser.add_argument("-v_build", action="store_true", help="Print build debug information")
 
@@ -79,6 +82,7 @@ board = args.board
 device = args.device
 tool = args.tool
 src = args.src
+project_root = args.project_root
 verbose = 1 if args.v else 0
 build_verbose = 1 if args.v_build else 0
 
@@ -170,7 +174,9 @@ logger("Generating system and copying files")
     # Exiting
 
 # sys.exit("Manual Exit")
-os.system(f"python ./{device}/{tool}/system_builder/build.py ./{example_dir}/{example}/system.tml " + board["DESCRIPTION"]["DIRECTORY"] + f" {build_dir}/ {src} {tool} {build_verbose}")
+build_rc = os.system(f"python ./{device}/{tool}/system_builder/build.py ./{example_dir}/{example}/system.tml " + board["DESCRIPTION"]["DIRECTORY"] + f" {build_dir}/ {src} {tool} {build_verbose} {project_root}")
+if build_rc != 0:
+    error("build.py failed - see the traceback above. Not generating TCL scripts.")
 # sys.exit("Manual Exit")
 ###################### Generate additional tcl scripts ######################
 if device == "fpga":
@@ -200,6 +206,6 @@ if device == "fpga":
         f.write(run)
 
 with open(build_dir + "/configure_options.tml", 'w') as f:
-    toml.dump({"build_dir": build_dir, "exmaple": example, "example_dir": example_dir, "board": board["DESCRIPTION"]["NAME"], "device": device, "src": src, "verbose": verbose},f)
+    toml.dump({"build_dir": build_dir, "exmaple": example, "example_dir": example_dir, "board": board["DESCRIPTION"]["NAME"], "device": device, "src": src, "project_root": project_root, "verbose": verbose},f)
 
 print ("Done")

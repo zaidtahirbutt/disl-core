@@ -14,8 +14,25 @@ else:
     import tomli as tomllib  # Use tomli for older versions
 
 
+def verilog_literal(value):
+    """Render a TOML-sourced parameter value as a Verilog literal.
+
+    Historically every parameter in this project was numeric and was
+    emitted with a bare str(). String parameters are needed for memory
+    initialization file paths (see BUILD.resolve_mem_init), which must
+    reach the RTL quoted; booleans are mapped to 1/0 because str(True)
+    would emit "True", which is not valid Verilog. Numeric behaviour is
+    unchanged.
+    """
+    if isinstance(value, bool):            # must precede int: bool IS an int
+        return "1" if value else "0"
+    if isinstance(value, str):
+        return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    return str(value)
+
+
 class BUILD:
-    def __init__(self, system, board, build_dir, build_verbose):
+    def __init__(self, system, board, build_dir, build_verbose, project_root=None):
         def config_load(system):
             with open(system) as f:
                 if ".tml" in system:
@@ -29,6 +46,13 @@ class BUILD:
                     return json.load(f)
         self.build_dir = build_dir
         self.build_verbose = build_verbose
+        # Anchors for resolving MEM_INIT paths. Derived from this file's own
+        # location rather than the CWD so they stay correct no matter where
+        # build.py is invoked from.
+        self.disl_root = os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__))))
+        self.system_dir = os.path.abspath(system.split("/system.tml")[0])
+        self.project_root = os.path.abspath(project_root) if project_root else self.disl_root
         self.system = config_load(system)
         self.modules = config_load('./fpga/common/config/modules.tml')
         self.definitions = config_load("./fpga/common/config/definitions.tml")
@@ -682,8 +706,130 @@ class BUILD:
         signal["REFERENCE"] = name
         return signal
     
+    def resolve_mem_init(self):
+        """Resolve, stage and parameterize every [INSTANTIATIONS.<inst>.MEM_INIT.<PARAM>] block.
+
+        Motivation: memory images (RISC-V firmware, compiled eBPF rules)
+        used to be named by hardcoded relative paths inside the RTL itself
+        -- paths that encoded one particular repository layout and silently
+        resolved into a different checkout once the project moved. Declaring
+        them here instead means the path is (a) visible in the system config
+        rather than buried in a `$readmemh` call, (b) resolved against an
+        explicit anchor rather than by counting `../` levels, and (c) usable
+        by BOTH simulation and synthesis, unlike $value$plusargs which only
+        exists at simulator runtime.
+
+        For each block:
+          FILE          path, may use ${PROJECT_ROOT} / ${DISL_ROOT} / ${EXAMPLE_DIR}
+          PAD_TO_DEPTH  optional bool: zero-fill up to DEPTH_WORDS
+          DEPTH_WORDS   required when padding: the depth the RTL declares
+          WORD_BITS     required when padding: bits per word (32, 64, ...)
+
+        The resolved file is copied into <build_dir>/mem/ so the build
+        directory is self-contained and archivable, and the *absolute* path
+        of that staged copy is injected as the named Verilog parameter.
+        Absolute, because the simulator runs from <build_dir>/tb_cocotb/
+        while Vivado synthesis runs from <build_dir>/<example>/<example>.runs/synth_1/
+        -- no single relative path is correct for both.
+        """
+        anchors = {
+            "${PROJECT_ROOT}": self.project_root,
+            "${DISL_ROOT}": self.disl_root,
+            "${EXAMPLE_DIR}": self.system_dir,
+        }
+        mem_dir = os.path.join(self.build_dir, "mem")
+        manifest = {"anchors": anchors, "images": []}
+
+        for instance_name in self.system["INSTANTIATIONS"].keys():
+            spec = self.system["INSTANTIATIONS"][instance_name].get("MEM_INIT")
+            if not spec:
+                continue
+            for parameter, entry in spec.items():
+                raw = entry.get("FILE")
+                if not raw:
+                    raise ValueError(
+                        f"MEM_INIT for instance '{instance_name}' parameter "
+                        f"'{parameter}' has no FILE field")
+
+                resolved = raw
+                for token, value in anchors.items():
+                    resolved = resolved.replace(token, value)
+                if "${" in resolved:
+                    raise ValueError(
+                        f"MEM_INIT FILE for '{instance_name}.{parameter}' still contains an "
+                        f"unresolved anchor after substitution: {resolved}\n"
+                        f"  Known anchors: {', '.join(anchors.keys())}")
+                resolved = os.path.abspath(
+                    resolved if os.path.isabs(resolved)
+                    else os.path.join(self.system_dir, resolved))
+
+                # Fail loudly. Previously a missing memory image produced only a
+                # mid-simulation $readmemh warning that was easy to miss entirely.
+                if not os.path.isfile(resolved):
+                    raise FileNotFoundError(
+                        f"MEM_INIT file for '{instance_name}.{parameter}' does not exist.\n"
+                        f"  declared : {raw}\n"
+                        f"  resolved : {resolved}\n"
+                        f"  ${{PROJECT_ROOT}} = {self.project_root}\n"
+                        f"  ${{DISL_ROOT}}    = {self.disl_root}\n"
+                        f"  ${{EXAMPLE_DIR}}  = {self.system_dir}\n"
+                        f"  If this is firmware or a rule set, build it first.")
+
+                os.makedirs(mem_dir, exist_ok=True)
+                staged = os.path.join(mem_dir, f"{instance_name}.{parameter}.hex")
+
+                words = []
+                with open(resolved) as src:
+                    for line in src:
+                        stripped = line.split("//", 1)[0].split()
+                        words.extend(stripped)
+
+                if entry.get("PAD_TO_DEPTH"):
+                    depth = entry.get("DEPTH_WORDS")
+                    word_bits = entry.get("WORD_BITS")
+                    if not depth or not word_bits:
+                        raise ValueError(
+                            f"MEM_INIT for '{instance_name}.{parameter}' sets PAD_TO_DEPTH "
+                            f"but is missing DEPTH_WORDS and/or WORD_BITS")
+                    if len(words) > depth:
+                        raise ValueError(
+                            f"MEM_INIT file for '{instance_name}.{parameter}' has {len(words)} "
+                            f"words, more than the declared DEPTH_WORDS={depth}:\n  {resolved}")
+                    zero = "0" * (word_bits // 4)
+                    padding = depth - len(words)
+                    words.extend([zero] * padding)
+                    if self.build_verbose or padding:
+                        print(f"MEM_INIT {instance_name}.{parameter}: {len(words) - padding} words "
+                              f"from {os.path.basename(resolved)}, zero-padded to {depth}")
+                else:
+                    print(f"MEM_INIT {instance_name}.{parameter}: {len(words)} words "
+                          f"from {os.path.basename(resolved)} (not padded)")
+
+                with open(staged, "w") as dst:
+                    dst.write("\n".join(words) + "\n")
+
+                self.params.setdefault(instance_name, {})[parameter] = os.path.abspath(staged)
+                manifest["images"].append({
+                    "instance": instance_name,
+                    "parameter": parameter,
+                    "declared": raw,
+                    "source": resolved,
+                    "staged": os.path.abspath(staged),
+                    "words": len(words),
+                    "padded_to_depth": bool(entry.get("PAD_TO_DEPTH")),
+                    "depth_words": entry.get("DEPTH_WORDS"),
+                    "word_bits": entry.get("WORD_BITS"),
+                })
+
+        # Provenance record: exactly which file on disk each image came from, so
+        # a later check can verify the declared path resolved where it was meant
+        # to rather than into some other checkout that happened to be present.
+        if manifest["images"]:
+            with open(os.path.join(mem_dir, "manifest.json"), "w") as f:
+                json.dump(manifest, f, indent=2)
+
     # this function runs all the evaluate functions
-    def generate_parameters(self):        
+    def generate_parameters(self):
         self.params = {}
         for instance_name in self.system["INSTANTIATIONS"].keys():
             module = self.system["INSTANTIATIONS"][instance_name]["MODULE"]
@@ -692,10 +838,11 @@ class BUILD:
             if hasattr(self, "evaluate_" + module):
                 func = getattr(self, "evaluate_" + module)
                 self.params[instance_name] = func(instance_name, self.params[instance_name])
+        self.resolve_mem_init()
         with open(self.build_dir + "/parameters.vh",'w') as f:
             for instance_name in self.params.keys():
                 for parameter in self.params[instance_name].keys():
-                    f.write("parameter PARAMETER_" + instance_name.upper() + "_" + parameter + " = " + str(self.params[instance_name][parameter]) + ";\n")
+                    f.write("parameter PARAMETER_" + instance_name.upper() + "_" + parameter + " = " + verilog_literal(self.params[instance_name][parameter]) + ";\n")
     
     def instantiate_signal(self, signal):
         declaration = ""
@@ -1329,6 +1476,10 @@ board = sys.argv[2]
 build_dir = sys.argv[3]
 argv4 = sys.argv[4]
 build_verbose = int(sys.argv[5])
+# Optional: root that ${PROJECT_ROOT} in a MEM_INIT path resolves to. Supplied by
+# configure.py --project_root; defaults to the disl-core checkout root when a
+# consuming project doesn't set one.
+project_root = sys.argv[6] if len(sys.argv) > 6 and sys.argv[6] else None
 
 
 if (build_verbose):
@@ -1347,7 +1498,7 @@ if (build_verbose):
 # the user has to manually specify cache depth separately and has to make sure that the cache depth/memory length of the riscv address map can fit into the cache (bram, etc) being
 # instantiated separately.
 
-builder = BUILD(system, board, build_dir, build_verbose)
+builder = BUILD(system, board, build_dir, build_verbose, project_root)
 builder.generate_top()
 builder.generate_constraints()
 builder.generate_ip_tcl()

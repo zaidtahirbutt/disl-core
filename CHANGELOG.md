@@ -2,6 +2,71 @@
 
 All notable changes to `disl-core` are recorded here.
 
+## v0.2.0 - 2026-08-30
+
+**Memory images are now declared in `system.tml`, not hardcoded in the RTL.**
+
+Two `$readmemh` calls named their memory images with hardcoded relative
+paths (`"../../../RISCV_C_FW_VebpfManyCore/fw/.../x.hex"` in
+`bram_axi_cachecontroller_v2.v`, `"../../../fpga/.../sim_combined_hex.hex"`
+in `progloader_riscv_vebpf_v2.v`). Those paths encoded the directory depth
+of one particular repository layout, so once this tree was vendored into a
+consuming project they resolved -- by depth coincidence -- into a *different*
+checkout that happened to hold identical files. A standalone clone would
+have found nothing at all. A third call held an absolute path into a
+developer's home directory.
+
+New mechanism:
+
+    [INSTANTIATIONS.<instance>.MEM_INIT.<VERILOG_PARAM>]
+        FILE         = "${PROJECT_ROOT}/path/to/image.hex"
+        PAD_TO_DEPTH = true
+        DEPTH_WORDS  = 16384
+        WORD_BITS    = 32
+
+`build.py` resolves `${PROJECT_ROOT}` / `${DISL_ROOT}` / `${EXAMPLE_DIR}`,
+copies the image into `<build_dir>/mem/`, optionally zero-pads it to the
+depth the RTL declares, and injects the absolute staged path as the named
+Verilog parameter. A `mem/manifest.json` records what each image resolved
+from. Missing files now fail the build loudly instead of producing a
+mid-simulation warning that was easy to miss.
+
+Absolute paths are used deliberately: simulation runs from
+`<build_dir>/tb_cocotb/` while Vivado synthesis runs from
+`<build_dir>/<example>/<example>.runs/synth_1/`, so no single relative path
+is correct for both.
+
+Also new: `bram_axi_cachecontroller_v2` gained `PRELOAD_MEM`, which loads
+the image in a delay-free `initial` block so Vivado can infer an
+initialized BRAM and ship firmware inside the bitstream. This is a separate
+block from the simulation path, which deliberately delays past the BRAM
+zeroing loop -- a delay makes the block non-synthesizable.
+
+Engine changes are generic: `build.py` knows only "a path to a file", never
+what RISC-V firmware or eBPF rules are. Knowing how to *produce* those
+belongs to the consuming project's tooling.
+
+- `configure.py`: new `--project_root`; now aborts if `build.py` fails
+  instead of continuing on to generate TCL scripts.
+- `generate_parameters` renders string and boolean parameters correctly
+  (previously bare `str()`, which was fine only because every parameter
+  was numeric).
+
+Validated against this exact commit:
+- With no `MEM_INIT` declared anywhere, generated output is byte-identical
+  to v0.1.3 across all 55 files (`top.v`, `parameters.vh`, all copied RTL);
+  only `configure_options.tml` differs, by the intended new provenance field.
+- Full cocotb simulation `PASS`, `sim_time_ns=3131136.001` -- identical to
+  every prior run since the first recorded baseline.
+- Both memory images now resolve inside the consuming checkout, load at
+  exactly the declared depth, and the eBPF rule words were confirmed
+  against the waveform to land at the correct array addresses. The
+  long-standing "Not enough words in the file for the requested range"
+  warnings are gone.
+
+
+All notable changes to `disl-core` are recorded here.
+
 ## v0.1.3 - 2026-08-25
 
 `configure.py`: `os.mkdir(build_dir)` -> `os.makedirs(build_dir, exist_ok=True)`.

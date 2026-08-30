@@ -1092,7 +1092,7 @@
 #######################################################################
 [bram_axi_cachecontroller_v2]
 	TYPE = ["MEMORY"]
-	PARAMETERS = ["MEM_SIZE_BITS", "ADDR_WIDTH", "DATA_WIDTH", "SIMULATION"]
+	PARAMETERS = ["MEM_SIZE_BITS", "ADDR_WIDTH", "DATA_WIDTH", "SIMULATION", "PRELOAD_MEM"]
 	[bram_axi_cachecontroller_v2.REQUIREMENTS]
 		INTERFACES = ["clk", "rst", "a"]
 		[bram_axi_cachecontroller_v2.REQUIREMENTS.INCLUDES]
