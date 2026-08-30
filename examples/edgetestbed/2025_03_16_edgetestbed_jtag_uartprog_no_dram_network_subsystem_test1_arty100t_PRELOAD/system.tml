@@ -4,7 +4,7 @@
 # CLKsPerBiT to the ProgLoaderV2 in this for UART BAUD RATE BPS
 
 # this name should be the same as the example project folder name
-NAME = "2025_6_3_edgetestbed_jtag_uartprog_no_dram_network_subsystem_test1_arty100t_SIM"
+NAME = "2025_03_16_edgetestbed_jtag_uartprog_no_dram_network_subsystem_test1_arty100t"
 
 [REQUIREMENTS]
 TOOLS = ["pyjtag"]
@@ -46,24 +46,15 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 		MODULE = "progloader_riscv_vebpf_v2"
 		PARAMETERS.CLOCK_FREQ_MHZ = 100
 		PARAMETERS.UART_BAUD_RATE_BPS = 1000000
-		PARAMETERS.SIMULATION = 1
-		PARAMETERS.VEBPF_SIMULATION = 1
+		PARAMETERS.SIMULATION = 0
 		PARAMETERS.DATA_WIDTH = 32
 		PARAMETERS.VEBPF_PROG_ADDRESS_WIDTH = 12
 		PARAMETERS.VEBPF_PROG_DATA_WIDTH = 64
 		PARAMETERS.VEBPF_PROG_DATA_BYTES = 8
 		PARAMETERS.MEM_ADDR_SIZE = 32
-	# Compiled eBPF rule image loaded into every VeBPF core's program memory.
-	# Resolved and staged by build.py; replaces a hardcoded relative path that
-	# used to live inside progloader_riscv_vebpf_v2.v.
-	[INSTANTIATIONS.progloader_v2.MEM_INIT.RULES_INIT_FILE]
-		FILE         = "${DISL_ROOT}/fpga/common/hdl/network_subsystem/VeBPF/firmware/VeBPF_firewall/sim_combined_hex.hex"
-		PAD_TO_DEPTH = true
-		DEPTH_WORDS  = 4096
-		WORD_BITS    = 64
 	[INSTANTIATIONS.softcore_memory_bus_arbiter]
 		MODULE = "softcore_memory_bus_grant"
-		PARAMETERS.SIMULATION = 1
+		PARAMETERS.SIMULATION = 0
 	[INSTANTIATIONS.cache_bram_cachecontroller_v2]
 		MODULE = "bram_axi_cachecontroller_v2"
 		# 524288 bits (64 kB)
@@ -71,31 +62,25 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 		# 2^16 = 65,536 bytes memory
 		PARAMETERS.ADDR_WIDTH = 16
 		PARAMETERS.DATA_WIDTH = 32
-		PARAMETERS.SIMULATION = 1
-		# Simulation loads the image in the SIMULATION branch (after the BRAM
-		# zeroing loop), so the delay-free synthesis preload stays off here.
-		PARAMETERS.PRELOAD_MEM = 0
-	# RISC-V control-plane firmware image. Resolved and staged by build.py;
-	# replaces a hardcoded relative path that used to live inside
-	# bram_axi_cachecontroller_v2.v and silently resolved into a different
-	# repository checkout.
+		# Bake the RISC-V firmware into the bitstream's BRAM so the board comes up
+		# already running it, with no UART upload step after flashing. This is the
+		# only difference from the plain SYN example next to this one.
+		PARAMETERS.PRELOAD_MEM = 1
 	[INSTANTIATIONS.cache_bram_cachecontroller_v2.MEM_INIT.MEM_INIT_FILE]
-		FILE         = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing/build/vebpf_firewall_sim/firmware.sim.hex"
+		FILE         = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing/build/vebpf_firewall_syn/firmware.sim.hex"
 		PAD_TO_DEPTH = true
 		DEPTH_WORDS  = 16384
 		WORD_BITS    = 32
 	[INSTANTIATIONS.eth_nic]
 		MODULE  = "eth_nic_100m_mmi"
-		PARAMETERS.SIMULATION = 1
+		PARAMETERS.SIMULATION = 0
 		PARAMETERS.AXI_DATA_WIDTH = 32
 		PARAMETERS.AXI_ADDRESS_WIDTH = 32
 		PARAMETERS.VEBPF_PROG_ADDRESS_WIDTH = 12
 		PARAMETERS.VEBPF_PROG_DATA_WIDTH = 64
 		PARAMETERS.VEBPF_PROG_DATA_BYTES = 8
-	# dont need this for cocotb sim
-	# [INSTANTIATIONS.clk_wiz_eth]
-	# 	MODULE = "clk_wiz_ethernet_phy"
-	
+	[INSTANTIATIONS.clk_wiz_eth]
+		MODULE = "clk_wiz_ethernet_phy"
 	# Going to keep the memory stack for riscv at 32 kB atm for the printf test
 	# then will increment it to 64 kB as per the Bram_v2 memory
 	 
@@ -377,19 +362,15 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 [INTERCONNECT]
 	STATIC = [
 				# clock connections
-				# don't need this connection for sim
-				# ["BOARD:clk_i", "MODULE:clk_wiz_eth:clk"],
-				# will directly run the phy_ref_ck from sim
-				# ["MODULE:clk_wiz_eth:clk_25_mhz_out", "BOARD:phy_ref_clk"],
+				["BOARD:clk_i", "MODULE:clk_wiz_eth:clk"],
+				["MODULE:clk_wiz_eth:clk_25_mhz_out", "BOARD:phy_ref_clk"],
 				["BOARD:phy_tx_clk", "MODULE:eth_nic:phy_tx_clk"],
 				["BOARD:phy_rx_clk", "MODULE:eth_nic:phy_rx_clk"],
-				# directly run other modules from clk in sim
-				# ["MODULE:clk_wiz_eth:clk_100_mhz_out", "MODULE:debug:clk", "MODULE:softcore_memory_bus_arbiter:clk", "MODULE:eth_nic:clk", "MODULE:cpu:clk","MODULE:cache_bram_cachecontroller_v2:clk", "MODULE:timer:clk", "MODULE:gpio:clk","MODULE:progloader_v2:clk", "MODULE:rand_mod:clk"],
-				["BOARD:clk_i", "MODULE:debug:clk", "MODULE:softcore_memory_bus_arbiter:clk", "MODULE:eth_nic:clk", "MODULE:cpu:clk","MODULE:cache_bram_cachecontroller_v2:clk", "MODULE:timer:clk", "MODULE:gpio:clk","MODULE:progloader_v2:clk", "MODULE:rand_mod:clk"],
+				["MODULE:clk_wiz_eth:clk_100_mhz_out", "MODULE:debug:clk", "MODULE:softcore_memory_bus_arbiter:clk", "MODULE:eth_nic:clk", "MODULE:cpu:clk","MODULE:cache_bram_cachecontroller_v2:clk", "MODULE:timer:clk", "MODULE:gpio:clk","MODULE:progloader_v2:clk", "MODULE:rand_mod:clk"],
 				# FPGA board interfaces connections
 				["BOARD:uart_rx" , "MODULE:debug:urx", "MODULE:progloader_v2:urx"],
 				["BOARD:uart_tx" , "MODULE:debug:utx"],
-				["BOARD:led" , "MODULE:gpio:led"],
+				["BOARD:led" , "CUSTOM:custom_led_assign_random_mod_and_gpio_sw"],
 				["BOARD:sw" , "MODULE:gpio:sw", "MODULE:rand_mod:four_bit_in"],
 				# FPGA BOARD Ethernet PHY connections x eth_nic PHY interface
 				["BOARD:phy_reset_n", "MODULE:eth_nic:phy_reset_n"],
