@@ -144,6 +144,51 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 				ORIGIN = "0x20000000"
 				LENGTH = "0x01900000"
 
+# ---------------------------------------------------------------------------
+# Build the RISC-V control-plane firmware as part of configuring this system,
+# so one command builds both the software and the hardware. Without this the
+# firmware had to be built by hand first, and MEM_INIT below would fail if you
+# forgot.
+#
+# VARS are the firmware's own build flags. SIMULATION_TESTING=1 suppresses error
+# printf() output (correct for simulation); set DEBUG=1 on a synthesis build to
+# compile in the Ethernet packet-processing debug output over UART.
+#
+# OPTIONAL = true would downgrade a missing RISC-V toolchain to a warning. It is
+# false here because MEM_INIT below genuinely needs the output.
+[PREBUILD.riscv_firmware]
+	DIR      = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing"
+	COMMAND  = "make"
+	ARGS     = ["APP=vebpf_firewall_sim"]
+	VARS     = { SIMULATION_TESTING = 1, DEBUG = 0 }
+	OPTIONAL = false
+
+# ---------------------------------------------------------------------------
+# Keep the firmware's C address map and this file's hardware address map in
+# sync. MODE options:
+#   "off"      do nothing
+#   "check"    compare against PATH and fail the build if they disagree
+#   "generate" overwrite PATH from the MAP below, so the firmware compiles
+#              against the hardware's map (modifies that file's working tree)
+#
+# NAMES maps a hardware MAP key to its C macro name. This is load-bearing, not
+# cosmetic: the key `debug` would otherwise emit `#define DEBUG 0x10000018`,
+# colliding with the DEBUG build flag the firmware already uses. That address is
+# the UART, which is what the legacy header has always called it.
+[ADDRESS_MAP_HEADER]
+	MODE     = "check"
+	INSTANCE = "cpu"
+	PATH     = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/riscv_subsystem/config/address_map.h"
+	[ADDRESS_MAP_HEADER.NAMES]
+		cache   = "MEM"
+		gpio    = "GPIO"
+		debug   = "UART"
+		timer   = "TIMER"
+		eth_nic = "ETH_NIC"
+	[ADDRESS_MAP_HEADER.EXTRA]
+		# Present in the legacy C header but not in the hardware MAP.
+		CONFIG = "0x80000000"
+
 # All constant numbers must be strings for the remaining system
 
 

@@ -60,6 +60,8 @@ parser.add_argument("--board", default=DEFAULT_BOARD, help="Target board (short 
 parser.add_argument("--device", default=DEFAULT_DEVICE, help="Target FPGA device")
 parser.add_argument("--tool", default=DEFAULT_TOOL, help="Target tool")
 parser.add_argument("--src", default=DEFAULT_SRC, help="Main source file")
+parser.add_argument("--skip_prebuild", action="store_true",
+                    help="Skip every [PREBUILD] step in system.tml (e.g. no cross-toolchain installed)")
 parser.add_argument("--project_root", default="",
                     help="Root that ${PROJECT_ROOT} in a system.tml MEM_INIT path resolves to "
                          "(e.g. the consuming project's checkout). Defaults to this disl-core root.")
@@ -174,7 +176,15 @@ logger("Generating system and copying files")
     # Exiting
 
 # sys.exit("Manual Exit")
-build_rc = os.system(f"python ./{device}/{tool}/system_builder/build.py ./{example_dir}/{example}/system.tml " + board["DESCRIPTION"]["DIRECTORY"] + f" {build_dir}/ {src} {tool} {build_verbose} {project_root}")
+# New options are passed as named flags, not positionals: `tool` and
+# `project_root` can be empty, and an empty positional collapses in the shell
+# and shifts everything after it.
+extra_args = ""
+if project_root:
+    extra_args += f' --project-root="{project_root}"'
+if args.skip_prebuild:
+    extra_args += " --skip-prebuild"
+build_rc = os.system(f"python ./{device}/{tool}/system_builder/build.py ./{example_dir}/{example}/system.tml " + board["DESCRIPTION"]["DIRECTORY"] + f" {build_dir}/ {src} {tool} {build_verbose}" + extra_args)
 if build_rc != 0:
     error("build.py failed - see the traceback above. Not generating TCL scripts.")
 # sys.exit("Manual Exit")

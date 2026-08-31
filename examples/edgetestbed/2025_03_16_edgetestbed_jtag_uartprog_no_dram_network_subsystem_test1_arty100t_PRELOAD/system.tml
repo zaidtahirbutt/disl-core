@@ -129,6 +129,29 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 				ORIGIN = "0x20000000"
 				LENGTH = "0x01900000"
 
+# The MEM_INIT block above bakes this firmware into the bitstream's BRAM, so
+# this step is mandatory -- OPTIONAL = false. Set DEBUG = 1 here to build a
+# bitstream whose firmware prints Ethernet packet-processing debug over UART.
+[PREBUILD.riscv_firmware]
+	DIR      = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing"
+	COMMAND  = "make"
+	ARGS     = ["APP=vebpf_firewall_syn"]
+	VARS     = { SIMULATION_TESTING = 0, DEBUG = 0 }
+	OPTIONAL = false
+
+[ADDRESS_MAP_HEADER]
+	MODE     = "check"
+	INSTANCE = "cpu"
+	PATH     = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/riscv_subsystem/config/address_map.h"
+	[ADDRESS_MAP_HEADER.NAMES]
+		cache   = "MEM"
+		gpio    = "GPIO"
+		debug   = "UART"
+		timer   = "TIMER"
+		eth_nic = "ETH_NIC"
+	[ADDRESS_MAP_HEADER.EXTRA]
+		CONFIG = "0x80000000"
+
 # All constant numbers must be strings for the remaining system
 
 

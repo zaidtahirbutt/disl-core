@@ -120,6 +120,32 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 				ORIGIN = "0x20000000"
 				LENGTH = "0x01900000"
 
+# Builds the hardware firmware image alongside the bitstream, purely for
+# convenience -- you need build/<app>/firmware.hex to upload over UART after
+# flashing. Nothing here consumes it (no MEM_INIT), so the generated bitstream is
+# unaffected. OPTIONAL = true keeps this example buildable with no RISC-V
+# toolchain installed; see the _PRELOAD example next to this one for baking the
+# firmware into the bitstream instead.
+[PREBUILD.riscv_firmware]
+	DIR      = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing"
+	COMMAND  = "make"
+	ARGS     = ["APP=vebpf_firewall_syn"]
+	VARS     = { SIMULATION_TESTING = 0, DEBUG = 0 }
+	OPTIONAL = true
+
+[ADDRESS_MAP_HEADER]
+	MODE     = "check"
+	INSTANCE = "cpu"
+	PATH     = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/riscv_subsystem/config/address_map.h"
+	[ADDRESS_MAP_HEADER.NAMES]
+		cache   = "MEM"
+		gpio    = "GPIO"
+		debug   = "UART"
+		timer   = "TIMER"
+		eth_nic = "ETH_NIC"
+	[ADDRESS_MAP_HEADER.EXTRA]
+		CONFIG = "0x80000000"
+
 # All constant numbers must be strings for the remaining system
 
 
