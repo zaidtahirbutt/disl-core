@@ -4,6 +4,7 @@
 
 import os
 import sys
+import subprocess
 import toml
 import json
 import argparse
@@ -176,17 +177,39 @@ logger("Generating system and copying files")
     # Exiting
 
 # sys.exit("Manual Exit")
-# New options are passed as named flags, not positionals: `tool` and
-# `project_root` can be empty, and an empty positional collapses in the shell
-# and shifts everything after it.
-extra_args = ""
+#
+# build.py is invoked with an explicit argv list rather than an interpolated
+# shell string. The previous `os.system(f"... {src} {tool} {build_verbose}")`
+# form was quietly fragile: `tool` and `project_root` can both legitimately be
+# empty, an empty value collapses when the shell splits on whitespace, and every
+# argument after it shifts down a slot. That only ever worked because `tool` is
+# empty in practice, which happened to line `build_verbose` up with the argv
+# index build.py reads. Passing a list means no shell, no word splitting, no
+# quoting rules, and paths containing spaces work.
+#
+# build.py reads exactly five positionals (system, board, build_dir, src,
+# build_verbose) and has never read `tool` at all -- it is only used here to
+# locate build.py itself -- so it is deliberately not passed.
+build_py = os.path.join(".", device, tool, "system_builder", "build.py")
+build_cmd = [
+    sys.executable,                                    # same interpreter, not whatever `python` resolves to
+    build_py,
+    f"./{example_dir}/{example}/system.tml",
+    board["DESCRIPTION"]["DIRECTORY"],
+    f"{build_dir}/",
+    src,
+    str(build_verbose),
+]
 if project_root:
-    extra_args += f' --project-root="{project_root}"'
+    build_cmd.append(f"--project-root={project_root}")
 if args.skip_prebuild:
-    extra_args += " --skip-prebuild"
-build_rc = os.system(f"python ./{device}/{tool}/system_builder/build.py ./{example_dir}/{example}/system.tml " + board["DESCRIPTION"]["DIRECTORY"] + f" {build_dir}/ {src} {tool} {build_verbose}" + extra_args)
+    build_cmd.append("--skip-prebuild")
+
+logger("Running: " + " ".join(build_cmd))
+build_rc = subprocess.run(build_cmd).returncode
 if build_rc != 0:
-    error("build.py failed - see the traceback above. Not generating TCL scripts.")
+    error(f"build.py failed with exit code {build_rc} - see the traceback above. "
+           "Not generating TCL scripts.")
 # sys.exit("Manual Exit")
 ###################### Generate additional tcl scripts ######################
 if device == "fpga":

@@ -145,17 +145,40 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 				LENGTH = "0x01900000"
 
 # ---------------------------------------------------------------------------
-# Build the RISC-V control-plane firmware as part of configuring this system,
-# so one command builds both the software and the hardware. Without this the
-# firmware had to be built by hand first, and MEM_INIT below would fail if you
-# forgot.
+# PREBUILD -- compile software as part of configuring the hardware, so one
+# command builds both. Without this the firmware had to be built by hand first,
+# and the choice of app and flags lived only in your shell history.
 #
-# VARS are the firmware's own build flags. SIMULATION_TESTING=1 suppresses error
-# printf() output (correct for simulation); set DEBUG=1 on a synthesis build to
-# compile in the Ethernet packet-processing debug output over UART.
+# Fields:
+#   DIR      working directory for the command (${...} anchors expanded)
+#   COMMAND  the executable; checked against PATH before running
+#   ARGS     arguments passed through verbatim
+#   VARS     appended as NAME=VALUE arguments -- which is how `make` takes
+#            variables, so this is where the firmware's own build flags go
+#   OPTIONAL what to do if the command is missing or fails (see below)
 #
-# OPTIONAL = true would downgrade a missing RISC-V toolchain to a warning. It is
-# false here because MEM_INIT below genuinely needs the output.
+# Runs BEFORE anything is generated and BEFORE MEM_INIT resolves, so a system
+# can compile its own firmware and then consume it in the same invocation.
+#
+# VARS is how this file selects firmware behaviour:
+#   SIMULATION_TESTING = 1  suppress error printf() output (right for simulation)
+#   DEBUG              = 1  compile in printf() error reporting as well as the
+#                           error LED. Set this on a SYNTHESIS build to watch
+#                           Ethernet packet processing over the debug UART on
+#                           real hardware.
+#
+# OPTIONAL answers one question: if this step cannot run, should the build stop?
+#   false -> hard failure.        Correct when something downstream needs the output.
+#   true  -> warn and continue.   Correct when the output is a convenience, so
+#                                 someone with no RISC-V cross-toolchain can
+#                                 still generate and synthesize this design.
+# The right answer depends on whether anything in THIS example consumes the
+# firmware. Here it is false: a MEM_INIT block below loads this firmware into the simulated BRAM, so
+#              the simulation is meaningless without it.
+#
+# `configure.py --skip_prebuild` (or `vebpf-mc --skip-prebuild`) bypasses every
+# step regardless. If a MEM_INIT then needs a missing output, that fails loudly
+# with a clear message rather than silently simulating garbage.
 [PREBUILD.riscv_firmware]
 	DIR      = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/fw/vebpf_network_packet_processing"
 	COMMAND  = "make"
@@ -164,19 +187,37 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 	OPTIONAL = false
 
 # ---------------------------------------------------------------------------
-# Keep the firmware's C address map and this file's hardware address map in
-# sync. MODE options:
-#   "off"      do nothing
-#   "check"    compare against PATH and fail the build if they disagree
-#   "generate" overwrite PATH from the MAP below, so the firmware compiles
-#              against the hardware's map (modifies that file's working tree)
+# ADDRESS_MAP_HEADER -- keep ONE address map, not two.
 #
-# NAMES maps a hardware MAP key to its C macro name. This is load-bearing, not
-# cosmetic: the key `debug` would otherwise emit `#define DEBUG 0x10000018`,
-# colliding with the DEBUG build flag the firmware already uses. That address is
-# the UART, which is what the legacy header has always called it.
+# The RISC-V address map has to be known in two places: the hardware (which
+# disl-core generates from [INSTANTIATIONS.<INSTANCE>.MAP] below) and the C
+# firmware (which has its own riscv_subsystem/config/address_map.h). Nothing
+# used to connect them, so they could drift apart silently.
+#
+# MODE is the legacy-header vs generated-header choice:
+#   "off"       do nothing. THE DEFAULT -- omit this whole section and nothing
+#               changes, which is why existing examples are unaffected.
+#   "check"     KEEP USING the legacy header at PATH, but verify it against the
+#               hardware map. A macro defined on BOTH sides at DIFFERENT
+#               addresses FAILS the build. An entry present on only ONE side is
+#               a warning, because the C code may simply not use that peripheral
+#               (see ETH_NIC below). Set STRICT = true to fail on those too.
+#   "generate"  OVERWRITE the header at PATH from the MAP below, so the firmware
+#               compiles against the hardware's map. This modifies that file in
+#               its own repository's working tree, which is why it is not default.
+#
+# A copy always lands in <build_dir>/gen/address_map.h for provenance.
+#
+# NAMES maps a hardware MAP key to its C macro name, and is load-bearing rather
+# than cosmetic: the MAP key `debug` would otherwise emit
+# `#define DEBUG 0x10000018` and collide with the DEBUG build flag the firmware
+# already uses. That address is the UART, which is what the C header has always
+# called it. Watch for this when adding MAP keys named after common macros.
+#
+# EXTRA adds macros the C header needs that have no hardware MAP entry.
 [ADDRESS_MAP_HEADER]
 	MODE     = "check"
+	STRICT   = false
 	INSTANCE = "cpu"
 	PATH     = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/riscv_subsystem/config/address_map.h"
 	[ADDRESS_MAP_HEADER.NAMES]
