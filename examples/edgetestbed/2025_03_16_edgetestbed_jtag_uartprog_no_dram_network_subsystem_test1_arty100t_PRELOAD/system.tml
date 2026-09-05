@@ -207,7 +207,7 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 #
 # EXTRA adds macros the C header needs that have no hardware MAP entry.
 [ADDRESS_MAP_HEADER]
-	MODE     = "check"
+	MODE     = "generate"
 	STRICT   = false
 	INSTANCE = "cpu"
 	PATH     = "${PROJECT_ROOT}/RISCV_C_FW_VebpfManyCore/riscv_subsystem/config/address_map.h"
