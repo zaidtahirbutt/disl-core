@@ -824,6 +824,19 @@ class BUILD:
                     found[parts[1]] = parts[2]
             return found
 
+        def as_int(token):
+            """Parse a C integer literal, or None if it is not a plain one.
+
+            Returns None rather than raising for things like `(1<<3)`, a macro
+            referencing another macro, or anything else a real C header may
+            legitimately contain -- a header *checker* must not crash on a
+            define it was never asked to compare. int(.., 0) accepts 0x/0o/0b
+            and decimal; C integer suffixes are stripped first."""
+            try:
+                return int(str(token).rstrip("uUlL"), 0)
+            except (ValueError, TypeError):
+                return None
+
         if mode == "generate":
             existing = open(target).read() if os.path.isfile(target) else None
             if existing == generated:
@@ -848,11 +861,18 @@ class BUILD:
         # code does not use that peripheral (or uses a different addressing scheme
         # through the crossbar), so it warns unless STRICT is set.
         strict = bool(spec.get("STRICT", False))
-        conflicts, gaps = [], []
+        conflicts, gaps, unparsed = [], [], []
         for macro, value in want.items():
             if macro not in have:
                 gaps.append(f"  {macro}: in the hardware map ({value}) but not defined in the header")
-            elif int(have[macro], 16) != int(value, 16):
+                continue
+            lhs, rhs = as_int(have[macro]), as_int(value)
+            if lhs is None or rhs is None:
+                # Compared by value, not by spelling -- but only when both sides
+                # actually are integer literals.
+                unparsed.append(f"  {macro}: not a plain integer literal on one side "
+                                 f"(header={have[macro]}, map={value}) -- not compared")
+            elif lhs != rhs:
                 conflicts.append(f"  {macro}: hardware map says {value}, header says {have[macro]}")
         for macro in have:
             if macro not in want:
@@ -866,6 +886,8 @@ class BUILD:
                 + "\n".join(conflicts + (gaps if strict else []))
                 + "\n  Fix system.tml or the header, or set MODE=\"generate\" to overwrite the header.")
 
+        for u in unparsed:
+            print(f"WARNING: ADDRESS_MAP_HEADER:{u}")
         if gaps:
             print(f"ADDRESS_MAP_HEADER: check -- no address conflicts, but {len(gaps)} entr(y/ies) "
                   f"exist on only one side (set STRICT = true to make this fail):")

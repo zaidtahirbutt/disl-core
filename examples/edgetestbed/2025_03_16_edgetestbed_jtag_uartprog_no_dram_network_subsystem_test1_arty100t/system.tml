@@ -179,7 +179,15 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 #               hardware map. A macro defined on BOTH sides at DIFFERENT
 #               addresses FAILS the build. An entry present on only ONE side is
 #               a warning, because the C code may simply not use that peripheral
-#               (see ETH_NIC below). Set STRICT = true to fail on those too.
+#               by name. Set STRICT = true to fail on those too.
+#               A define whose value is not a plain integer literal (e.g.
+#               `(1<<3)`) is skipped with a warning rather than crashing.
+#               Live example: eth_nic below has no ETH_NIC macro in the C header.
+#               That is benign -- board.h reaches the network subsystem at
+#               _net1 = 0x20500000 and _netbrx = 0x20800000, both inside the
+#               eth_nic region declared here, but hardcoded as absolute literals
+#               instead of derived from a named base. Naming the base and
+#               deriving those offsets would let this check cover them too.
 #   "generate"  OVERWRITE the header at PATH from the MAP below, so the firmware
 #               compiles against the hardware's map. This modifies that file in
 #               its own repository's working tree, which is why it is not default.
