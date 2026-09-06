@@ -1088,6 +1088,27 @@ async def run_test(dut):
 
     tb = TB(dut)
 
+    # Count VeBPF halt events for the application-level assertions at the end of
+    # this test. A halt is how a core signals that an eBPF program reached EXIT,
+    # so a run with zero halts executed nothing -- the exact symptom of the eBPF
+    # rules never being loaded.
+    _halt_count = {"n": 0}
+
+    async def _count_vebpf_halts():
+        sig = dut.eth_nic.eth_fifo_to_bram.VeBPF_halt_combined_global
+        prev = 0
+        while True:
+            await RisingEdge(dut.clk_i)
+            try:
+                cur = int(sig.value)
+            except Exception:      # X/Z during reset
+                continue
+            if cur == 1 and prev == 0:
+                _halt_count["n"] += 1
+            prev = cur
+
+    cocotb.start_soon(_count_vebpf_halts())
+
     await tb.init()  # async def init(self): function in the coroutine 
 
     tb.log.info("Loading VeBPF program memory throught the program loader module")
@@ -2663,6 +2684,173 @@ async def run_test(dut):
 
     await RisingEdge(dut.clk_i)
     await RisingEdge(dut.clk_i)
+
+    # =====================================================================
+    # APPLICATION-LEVEL ASSERTIONS
+    #
+    # Until these existed, this testbench had NO active assertions at all --
+    # every one in the file was commented out -- so it passed as long as the
+    # simulation reached the end without a Python exception. It could not fail
+    # on wrong firmware, wrong eBPF rules, or a VeBPF core erroring out. It
+    # notably did not fail during the long period when the RTL's hardcoded
+    # $readmemh paths were silently loading nothing at all.
+    #
+    # Failures are collected and reported together rather than aborting on the
+    # first one, so a broken run tells you everything that is wrong at once.
+    # =====================================================================
+    tb.log.info("=" * 70)
+    tb.log.info("APPLICATION-LEVEL ASSERTIONS")
+    tb.log.info("=" * 70)
+
+    _failures = []
+
+    def _read(path_desc, handle):
+        """Read a signal, turning a bad read into a reported failure rather than
+        a traceback. Two distinct problems are worth separating:
+          - the value contains X/Z, i.e. the register was never driven or a
+            memory was never initialized (the historical failure mode here); or
+          - the handle itself is unreadable, i.e. renamed, optimized away, or
+            the hierarchy path is wrong.
+        """
+        try:
+            raw = handle.value
+        except Exception as exc:                      # noqa: BLE001
+            _failures.append(f"{path_desc}: signal not readable ({exc!r}) -- "
+                              f"renamed, optimized away, or wrong hierarchy path?")
+            return None
+        try:
+            return int(raw)
+        except Exception:                             # noqa: BLE001
+            _failures.append(f"{path_desc}: value is UNINITIALIZED (contains x/z: {raw}) -- "
+                              f"nothing ever drove this. For a memory, that means the "
+                              f"image was never loaded.")
+            return None
+
+    def _check(desc, got, want):
+        if got is None:
+            return
+        if got != want:
+            _failures.append(f"{desc}: got {got} (0x{got:X}), expected {want} (0x{want:X})")
+        else:
+            tb.log.info(f"  OK  {desc} = {got}")
+
+    # ---------------------------------------------------------------------
+    # 1. The eBPF rules really are in the cores' program memory.
+    #
+    # Read back against the SAME image the RTL was told to load -- staged by
+    # disl-core's MEM_INIT into <build_dir>/mem/ -- so this check maintains
+    # itself when the rule set changes, and fails loudly if the image is not
+    # loaded, is the wrong file, or is mis-padded.
+    # ---------------------------------------------------------------------
+    _rules_img = os.path.join("..", "mem", "progloader_v2.RULES_INIT_FILE.hex")
+    if not os.path.isfile(_rules_img):
+        _failures.append(f"staged eBPF rules image missing: {_rules_img} "
+                          f"(MEM_INIT should have produced it)")
+    else:
+        _words = []
+        with open(_rules_img) as f:
+            for line in f:
+                _words.extend(line.split("//", 1)[0].split())
+        tb.log.info(f"  staged rules image: {len(_words)} words from {_rules_img}")
+
+        # Compare the leading real rule content word-for-word. Everything past
+        # it is MEM_INIT zero padding, spot-checked below.
+        _n_real = 64
+        _mismatch = 0
+        for i in range(min(_n_real, len(_words))):
+            got = _read(f"instrs[{i}]", dut.progloader_v2.genblk4.instrs[i])
+            if got is None:
+                break
+            want = int(_words[i], 16)
+            if got != want:
+                _mismatch += 1
+                if _mismatch <= 4:
+                    _failures.append(
+                        f"eBPF rule word {i} not loaded correctly: "
+                        f"memory has 0x{got:016X}, image has 0x{want:016X}")
+        if _mismatch == 0:
+            tb.log.info(f"  OK  first {_n_real} eBPF rule words match the staged image exactly")
+        elif _mismatch > 4:
+            _failures.append(f"...and {_mismatch - 4} further eBPF rule word mismatches")
+
+        # Padding must be zeros, not X -- an unpadded image used to leave the
+        # tail of this memory undefined.
+        for i in (len(_words) - 1, len(_words) // 2):
+            if i >= _n_real:
+                got = _read(f"instrs[{i}] (padding)", dut.progloader_v2.genblk4.instrs[i])
+                _check(f"eBPF rules padding at word {i} is zero", got, 0)
+
+    # ---------------------------------------------------------------------
+    # 2. Nothing errored. These are the flags the design raises when a VeBPF
+    #    core faults or the result path detects a bad outcome; any of them set
+    #    means the run was not clean, however far the simulation got.
+    # ---------------------------------------------------------------------
+    _nic = dut.eth_nic.eth_fifo_to_bram
+    _check("VeBPF_error_combined_global (any core errored)",
+           _read("VeBPF_error_combined_global", _nic.VeBPF_error_combined_global), 0)
+    _check("VeBPF result-evaluator final error flag",
+           _read("final_result_error_flag_reg",
+                 _nic.VeBPF_result_evaluator_final_result_error_flag_reg), 0)
+    _check("VeBPF rules-scheduler error flag",
+           _read("VeBPF_rules_scheduler_error_flag",
+                 _nic.VeBPF_rules_scheduler_error_flag), 0)
+
+    # ---------------------------------------------------------------------
+    # 3. Every descriptor-table slot reports a clean, completed classification.
+    #    RX_PKT_DESC_TABLE_DEPTH is 4, so these are the last four packets the
+    #    VeBPF array classified.
+    # ---------------------------------------------------------------------
+    _DESC_DEPTH = 4
+    for i in range(_DESC_DEPTH):
+        _check(f"descriptor slot {i} error bit",
+               _read(f"desc_table error_bit[{i}]",
+                     _nic.desc_table_VeBPF_rx_pkt_hdr_processing_done_result_error_bit[i]), 0)
+
+    # ---------------------------------------------------------------------
+    # 4. The verdicts themselves -- the actual firewall output.
+    #
+    # GOLDEN VALUES for this example's fixed stimulus and rule set. Four
+    # packets classified to four DIFFERENT destinations, which is what makes
+    # this a real check on the eBPF programs rather than on plumbing: wrong or
+    # unloaded rules do not produce this pattern. Update deliberately if the
+    # stimulus or rule set changes, and say why in the commit.
+    # ---------------------------------------------------------------------
+    _EXPECTED_VERDICTS = [5, 3, 4, 1]
+    for i, want in enumerate(_EXPECTED_VERDICTS):
+        _check(f"descriptor slot {i} rx_pkt_destination (VeBPF verdict)",
+               _read(f"desc_table destination[{i}]",
+                     _nic.desc_table_VeBPF_rx_pkt_hdr_processing_done_result_rx_pkt_destination[i]),
+               want)
+
+    _check("VeBPF result-evaluator final result",
+           _read("final_result_reg", _nic.VeBPF_result_evaluator_final_result_reg), 5)
+
+    # ---------------------------------------------------------------------
+    # 5. The cores actually ran. A halt is how a VeBPF core signals that an
+    #    eBPF program reached EXIT, so zero halts across the whole run means
+    #    nothing executed -- exactly the symptom of rules never loading.
+    # ---------------------------------------------------------------------
+    _halts = _halt_count["n"]
+    _MIN_HALTS = 4          # one per classified packet; 4 observed on a good run
+    if _halts < _MIN_HALTS:
+        _failures.append(
+            f"only {_halts} VeBPF halt event(s) observed, expected at least "
+            f"{_MIN_HALTS} (one per classified packet). Zero would mean the "
+            f"cores never completed an eBPF program at all.")
+    else:
+        tb.log.info(f"  OK  VeBPF halt events observed: {_halts} (>= {_MIN_HALTS})")
+
+    # ---------------------------------------------------------------------
+    tb.log.info("=" * 70)
+    if _failures:
+        tb.log.error(f"{len(_failures)} APPLICATION-LEVEL CHECK(S) FAILED:")
+        for f in _failures:
+            tb.log.error(f"    - {f}")
+        raise AssertionError(
+            f"{len(_failures)} application-level check(s) failed; see the log above. "
+            f"First: {_failures[0]}")
+    tb.log.info("ALL APPLICATION-LEVEL ASSERTIONS PASSED")
+    tb.log.info("=" * 70)
 
     #z
     # test_framez = Ether(bytes(test_frame.get_payload()))
