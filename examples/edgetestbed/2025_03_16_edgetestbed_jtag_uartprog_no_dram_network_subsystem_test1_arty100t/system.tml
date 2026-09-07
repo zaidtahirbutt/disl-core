@@ -120,6 +120,27 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 				ORIGIN = "0x20000000"
 				LENGTH = "0x01900000"
 # ---------------------------------------------------------------------------
+# Build the eBPF rule set from its .asm sources, so the rules are reproducible
+# rather than a committed binary. Two stages behind this one script:
+#   combined_compile.sh    .asm -> combined_hex.hex   (UART-upload format)
+#   vebpf_rules_hexconv.py combined_hex.hex -> sim_combined_hex.hex ($readmemh)
+#
+# Both are written back IN PLACE next to the .asm sources, which is exactly
+# where the RULES_INIT_FILE MEM_INIT block below already points -- so this step
+# refreshes the images without the MEM_INIT path ever changing. Regeneration is
+# byte-identical, so a normal build leaves `git status` clean.
+#
+# OPTIONAL = true because the assembler needs `parcon` from git rather than the
+# PyPI release (see tools/build_vebpf_rules.sh). With `uv sync` done at the repo
+# root it is present and the rules rebuild; without it this step warns and the
+# previously committed images are used, so the build still works.
+[PREBUILD.vebpf_rules]
+	DIR      = "${PROJECT_ROOT}"
+	COMMAND  = "bash"
+	ARGS     = ["tools/build_vebpf_rules.sh", "VeBPF_firewall"]
+	OPTIONAL = true
+
+# ---------------------------------------------------------------------------
 # PREBUILD -- compile software as part of configuring the hardware, so one
 # command builds both. Without this the firmware had to be built by hand first,
 # and the choice of app and flags lived only in your shell history.
