@@ -2841,6 +2841,111 @@ async def run_test(dut):
         tb.log.info(f"  OK  VeBPF halt events observed: {_halts} (>= {_MIN_HALTS})")
 
     # ---------------------------------------------------------------------
+    # 6. The RISC-V control plane actually did its job.
+    #
+    # Everything above tests the VeBPF data plane. These check the *software*
+    # side: the firmware polls the network CSRs, reads each packet's descriptor
+    # and VeBPF verdict, then acknowledges by writing NET_RX_PKT_AVAIL_CLEAR and
+    # NET_RX_FIFO_RD_PTR_INC. So the rx descriptor read pointer only advances
+    # because the firmware advanced it.
+    #
+    # This is what makes it a real check on the control plane: the WRITE pointer
+    # is driven by hardware and advances whether or not the CPU is alive, while
+    # the READ pointer moves only if the firmware ran, understood the CSR layout
+    # and kept up. Firmware that never started, hung, or busy-looped without
+    # acknowledging leaves read at 0 while write climbs.
+    # ---------------------------------------------------------------------
+    _wr = _read("wr_fifo_ptr_rx_pkt_reg", _nic.wr_fifo_ptr_rx_pkt_reg)
+    _rd = _read("rd_fifo_ptr_rx_pkt_reg", _nic.rd_fifo_ptr_rx_pkt_reg)
+
+    _EXPECTED_RX_DESCRIPTORS = 5    # golden: packets enqueued by this stimulus
+    _check("rx descriptors enqueued by hardware (write pointer)", _wr,
+           _EXPECTED_RX_DESCRIPTORS)
+
+    if _rd is not None and _wr is not None:
+        if _wr == 0:
+            # Both pointers at zero is NOT a passing drain -- it means no
+            # descriptor was ever enqueued, so there was nothing to drain and
+            # this check would otherwise pass vacuously. Found by fault
+            # injection: with no firmware loaded the RISC-V never arms packet
+            # reception, so the hardware never enqueues either and rd == wr == 0.
+            _failures.append(
+                "no rx descriptor was ever enqueued (read == write == 0), so the "
+                "control plane had nothing to consume. The firmware never armed "
+                "packet reception -- check that it loaded and started.")
+        elif _rd == 0:
+            _failures.append(
+                f"the RISC-V control plane consumed NOTHING: hardware enqueued {_wr} rx "
+                f"descriptor(s) but the firmware's read pointer is still 0. The firmware "
+                f"never ran, hung, or is not acknowledging via NET_RX_FIFO_RD_PTR_INC.")
+        elif _rd != _wr:
+            _failures.append(
+                f"the RISC-V control plane did not drain the rx descriptor queue: "
+                f"read pointer {_rd} != write pointer {_wr} ({_wr - _rd} descriptor(s) "
+                f"left unconsumed).")
+        else:
+            tb.log.info(f"  OK  control plane drained every rx descriptor "
+                        f"(read == write == {_rd}, non-zero)")
+
+    # The length the firmware latched when it read a descriptor. Zero or X here
+    # would mean it read the register but got nothing meaningful out of it.
+    _check("packet length read by the firmware from the descriptor table",
+           _read("desc_table_rx_pkt_len_rd_ptr_reg", _nic.desc_table_rx_pkt_len_rd_ptr_reg),
+           70)
+
+    # The VeBPF verdict the firmware most recently latched. Must be one the data
+    # plane actually produced (section 4), not a stale or garbage value -- this
+    # is the hand-off point between the two planes.
+    _verdict_read = _read(
+        "desc_table_..._rx_pkt_destination_rd_ptr_reg",
+        _nic.desc_table_VeBPF_rx_pkt_hdr_processing_done_result_rx_pkt_destination_rd_ptr_reg)
+    if _verdict_read is not None:
+        if _verdict_read not in _EXPECTED_VERDICTS:
+            _failures.append(
+                f"the verdict the firmware read ({_verdict_read}) is not one the VeBPF "
+                f"array produced {_EXPECTED_VERDICTS}; the data plane and control plane "
+                f"disagree about this packet.")
+        else:
+            tb.log.info(f"  OK  verdict read by the firmware ({_verdict_read}) is one the "
+                        f"VeBPF array produced")
+
+    # The firmware image is really in the RISC-V instruction memory. Same idea
+    # as the eBPF rules check, read back against the image MEM_INIT staged.
+    # Icarus does not always expose a large unpacked memory over VPI, so an
+    # unreadable handle is reported as a skip rather than a failure -- it is a
+    # simulator limitation, not a defect in the design.
+    _fw_img = os.path.join("..", "mem", "cache_bram_cachecontroller_v2.MEM_INIT_FILE.hex")
+    if not os.path.isfile(_fw_img):
+        _failures.append(f"staged RISC-V firmware image missing: {_fw_img}")
+    else:
+        _fw_words = []
+        with open(_fw_img) as f:
+            for line in f:
+                _fw_words.extend(line.split("//", 1)[0].split())
+        try:
+            _probe = int(dut.cache_bram_cachecontroller_v2.mem[0].value)
+        except Exception as exc:                      # noqa: BLE001
+            tb.log.warning(f"  SKIP  RISC-V firmware memory not readable over VPI "
+                            f"({type(exc).__name__}); relying on the control-plane "
+                            f"pointer checks above instead")
+            _probe = None
+        if _probe is not None:
+            _fw_mismatch = 0
+            for i in range(min(32, len(_fw_words))):
+                got = _read(f"riscv mem[{i}]", dut.cache_bram_cachecontroller_v2.mem[i])
+                if got is None:
+                    break
+                want = int(_fw_words[i], 16)
+                if got != want:
+                    _fw_mismatch += 1
+                    if _fw_mismatch <= 3:
+                        _failures.append(
+                            f"RISC-V firmware word {i} not loaded correctly: memory has "
+                            f"0x{got:08X}, staged image has 0x{want:08X}")
+            if _fw_mismatch == 0:
+                tb.log.info("  OK  first 32 RISC-V firmware words match the staged image")
+
+    # ---------------------------------------------------------------------
     tb.log.info("=" * 70)
     if _failures:
         tb.log.error(f"{len(_failures)} APPLICATION-LEVEL CHECK(S) FAILED:")
