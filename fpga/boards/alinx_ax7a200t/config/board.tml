@@ -146,6 +146,18 @@ PART.LONG = "xc7a200tfbg484-2"
 		DIRECTION = "SOURCE"
 		WIDTH = 1
 		INTERFACE_TYPE = "GENERAL"
+	# User switches and LEDs. Added so a simulation example can drive reset and
+	# reprogram through real top-level ports, the way the artya7100t examples do.
+	# The synthesis examples on this board use the vio_0_sw_leds VIO core instead
+	# (a Vivado IP, and a black box to Icarus), which is why these did not exist.
+	[IO.sw]
+		DIRECTION = "SOURCE"
+		WIDTH = 4
+		INTERFACE_TYPE = "GENERAL"
+	[IO.led]
+		DIRECTION = "SINK"
+		WIDTH = 4
+		INTERFACE_TYPE = "GENERAL"
 	[IO.uart_rx]
 		DIRECTION = "SOURCE"
 		WIDTH = 1
@@ -201,6 +213,15 @@ PART.LONG = "xc7a200tfbg484-2"
 
 
 [CONSTRAINTS]
+# sw / led carry NO pin assignments on purpose. This board file ships with the
+# AX7A200T's documented pinout for every other port; the user keys and LEDs were
+# never part of it, and inventing PACKAGE_PINs would silently drive whatever
+# happens to be at those locations. A simulation needs no pins, so the SIM
+# example works as-is; a SYNTHESIS build using these ports will fail loudly with
+# unconstrained-port errors, which is the correct outcome -- add your board
+# revision's pins here at that point.
+sw = "# sw[3:0] intentionally unconstrained -- see the comment in board.tml [CONSTRAINTS]"
+led = "# led[3:0] intentionally unconstrained -- see the comment in board.tml [CONSTRAINTS]"
 
 ### DIFFERENTIAL clk ##
 # sys_clk_p = """

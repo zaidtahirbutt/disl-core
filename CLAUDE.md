@@ -27,10 +27,15 @@ rules *are*. Project-specific knowledge belongs in the consuming project's
 ## Entry point
 
 ```console
-python configure.py --example_dir ./examples/edgetestbed --example <name> \
+python configure.py --example_dir ./examples/VebpfManyCore --example <name> \
                     --board artya7100t --build_dir <abs path> \
-                    [--project_root <consuming repo>] [--skip_prebuild]
+                    [--project_root <consuming repo>] [--skip_prebuild] \
+                    [--prebuild_var riscv_firmware:NAME=VALUE]
 ```
+
+All four of the first arguments have defaults (`./examples/VebpfManyCore`,
+`vebpf_manycore_1core_arty100t_SIM`, `artya7100t`,
+`./build/build_<YYYY_MM_DD>_<example>`).
 
 `configure.py` must run with **CWD = this repo root** — input paths are
 `./fpga/...` relative. It reads the TOMLs, invokes
@@ -67,7 +72,26 @@ copy into `<build_dir>/mem/`, zero-pads to depth, injects the **absolute** stage
 path as a parameter, and writes `<build_dir>/mem/manifest.json` for provenance.
 
 Anchors: `${PROJECT_ROOT}` (caller-supplied via `--project_root`, defaults to
-this repo root), `${DISL_ROOT}`, `${EXAMPLE_DIR}`.
+this repo root), `${DISL_ROOT}`, `${EXAMPLE_DIR}`, and
+**`${PREBUILD:<step>:<NAME>}`**.
+
+The last one resolves to what a `[PREBUILD]` step will actually be invoked with —
+its `DIR` or any of its `VARS`, after `--prebuild-var` overrides. It exists so a
+`MEM_INIT` path can be *derived* from the step that produces the file rather than
+repeating it:
+
+```toml
+FILE = "${PREBUILD:riscv_firmware:DIR}/build/${PREBUILD:riscv_firmware:APP}/…"
+```
+
+Without it, changing what a system builds means editing two places and editing
+one silently loads a stale image. Still generic: the engine does not know which
+step builds what, only that a step was named.
+
+**All anchor substitution goes through `expand()`/`resolve_path()`.**
+`resolve_mem_init()` used to re-implement it, which meant this anchor worked
+everywhere except MEM_INIT — the one place it was for. Do not reintroduce a
+second copy.
 
 **Why absolute paths**: simulation runs from `<build_dir>/tb_cocotb/` while
 Vivado synthesis runs from `<build_dir>/<example>/<example>.runs/synth_1/`. **No
@@ -87,6 +111,12 @@ was rejected — it is simulation-only and does nothing for synthesis.
 true` downgrades a missing tool or failed step to a warning. Commands run as an
 **argv list, never through a shell** — a config file must not be able to inject
 shell syntax.
+
+`--prebuild-var=<step>:<NAME>=<VALUE>` (via `configure.py --prebuild_var`,
+repeatable) appends an extra argument to **one named step**, after its `VARS`, so
+for `make` it overrides them. It is scoped per step on purpose: a value meant for
+one step must not leak into the others. Deliberately generic — the engine does
+not know which step builds firmware; the consuming CLI supplies the step name.
 
 ### `[ADDRESS_MAP_HEADER]` (v0.3.0) — one address map, not two
 
@@ -129,12 +159,28 @@ happened to be numeric.
    text mode; use `newline=''` on read and write, and verify with
    `git diff --stat`.
 
-3. **`$readmemh` inside `if (PARAMETER)` is constant-folded away at synthesis**,
-   so it is simulation-only in practice — unlike `` `ifdef ``, it *looks*
-   conditional but disappears. A `#delay` anywhere in that `initial` block makes
-   it non-synthesizable, which is why `PRELOAD_MEM` uses a **separate,
-   delay-free** block from the simulation load path in
-   `bram_axi_cachecontroller_v2.v`.
+3. **What actually makes a `$readmemh` synthesizable — stated precisely, because
+   an earlier version of this file got it wrong.** A parameter-conditional
+   `$readmemh` is constant-folded **on the parameter's value**: it survives
+   synthesis when the condition is *true* and vanishes when it is *false*. It is
+   not "simulation-only" as a category. So `PRELOAD_MEM`'s
+   `if (PRELOAD_MEM && MEM_INIT_FILE != "")` is genuinely honoured by Vivado —
+   confirmed in the synthesis log of the `..._PRELOAD` build:
+   `INFO: [Synth 8-3876] $readmem data file '…' is read successfully
+   [bram_axi_cachecontroller_v2.v:176]`, with no "initialization ignored"
+   warning and the target mapping to Block RAM.
+
+   The two things that *do* disqualify a load from synthesis:
+   - **a `#delay` anywhere in that `initial` block** — which is why `PRELOAD_MEM`
+     uses a separate, delay-free block from the simulation load path (the sim
+     path has `#5` in it);
+   - **sitting inside a disabled generate-if**, where the whole block including
+     its arrays is eliminated at elaboration. This is the case for the eBPF
+     rules' `$readmemh` in `progloader_riscv_vebpf_v2.v:572`: its enclosing
+     `if (SIMULATION && VEBPF_SIMULATION)` is false in the synthesis examples, so
+     `instrs[]` does not exist in hardware at all. That array is a
+     simulation-only artifact — on hardware the rules live in the network
+     subsystem. See §41 of the working notes before attempting a rules preload.
 
 4. **This repo is a submodule and sits on DETACHED HEAD.** See the parent's
    `CLAUDE.md` before pushing — `git push origin main` can report

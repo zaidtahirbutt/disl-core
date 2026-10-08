@@ -17,8 +17,8 @@ else:
 from datetime import datetime 
 
 ########################### Defaults ###########################
-DEFAULT_EXAMPLE = "2025_6_3_edgetestbed_jtag_uartprog_no_dram_network_subsystem_test1_arty100t_SIM"
-DEFAULT_EXAMPLE_DIR = "./examples/edgetestbed"
+DEFAULT_EXAMPLE = "vebpf_manycore_1core_arty100t_SIM"
+DEFAULT_EXAMPLE_DIR = "./examples/VebpfManyCore"
 DEFAULT_BOARD = "artya7100t"
 DEFAULT_DEVICE = "fpga"
 DEFAULT_TOOL = ""
@@ -61,6 +61,11 @@ parser.add_argument("--board", default=DEFAULT_BOARD, help="Target board (short 
 parser.add_argument("--device", default=DEFAULT_DEVICE, help="Target FPGA device")
 parser.add_argument("--tool", default=DEFAULT_TOOL, help="Target tool")
 parser.add_argument("--src", default=DEFAULT_SRC, help="Main source file")
+parser.add_argument("--prebuild_var", action="append", default=[],
+                    metavar="STEP:NAME=VALUE",
+                    help="Extra NAME=VALUE argument for one [PREBUILD] step, e.g. "
+                         "riscv_firmware:DEBUG=1. Repeatable; overrides that step's "
+                         "VARS for the same name.")
 parser.add_argument("--skip_prebuild", action="store_true",
                     help="Skip every [PREBUILD] step in system.tml (e.g. no cross-toolchain installed)")
 parser.add_argument("--project_root", default="",
@@ -204,6 +209,8 @@ if project_root:
     build_cmd.append(f"--project-root={project_root}")
 if args.skip_prebuild:
     build_cmd.append("--skip-prebuild")
+for _pv in args.prebuild_var:
+    build_cmd.append(f"--prebuild-var={_pv}")
 
 logger("Running: " + " ".join(build_cmd))
 build_rc = subprocess.run(build_cmd).returncode
@@ -225,10 +232,17 @@ if device == "fpga":
     compile_tcl += f"open_project  ./{example}/{example}.xpr\n"
     compile_tcl += "update_compile_order -fileset sources_1\n"
     compile_tcl += "reset_run synth_1\n"
-    compile_tcl += "launch_runs synth_1 -jobs 24 \n"
+    # Vivado parallel jobs. This was hardcoded at 24, which assumes a large build
+    # server. On a 4-core / 9 GB machine it forks 24 workers for no speedup and
+    # six times the memory, and a 200T synthesis gets OOM-killed part way through
+    # "Cross Boundary and Area Optimization". Derive it from the actual machine;
+    # override with VIVADO_JOBS when you do have the cores to spare.
+    _jobs = os.environ.get("VIVADO_JOBS")
+    _jobs = int(_jobs) if _jobs else max(1, min(8, os.cpu_count() or 4))
+    compile_tcl += f"launch_runs synth_1 -jobs {_jobs} \n"
     compile_tcl += "wait_on_run synth_1\n"
     compile_tcl += "set_property STEPS.WRITE_BITSTREAM.ARGS.BIN_FILE true [get_runs impl_1]\n"
-    compile_tcl += "launch_runs -to_step write_bitstream impl_1 -jobs 24\n"
+    compile_tcl += f"launch_runs -to_step write_bitstream impl_1 -jobs {_jobs}\n"
     compile_tcl += "wait_on_run impl_1\n"
     with open(build_dir + "/compile_project.tcl",'w') as f:
         f.write(compile_tcl)

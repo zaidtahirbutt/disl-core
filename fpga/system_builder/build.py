@@ -1,4 +1,5 @@
 import toml
+import re
 import json
 import sys
 import math
@@ -33,7 +34,8 @@ def verilog_literal(value):
 
 
 class BUILD:
-    def __init__(self, system, board, build_dir, build_verbose, project_root=None):
+    def __init__(self, system, board, build_dir, build_verbose, project_root=None,
+                 prebuild_vars=None):
         def config_load(system):
             with open(system) as f:
                 if ".tml" in system:
@@ -54,6 +56,10 @@ class BUILD:
             os.path.abspath(__file__))))
         self.system_dir = os.path.abspath(system.split("/system.tml")[0])
         self.project_root = os.path.abspath(project_root) if project_root else self.disl_root
+        # Extra NAME=VALUE arguments for individual PREBUILD steps, supplied on the
+        # command line as --prebuild-var=<step>:<NAME>=<VALUE>. Scoped per step on
+        # purpose: a value meant for one step must not leak into the others.
+        self.prebuild_vars = prebuild_vars or {}
         self.system = config_load(system)
         self.modules = config_load('./fpga/common/config/modules.tml')
         self.definitions = config_load("./fpga/common/config/definitions.tml")
@@ -717,15 +723,54 @@ class BUILD:
             "${EXAMPLE_DIR}": self.system_dir,
         }
 
+    def prebuild_effective(self, step):
+        """The values a PREBUILD step will actually be invoked with.
+
+        DIR plus every VARS entry, with any --prebuild-var override applied on
+        top. Computed independently of whether the step actually runs, because
+        --skip-prebuild must still resolve a ${PREBUILD:...} reference to the
+        same path the step would have produced.
+        """
+        spec = (self.system.get("PREBUILD") or {}).get(step)
+        if spec is None:
+            known = ", ".join((self.system.get("PREBUILD") or {}).keys()) or "(none)"
+            raise ValueError(f"${{PREBUILD:{step}:...}} names no such step. "
+                             f"Declared steps: {known}")
+        values = {}
+        if spec.get("DIR"):
+            values["DIR"] = self.resolve_path(spec["DIR"])
+        for k, v in (spec.get("VARS") or {}).items():
+            values[k] = str(v)
+        values.update(self.prebuild_vars.get(step) or {})   # CLI wins
+        return values
+
     def expand(self, raw):
-        """Substitute path anchors in a string, failing on an unknown one."""
+        """Substitute path anchors in a string, failing on an unknown one.
+
+        Besides the plain path anchors there is ${PREBUILD:<step>:<NAME>}, which
+        resolves to what that PREBUILD step will be invoked with -- its DIR or
+        any of its VARS, after --prebuild-var overrides. That lets a MEM_INIT
+        path be *derived* from the step that produces the file instead of
+        repeating it, so the two cannot drift apart. Without it, changing which
+        firmware a system builds means editing two places, and editing only one
+        silently loads a stale image.
+        """
         out = str(raw)
         for token, value in self.anchors().items():
             out = out.replace(token, value)
+        for m in set(re.findall(r"\$\{PREBUILD:([^:}]+):([^}]+)\}", out)):
+            step, key = m
+            values = self.prebuild_effective(step)
+            if key not in values:
+                raise ValueError(
+                    f"${{PREBUILD:{step}:{key}}}: step '{step}' has no '{key}'. "
+                    f"Available: {', '.join(sorted(values)) or '(none)'}")
+            out = out.replace(f"${{PREBUILD:{step}:{key}}}", values[key])
         if "${" in out:
             raise ValueError(
                 f"unresolved anchor in system.tml value: {out}\n"
-                f"  known anchors: {', '.join(self.anchors().keys())}")
+                f"  known anchors: {', '.join(self.anchors().keys())}, "
+                f"${{PREBUILD:<step>:<NAME>}}")
         return out
 
     def resolve_path(self, raw):
@@ -960,7 +1005,14 @@ class BUILD:
 
             argv = [command]
             argv += [self.expand(a) for a in (step.get("ARGS") or [])]
-            argv += [f"{k}={self.expand(v)}" for k, v in (step.get("VARS") or {}).items()]
+            # Built from the same effective-values table that ${PREBUILD:...}
+            # resolves against, so what a step is invoked with and what a MEM_INIT
+            # path derives from can never disagree. A CLI override REPLACES the
+            # declared value rather than being appended after it -- `make` would
+            # honour a duplicate NAME=VALUE either way, but a command line showing
+            # the same variable twice is a poor thing to have to read in a log.
+            _effective = self.prebuild_effective(name)
+            argv += [f"{k}={v}" for k, v in _effective.items() if k != "DIR"]
 
             print(f"PREBUILD.{name}: {' '.join(argv)}   (cwd={workdir})")
             # argv list, never shell=True -- a config file should not be able to
@@ -1014,17 +1066,16 @@ class BUILD:
                         f"MEM_INIT for instance '{instance_name}' parameter "
                         f"'{parameter}' has no FILE field")
 
-                resolved = raw
-                for token, value in anchors.items():
-                    resolved = resolved.replace(token, value)
-                if "${" in resolved:
+                # One substitution implementation, shared with everything else in
+                # this file. This block used to re-implement it, which meant the
+                # ${PREBUILD:<step>:<NAME>} anchor -- the thing that keeps a
+                # MEM_INIT path and the step that produces the file from drifting
+                # -- resolved everywhere except here, the one place it matters.
+                try:
+                    resolved = self.resolve_path(raw)
+                except ValueError as exc:
                     raise ValueError(
-                        f"MEM_INIT FILE for '{instance_name}.{parameter}' still contains an "
-                        f"unresolved anchor after substitution: {resolved}\n"
-                        f"  Known anchors: {', '.join(anchors.keys())}")
-                resolved = os.path.abspath(
-                    resolved if os.path.isabs(resolved)
-                    else os.path.join(self.system_dir, resolved))
+                        f"MEM_INIT FILE for '{instance_name}.{parameter}': {exc}")
 
                 # Fail loudly. Previously a missing memory image produced only a
                 # mid-simulation $readmemh warning that was easy to miss entirely.
@@ -1748,11 +1799,20 @@ build_verbose = int(sys.argv[5])
 # later argument, so new options must not be positional.
 project_root = None
 skip_prebuild = False
+prebuild_vars = {}
 for _arg in sys.argv[6:]:
     if _arg.startswith("--project-root="):
         project_root = _arg.split("=", 1)[1] or None
     elif _arg == "--skip-prebuild":
         skip_prebuild = True
+    elif _arg.startswith("--prebuild-var="):
+        # --prebuild-var=<step>:<NAME>=<VALUE>
+        _spec = _arg.split("=", 1)[1]
+        if ":" not in _spec or "=" not in _spec.split(":", 1)[1]:
+            sys.exit(f"error: --prebuild-var needs <step>:<NAME>=<VALUE>, got '{_spec}'")
+        _step, _kv = _spec.split(":", 1)
+        _k, _v = _kv.split("=", 1)
+        prebuild_vars.setdefault(_step, {})[_k] = _v
     elif _arg:
         print(f"WARNING: build.py ignoring unrecognized argument '{_arg}'")
 
@@ -1773,7 +1833,7 @@ if (build_verbose):
 # the user has to manually specify cache depth separately and has to make sure that the cache depth/memory length of the riscv address map can fit into the cache (bram, etc) being
 # instantiated separately.
 
-builder = BUILD(system, board, build_dir, build_verbose, project_root)
+builder = BUILD(system, board, build_dir, build_verbose, project_root, prebuild_vars)
 # Order matters: emit/verify the address-map header first so a PREBUILD step that
 # compiles firmware sees the current map, then run PREBUILD so its outputs exist
 # before MEM_INIT (inside generate_top) tries to resolve them.

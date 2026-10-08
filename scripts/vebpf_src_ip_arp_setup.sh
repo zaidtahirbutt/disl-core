@@ -53,10 +53,14 @@ sudo nmcli --wait 0 connection up "$ETH_DEV"
 sleep 0.5  # wait for kernel to fully activate IPs
 
 # Add FPGA static ARP entries (NetworkManager does not persist ARP, so still need ip/arp)
-sudo arp -s 128.0.0.1 02:00:00:00:00:02
-sudo arp -s 240.0.0.1 02:00:00:00:03
-sudo arp -s 1.0.0.1 02:00:00:00:04
+# NOTE: the 240.0.0.1 and 1.0.0.1 entries previously had FIVE-octet MACs
+# (02:00:00:00:03 / 02:00:00:00:04). `arp -s` rejects those, so two of the four
+# test paths silently had no ARP entry. Corrected to six octets, matching
+# vebpf_arp_setup.sh in the legacy repo, which had them right.
 sudo arp -s 245.255.255.1 02:00:00:00:00:01
+sudo arp -s 128.0.0.1     02:00:00:00:00:02
+sudo arp -s 240.0.0.1     02:00:00:00:00:03
+sudo arp -s 1.0.0.1       02:00:00:00:00:04
 
 echo -e "\nShowing active connection config:"
 nmcli -f NAME,DEVICE,STATE connection show "$ETH_DEV"
