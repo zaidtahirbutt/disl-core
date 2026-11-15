@@ -1593,6 +1593,30 @@ class BUILD:
         constraints = ""
         for port in self.system["EXTERNAL_IO"]["PORTS"]:
             constraints += self.board["CONSTRAINTS"][port] + "\n"
+
+        # CLOCK-DOMAIN CROSSING. A design that drives the NIC's logic side from a
+        # different clock than the RGMII MAC has exactly one crossing, and it is
+        # handled in RTL: the two axis_async_fifo_adapter instances inside
+        # eth_mac_1g_rgmii_fifo for data, and reset synchronisers for resets.
+        # Those crossings must be declared asynchronous or Vivado times straight
+        # through them and reports violations that are not real -- measured: four
+        # failing endpoints, all of them the VIO probe reaching the RGMII reset
+        # synchroniser's async preset.
+        #
+        # The test is done HERE rather than in the .xdc because an .xdc file is
+        # not evaluated as Tcl: `if` in a constraints file raises
+        # "[Designutils 20-1307] Command 'if' is not supported in the xdc
+        # constraint file" and the constraint is silently skipped.
+        if "clkout83mhz" in str(self.system.get("INTERCONNECT", "")):
+            constraints += (
+                "\n# CDC: isolate the NIC logic-side clock from every other clock in the\n"
+                "# design. Paths WITHIN each group are still timed; only crossings are\n"
+                "# excluded, and every crossing goes through an async FIFO or a reset\n"
+                "# synchroniser.\n"
+                "set_clock_groups -asynchronous "
+                "-group [get_clocks -quiet *clkout83mhz*] "
+                "-group [get_clocks -quiet -filter {NAME !~ \"*clkout83mhz*\"}]\n")
+
         with open(self.build_dir + "constraints.xdc",'w') as f:
             f.write(constraints)
 
