@@ -1092,9 +1092,9 @@
 #######################################################################
 [bram_axi_cachecontroller_v2]
 	TYPE = ["MEMORY"]
-	PARAMETERS = ["MEM_SIZE_BITS", "ADDR_WIDTH", "DATA_WIDTH", "SIMULATION", "PRELOAD_MEM"]
+	PARAMETERS = ["MEM_SIZE_BITS", "ADDR_WIDTH", "DATA_WIDTH", "SIMULATION", "PRELOAD_MEM", "SINGLE_EDGE"]
 	[bram_axi_cachecontroller_v2.REQUIREMENTS]
-		INTERFACES = ["clk", "rst", "a"]
+		INTERFACES = ["clk", "rst", "cpu_resetn", "a"]
 		[bram_axi_cachecontroller_v2.REQUIREMENTS.INCLUDES]
 			COMMON = []
 			BOARD = []
@@ -1107,6 +1107,10 @@
 			TYPE = "CLOCK"
 			DIRECTION = "SINK"
 	[bram_axi_cachecontroller_v2.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[bram_axi_cachecontroller_v2.INTERFACES.cpu_resetn]
 			TYPE = "GENERAL"
 			WIDTH = 1
 			DIRECTION = "SINK"

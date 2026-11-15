@@ -1,7 +1,7 @@
 // `timescale 1ps/1ps
 
 module bram_axi_cachecontroller_v2(
-clk,rst,
+clk,rst,cpu_resetn,
 a_axi_araddr,a_axi_arvalid,a_axi_arready,
 a_axi_awaddr,a_axi_awvalid,a_axi_awready,
 a_axi_rdata,a_axi_rvalid,a_axi_rready,
@@ -30,9 +30,43 @@ parameter MEM_INIT_FILE = "";
 // zeroing loop, and a delay makes the block non-synthesizable.
 parameter PRELOAD_MEM = 0;
 parameter MEM_SIZE_BITS = 524288;  
+// SINGLE_EDGE = 1 runs this controller's read/write FSMs on the RISING clock
+// edge instead of the falling one.
+//
+// Why it is an option rather than simply "on": the two-phase (negedge) design
+// gives the request path from the softcore, through softcore_memory_bus_grant
+// and the generated interconnect, only HALF a clock to settle -- ~10.15 ns of
+// logic into a 5 ns window on the Arty, which is the critical path of the whole
+// design. On the rising edge that path gets the full period and WNS improves
+// from -5.315 ns to -3.084 ns.
+//
+// The cost is one extra clock per memory transaction (measured: read 4->5,
+// write 5->6). The Arty absorbs that -- 1-core and 2-core both pass unchanged.
+// The 2-core Alinx does NOT: at gigabit, packets arrive ~10x faster and the
+// data plane runs out of headroom. Measured there: only 2 of 5 packets
+// classified in the same window, no errors, just too slow.
+//
+// So: enable on configurations where it has been verified, leave off elsewhere.
+parameter SINGLE_EDGE = 0;
 	// 524288 bits (64 kB) => 524288 bits >> 5 (log_base_2 DATA_WIDTH) = 16384 32bit-words (DATA_WIDTHbit-words) (64kB = 65536 bytes) = DEPTH for 32 bit word BRAM when addres width = 16bits => 2^16 = 65,536
 
 input clk;
+// Active-low reset of the SOFTCORE, not of this module.
+//
+// The softcore is reset whenever `reprogram` asserts (cpu_resetn =
+// !(sw0_reset | reprogram)) but this controller is reset only by sw0_reset, so
+// the two sit in different reset domains. A read in flight when the softcore is
+// reset is therefore ORPHANED: its master disappears, a_axi_rready never
+// arrives, and axi_rvalid_internal latches high with no way to clear. Measured:
+// stuck high from 360 us to 996 us while the softcore was released at 958 us,
+// so its very first instruction fetch completed instantly against that dead
+// beat, decoded garbage, jumped into a data word and trapped.
+//
+// This input lets the read channel be flushed exactly when the softcore is
+// released, which is the one moment a stale beat can do harm. The WRITE channel
+// deliberately does NOT use it -- the progloader writes firmware into this
+// controller while the softcore is held in reset, and that must keep working.
+input cpu_resetn;
 input rst;
 input 		[ADDR_WIDTH-1:0] 	a_axi_araddr;
 input 			 		a_axi_arvalid;
@@ -65,6 +99,12 @@ output	[1:0] 			a_b_response;
 reg [ADDR_WIDTH-1:0] axi_araddr_buff;
 reg axi_arready_internal;
 reg axi_rvalid_internal;
+// Folds at elaboration: `posedge ctrl_clk` is `posedge clk` when SINGLE_EDGE
+// is 1 and `negedge clk` when it is 0. No runtime clock mux is inferred.
+wire ctrl_clk = SINGLE_EDGE ? clk : ~clk;
+// Rising edge of cpu_resetn == the softcore has just been released.
+reg  cpu_resetn_d;
+wire cpu_release = cpu_resetn && !cpu_resetn_d;
 reg [ADDR_WIDTH-1:0] axi_awaddr_buff;
 reg [DATA_WIDTH-1:0] axi_wdata_buff;
 reg [(DATA_WIDTH>>3)-1:0] axi_wstrb_buff;
@@ -272,8 +312,8 @@ end
 
 // mealy statemachine here mealy vs moore fsm http://electrosofts.com/verilog/fsm.html
 
-always @(negedge clk) begin
-	if (rst)
+always @(posedge ctrl_clk) begin
+	if (rst || cpu_release)
 		axi_rvalid_internal <= 1'b0;
 	else if (axi_rvalid_internal && a_axi_rready)	// rready =1 from master axi after this AXI Slave had given the master axi rvalid = 1
 		axi_rvalid_internal <= 1'b0;		//axi_rvalid_internal
@@ -291,8 +331,8 @@ end
 // but why the 1 clk delay?
 // mealy statemachine here mealy vs moore fsm http://electrosofts.com/verilog/fsm.html
 
-always @(negedge clk) begin
-	if (rst) begin
+always @(posedge ctrl_clk) begin
+	if (rst || cpu_release) begin
 		axi_arready_internal <= 1;		// axi_arready_internal is 1 on reset!
 		axi_araddr_buff <= 0;
 
@@ -363,7 +403,7 @@ end
 // mealy statemachine here mealy vs moore fsm http://electrosofts.com/verilog/fsm.html
 
 
-always @(negedge clk) begin
+always @(posedge ctrl_clk) begin
 	if (rst) begin 
 		axi_awaddr_buff <= 0;
 		axi_awready_internal	<= 0;
@@ -392,8 +432,19 @@ always @(negedge clk) begin
 			w_state <= 3'd2;
 		end		
 	end else if (w_state == 3'd2) begin
+		// FULL-WORD FAST PATH. States 2 and 3 are a read-modify-write that
+		// exists only to preserve bytes wstrb masks off. When every strobe is
+		// set there is nothing to preserve, so the read is pure waste -- and
+		// the NIC writes packet data with wstrb = 4'b1111 every time, which is
+		// exactly the traffic that saturates this controller at gigabit.
+		// Skipping the read costs one state and buys ~20% write throughput.
+		if (&axi_wstrb_buff) begin
+			mem[axi_awaddr_buff] <= axi_wdata_buff;
+			w_state <= 3'd4;
+		end else begin
 		write_data <= mem[axi_awaddr_buff];		// if wstrb is 0 for this byte then write the 
 		w_state <= 3'd3;						// same mem back at this address again
+		end
 	end else if (w_state == 3'd3) begin
 		mem[axi_awaddr_buff] <= write_data_masked; //write data either new or the old one depending
 								// on the wstrb value in the memory here
@@ -404,5 +455,10 @@ always @(negedge clk) begin
 					  		// the writing process again
 	end
 end
+always @(posedge clk) begin
+	if (rst) cpu_resetn_d <= 1'b0;
+	else     cpu_resetn_d <= cpu_resetn;
+end
+
 endmodule
 

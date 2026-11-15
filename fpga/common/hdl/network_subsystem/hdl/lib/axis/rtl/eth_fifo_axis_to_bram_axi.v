@@ -6648,7 +6648,26 @@ reg [NUMBER_OF_VEBPF - 1:0] VeBPF_result_tracker_available_array_reg, VeBPF_resu
 
 reg [NUMBER_OF_VEBPF - 1:0] VeBPF_result_tracker_run_VeBPF_in_reg, VeBPF_result_tracker_run_VeBPF_in_next;
 
-assign VeBPF_reset_n_combined_global = VeBPF_result_tracker_run_VeBPF_in_reg;
+// Each VeBPF core's data memory is reset by ((!reset_n_int) ^ csr_ctl[1]) in
+// cpu.v, which encodes "exactly one master owns this memory": the loader when
+// the core is held in reset (reset_n=0, csr_ctl[1]=1), the CPU when it is
+// running (reset_n=1, csr_ctl[1]=0). The remaining combination --
+// reset_n=1 WITH csr_ctl[1]=1 -- puts the memory itself into reset, so it can
+// never answer the loader's strobe. VEBPF_DATA_W_DATAMEM_ACK_WAIT then waits on
+// &(all acks) forever: no timeout, no retry.
+//
+// The result tracker can leave a core's run bit set when the loader enters
+// external-access mode, which produces exactly that combination. Measured on
+// the 2-core Alinx CDC build: csr_ctl=0x02, strobe held, acks=2'b10,
+// reset_n={1,0}, loader stuck from 1513 us to the end of the run while packet
+// reception carried on normally. Single-core builds cannot show it because
+// &(1-bit) is trivially true.
+//
+// Hold every core in reset while the loader owns the memories. That is the
+// documented load-mode condition, and whenever the invariant already held this
+// changes nothing.
+assign VeBPF_reset_n_combined_global =
+    VeBPF_result_tracker_run_VeBPF_in_reg & {NUMBER_OF_VEBPF{~VeBPF_csr_ctl_reg[1]}};
     // BTW in VeBPF 
         // assign reset_n_int = (reset_n | csr_ctl[0]);
             // so its a different csr bit from the bit used for VeBPF data loading FSM 

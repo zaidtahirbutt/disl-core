@@ -74,6 +74,11 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 		PARAMETERS.SIMULATION = 1
 		# Simulation loads the image in the SIMULATION branch (after the BRAM
 		# zeroing loop), so the delay-free synthesis preload stays off here.
+		# Rising-edge FSMs: gives the softcore->arbiter->controller request path
+		# a full clock instead of half. Verified on 1-core and 2-core Arty.
+		# Left off for Alinx -- costs a cycle per access, which gigabit
+		# cannot absorb. See the timing work log.
+		PARAMETERS.SINGLE_EDGE = 1
 		PARAMETERS.PRELOAD_MEM = 0
 	# RISC-V control-plane firmware image. Resolved and staged by build.py;
 	# replaces a hardcoded relative path that used to live inside
@@ -519,7 +524,7 @@ PORTS = ["clk_i","sw","led","uart_tx","uart_rx", "phy_reset_n", "phy_col", "phy_
 				["BOARD:phy_tx_en", "MODULE:eth_nic:phy_tx_en"],
 				["BOARD:phy_txd", "MODULE:eth_nic:phy_txd"],
 				# different reset and reprogram connections
-				["CUSTOM:cpu_resetn", "MODULE:cpu:resetn"],
+				["CUSTOM:cpu_resetn", "MODULE:cpu:resetn", "MODULE:cache_bram_cachecontroller_v2:cpu_resetn"],
 				["CUSTOM:sw0_reset_or_reprogram", "MODULE:gpio:rst", "MODULE:debug:rst", "MODULE:timer:rst", "MODULE:rand_mod:rst"],
 				["CUSTOM:reprogram", "MODULE:progloader_v2:reprogram"],
 				["CUSTOM:sw0_reset", "MODULE:cache_bram_cachecontroller_v2:rst","MODULE:eth_nic:rst","MODULE:progloader_v2:rst", "MODULE:softcore_memory_bus_arbiter:rst"],

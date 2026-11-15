@@ -144,9 +144,15 @@ always @(*) begin
 			state_next = WAIT_FOR_RDATA_COMPL;
 			mem_bus_group_sel_ctrl = 0;
 
-			if (m_softcore_axi_rready || m_softcore_axi_rvalid) begin
+			// LATENCY-INSENSITIVE HOLD. This used to drop to IDLE as soon as rready
+			// and rvalid were BOTH momentarily low -- inferring "finished" from a
+			// quiet bus. That only holds if the slave answers with no gap. Add any
+			// slave latency and a gap opens mid-transaction: the arbiter releases,
+			// and with an eth_nic mem_bus_grant_request pending the bus is handed
+			// away under the softcore's in-flight fetch. Hold until the beat moves.
+			if (!(m_softcore_axi_rvalid && m_softcore_axi_rready)) begin
 				state_next = WAIT_FOR_RDATA_COMPL;
-			end else if ((!m_softcore_axi_rready) && (!m_softcore_axi_rvalid)) begin
+			end else begin
 				state_next = STATE_IDLE;	
 				// state_next = GRANT_BUS_CONTROL;	
 				// mem_bus_group_sel_ctrl = 1; 
@@ -158,7 +164,9 @@ always @(*) begin
 			state_next = WAIT_FOR_READ_COMPL;
 			mem_bus_group_sel_ctrl = 0;
 
-			if((!m_softcore_axi_rready) && (!m_softcore_axi_rvalid)) begin
+			// Same fix as WAIT_FOR_RDATA_COMPL: release on completion, not on a
+			// momentarily idle bus.
+			if (m_softcore_axi_rvalid && m_softcore_axi_rready) begin
 				state_next = STATE_IDLE;
 				// state_next = GRANT_BUS_CONTROL;
 				// mem_bus_group_sel_ctrl = 1; 
