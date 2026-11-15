@@ -70,16 +70,16 @@ PORTS = ["sys_clk_p", "sys_clk_n", "sys_rst_n", "uart_tx","uart_rx", "phy_reset_
 		PARAMETERS.SIMULATION = 0
 	[INSTANTIATIONS.cache_bram_cachecontroller_v2]
 		MODULE = "bram_axi_cachecontroller_v2"
-		# 524288 bits (64 kB)
-		PARAMETERS.MEM_SIZE_BITS = 524288
-		# 2^16 = 65,536 bytes memory
-		PARAMETERS.ADDR_WIDTH = 16
-		PARAMETERS.DATA_WIDTH = 32
 		# Rising-edge FSMs: gives the softcore->arbiter->controller request path a
 		# full clock instead of half (WNS -5.315 -> -3.084 on Arty). The extra
 		# cycle it costs per access is paid back by the full-word write fast path
 		# in the controller, so gigabit keeps up. Verified: all sims 21/21.
 		PARAMETERS.SINGLE_EDGE = 1
+		# 524288 bits (64 kB)
+		PARAMETERS.MEM_SIZE_BITS = 524288
+		# 2^16 = 65,536 bytes memory
+		PARAMETERS.ADDR_WIDTH = 16
+		PARAMETERS.DATA_WIDTH = 32
 		PARAMETERS.PRELOAD_MEM = 1
 	[INSTANTIATIONS.cache_bram_cachecontroller_v2.MEM_INIT.MEM_INIT_FILE]
 		FILE         = "${PREBUILD:riscv_firmware:DIR}/build/${PREBUILD:riscv_firmware:APP}/${PREBUILD:riscv_firmware:TARGET}/firmware.sim.hex"
@@ -421,7 +421,7 @@ PORTS = ["sys_clk_p", "sys_clk_n", "sys_rst_n", "uart_tx","uart_rx", "phy_reset_
 				["CUSTOM:clk_sys_125mhz", "MODULE:sync_reset_inst:clk"],
 				["CUSTOM:not_locked_clk_mmcm_eth_rgmmi_inst", "MODULE:sync_reset_inst:rst"],
 				# sys clk connections to soc peripherals
-				["CUSTOM:clk_sys_125mhz", "MODULE:vio_0_sw_leds_inst:clk", "MODULE:debug:clk", "MODULE:softcore_memory_bus_arbiter:clk", "MODULE:eth_nic:clk", "MODULE:cpu:clk","MODULE:cache_bram_cachecontroller_v2:clk", "MODULE:timer:clk", "MODULE:gpio:clk","MODULE:progloader_v2:clk", "MODULE:rand_mod:clk"],
+				["CUSTOM:clk_sys_125mhz", "MODULE:vio_0_sw_leds_inst:clk", "MODULE:debug:clk", "MODULE:softcore_memory_bus_arbiter:clk", "MODULE:eth_nic:clk","MODULE:eth_nic:logic_clk", "MODULE:cpu:clk","MODULE:cache_bram_cachecontroller_v2:clk", "MODULE:timer:clk", "MODULE:gpio:clk","MODULE:progloader_v2:clk", "MODULE:rand_mod:clk"],
 				["CUSTOM:clk_sys_125mhz_90shift", "MODULE:eth_nic:clk90"],
 				["MODULE:eth_nic:phy_tx_clk", "BOARD:phy_tx_clk"],
 				["BOARD:phy_rx_clk", "MODULE:eth_nic:phy_rx_clk"],
@@ -440,7 +440,7 @@ PORTS = ["sys_clk_p", "sys_clk_n", "sys_rst_n", "uart_tx","uart_rx", "phy_reset_
 				["CUSTOM:cpu_resetn", "MODULE:cpu:resetn", "MODULE:cache_bram_cachecontroller_v2:cpu_resetn"],
 				["CUSTOM:sw0_reset_or_reprogram", "MODULE:gpio:rst", "MODULE:debug:rst", "MODULE:timer:rst", "MODULE:rand_mod:rst"],
 				["CUSTOM:reprogram", "MODULE:progloader_v2:reprogram"],
-				["CUSTOM:sw0_reset", "MODULE:cache_bram_cachecontroller_v2:rst","MODULE:eth_nic:rst","MODULE:progloader_v2:rst", "MODULE:softcore_memory_bus_arbiter:rst"],
+				["CUSTOM:sw0_reset", "MODULE:cache_bram_cachecontroller_v2:rst","MODULE:eth_nic:rst","MODULE:eth_nic:logic_rst","MODULE:progloader_v2:rst", "MODULE:softcore_memory_bus_arbiter:rst"],
 				["CUSTOM:reprogram_vebpf", "MODULE:progloader_v2:reprogram_VeBPF_in"],
 				# progloader_v2 x eth_nic VeBPF eBPF rules loading connections
 				["MODULE:progloader_v2:VeBPF_prog_addr_out", "MODULE:eth_nic:VeBPF_prog_addr_in"],

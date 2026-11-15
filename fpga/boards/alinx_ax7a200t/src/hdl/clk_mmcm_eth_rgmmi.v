@@ -4,6 +4,11 @@ module clk_mmcm_eth_rgmmi(
 	input rst, 
 	output clkout125mhz, 
 	output clkout125mhz_90shift, 
+	// Logic-domain clock for the CDC build: VCO is 1000 MHz (M=5, D=1 from
+	// 200 MHz in), so CLKOUT3_DIVIDE(12) gives exactly 83.33 MHz. CLKOUT3..6
+	// were spare. RGMII keeps the 125 MHz pair above; everything downstream of
+	// the MAC's async FIFO can run on this instead.
+	output clkout83mhz, 
 	// output CLKFBOUT,
 	output locked
 );
@@ -29,7 +34,7 @@ module clk_mmcm_eth_rgmmi(
 		.CLKOUT2_DIVIDE(5),
 		.CLKOUT2_DUTY_CYCLE(0.5),
 		.CLKOUT2_PHASE(0),
-		.CLKOUT3_DIVIDE(1),
+		.CLKOUT3_DIVIDE(12),	// 1000 MHz VCO / 12 = 83.33 MHz
 		.CLKOUT3_DUTY_CYCLE(0.5),
 		.CLKOUT3_PHASE(0),
 		.CLKOUT4_DIVIDE(1),
@@ -75,7 +80,7 @@ module clk_mmcm_eth_rgmmi(
 		// .CLKOUT2(clk_200_mmcm_out),
 		.CLKOUT2(),
 		.CLKOUT2B(),
-		.CLKOUT3(),
+		.CLKOUT3(clkout83mhz),	// 83.33 MHz logic-domain clock
 		.CLKOUT3B(),
 		.CLKOUT4(),
 		.CLKOUT5(),

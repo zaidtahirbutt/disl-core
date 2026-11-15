@@ -982,7 +982,7 @@
 	TYPES = ["PERIPHERAL"]
 	PARAMETERS = ["TARGET","AXI_DATA_WIDTH", "AXI_ADDRESS_WIDTH", "VEBPF_PROG_ADDRESS_WIDTH","VEBPF_PROG_DATA_WIDTH", "VEBPF_PROG_DATA_BYTES", "SIMULATION", "NUMBER_OF_VEBPF", "MAX_NUMBER_OF_VEBPF", "VEBPF_PROG_ADDRESS_WIDTH_REDUCED", "VEBPF_RULES_SCHEDULER_TABLE_DEPTH_MAX"]
 	[eth_nic_1g_rgmmi.REQUIREMENTS]
-		INTERFACES = ["clk", "clk90", "rst", "phy_rx_clk", "phy_rxd", "phy_rx_ctl", "phy_tx_clk", "phy_tx_ctl", "phy_txd", "phy_reset_n", "s_eth", "m_eth", "eth_mem_write_req", "eth_mem_write_grant", "VeBPF_prog_addr_in", "VeBPF_prog_data_in", "VeBPF_prog_write_enable_in", "VeBPF_prog_reset_in", "VeBPF_prog_busy_in", "VeBPF_prog_done_in", "VeBPF_next_rule_switch_flag_in", "VeBPF_all_rules_done_switch_flag_in"]
+		INTERFACES = ["clk", "clk90", "rst", "logic_clk", "logic_rst", "phy_rx_clk", "phy_rxd", "phy_rx_ctl", "phy_tx_clk", "phy_tx_ctl", "phy_txd", "phy_reset_n", "s_eth", "m_eth", "eth_mem_write_req", "eth_mem_write_grant", "VeBPF_prog_addr_in", "VeBPF_prog_data_in", "VeBPF_prog_write_enable_in", "VeBPF_prog_reset_in", "VeBPF_prog_busy_in", "VeBPF_prog_done_in", "VeBPF_next_rule_switch_flag_in", "VeBPF_all_rules_done_switch_flag_in"]
 		[eth_nic_1g_rgmmi.REQUIREMENTS.INCLUDES]
 			COMMON = []
 			BOARD = []
@@ -999,6 +999,13 @@
 			TYPE = "CLOCK"
 			DIRECTION = "SINK"
 	[eth_nic_1g_rgmmi.INTERFACES.rst]
+			TYPE = "GENERAL"
+			WIDTH = 1
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.logic_clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[eth_nic_1g_rgmmi.INTERFACES.logic_rst]
 			TYPE = "GENERAL"
 			WIDTH = 1
 			DIRECTION = "SINK"
@@ -1666,12 +1673,55 @@ PARAMETERS = ["ADDR_WIDTH", "NUMBER_OF_MEMORY_REGIONS"]
 	[clk_wiz_ethernet_phy.INTERFACES.clk_25_mhz_out]
 			TYPE = "CLOCK"
 			DIRECTION = "SOURCE"
+[clk_wiz_ethernet_phy_50mhz]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = []
+	[clk_wiz_ethernet_phy_50mhz.REQUIREMENTS]
+		INTERFACES = ["clk", "clk_50_mhz_out", "clk_25_mhz_out"]
+		[clk_wiz_ethernet_phy_50mhz.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = ["clk_wiz_ethernet_phy_50mhz.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	        COMMON_FOLDER_FILES = []
+	[clk_wiz_ethernet_phy_50mhz.ENCODINGS]
+	[clk_wiz_ethernet_phy_50mhz.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[clk_wiz_ethernet_phy_50mhz.INTERFACES.clk_50_mhz_out]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+	[clk_wiz_ethernet_phy_50mhz.INTERFACES.clk_25_mhz_out]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+[clk_wiz_ethernet_phy_70mhz]
+	TYPES = ["PERIPHERAL"]
+	PARAMETERS = []
+	[clk_wiz_ethernet_phy_70mhz.REQUIREMENTS]
+		INTERFACES = ["clk", "clk_70_mhz_out", "clk_25_mhz_out"]
+		[clk_wiz_ethernet_phy_70mhz.REQUIREMENTS.INCLUDES]
+			COMMON = []
+			BOARD = ["clk_wiz_ethernet_phy_70mhz.v"]
+			COMMON_FOLDER = []
+			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = []
+	        COMMON_FOLDER_FILES = []
+	[clk_wiz_ethernet_phy_70mhz.ENCODINGS]
+	[clk_wiz_ethernet_phy_70mhz.INTERFACES.clk]
+			TYPE = "CLOCK"
+			DIRECTION = "SINK"
+	[clk_wiz_ethernet_phy_70mhz.INTERFACES.clk_70_mhz_out]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+	[clk_wiz_ethernet_phy_70mhz.INTERFACES.clk_25_mhz_out]
+			TYPE = "CLOCK"
+			DIRECTION = "SOURCE"
+#######################################################################
 #######################################################################
 [clk_mmcm_eth_rgmmi]
 	TYPES = ["PERIPHERAL"]
 	PARAMETERS = []
 	[clk_mmcm_eth_rgmmi.REQUIREMENTS]
-		INTERFACES = ["clkin200mhz", "rst", "clkout125mhz", "clkout125mhz_90shift", "locked"]
+		INTERFACES = ["clkin200mhz", "rst", "clkout125mhz", "clkout125mhz_90shift", "clkout83mhz", "locked"]
 		[clk_mmcm_eth_rgmmi.REQUIREMENTS.INCLUDES]
 			COMMON = []
 			BOARD = ["clk_mmcm_eth_rgmmi.v"]
@@ -1695,6 +1745,9 @@ PARAMETERS = ["ADDR_WIDTH", "NUMBER_OF_MEMORY_REGIONS"]
 	[clk_mmcm_eth_rgmmi.INTERFACES.locked]
 			TYPE = "GENERAL"
 			WIDTH = 1
+			DIRECTION = "SOURCE"
+	[clk_mmcm_eth_rgmmi.INTERFACES.clkout83mhz]
+			TYPE = "CLOCK"
 			DIRECTION = "SOURCE"
 #######################################################################
 [vio_0_sw_leds]

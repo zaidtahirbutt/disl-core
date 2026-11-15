@@ -53,6 +53,18 @@ module eth_nic_1g_rgmmi #
     input  wire       clk,
     input  wire       clk90,
     input  wire       rst,
+    // CLOCK DOMAIN SPLIT.
+    //   clk / clk90 / rst   : the RGMII MAC. Gigabit pins these at 125 MHz.
+    //   logic_clk / logic_rst: everything downstream of the MAC's FIFO -- the
+    //                          packet FIFOs, the VeBPF array, and the AXI ports
+    //                          to the bus arbiter and softcore.
+    // The crossing itself already existed: eth_mac_1g_rgmii_fifo is a dual-clock
+    // design built on two axis_async_fifo_adapter instances. Both of its clock
+    // inputs were simply tied to the same net. Separating them lets the logic
+    // side run slower than 125 MHz, which is what the VeBPF array needs to meet
+    // timing (its rules-scheduler -> result-evaluator path tops out near 97 MHz).
+    input  wire       logic_clk,
+    input  wire       logic_rst,
 
     /*
      * GPIO
@@ -346,8 +358,8 @@ wire no_match = !match_cond;
 reg match_cond_reg = 0;
 reg no_match_reg = 0;
 
-always @(posedge clk) begin
-    if (rst) begin
+always @(posedge logic_clk) begin
+    if (logic_rst) begin
         match_cond_reg <= 0;
         no_match_reg <= 0;
     end else begin
@@ -392,8 +404,8 @@ assign rx_fifo_udp_payload_axis_tuser = rx_udp_payload_axis_tuser;
 reg valid_last = 0;
 reg [7:0] led_reg = 0;
 
-always @(posedge clk) begin
-    if (rst) begin
+always @(posedge logic_clk) begin
+    if (logic_rst) begin
         led_reg <= 0;
     end else begin
         if (tx_udp_payload_axis_tvalid) begin
@@ -430,8 +442,8 @@ eth_mac_inst (
     .gtx_clk(clk),
     .gtx_clk90(clk90),
     .gtx_rst(rst),
-    .logic_clk(clk),
-    .logic_rst(rst),
+    .logic_clk(logic_clk),
+    .logic_rst(logic_rst),
 
     .tx_axis_tdata(tx_axis_tdata),
     .tx_axis_tvalid(tx_axis_tvalid),
@@ -699,8 +711,8 @@ axis_fifo #(
     .FRAME_FIFO(0)
     )
 eth_packets_fifo(
-    .clk(clk),
-    .rst(rst),
+    .clk(logic_clk),
+    .rst(logic_rst),
 
     // AXI input
     .s_axis_tdata(rx_axis_tdata),
@@ -741,8 +753,8 @@ axis_fifo #(
     .FRAME_FIFO(0)
     )
 eth_tx_pkts_fifo(
-    .clk(clk),
-    .rst(rst),
+    .clk(logic_clk),
+    .rst(logic_rst),
 
     // AXI input
     .s_axis_tdata(tx_output_fifo_eth_packet_axis_tdata),
@@ -810,8 +822,8 @@ eth_fifo_axis_to_bram_axi #(
 ) 
 eth_fifo_to_bram(
     //sys clk and reset
-    .clk(clk),
-    .rst(rst),
+    .clk(logic_clk),
+    .rst(logic_rst),
 
     // AXI STREAM input from ethernet fifo being stored to ther BRAM here for the RV processor to read from
     .s_axis_tdata(rx_output_fifo_eth_packet_axis_tdata),  // these signals connected to eth AXIS fifo 
