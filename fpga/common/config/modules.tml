@@ -866,7 +866,7 @@
 			BOARD = []
 			COMMON_FOLDER = ["network_subsystem"]
 			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
-			COMMON_FOLDER_FILES = ["eth_nic_100m_mmi.v", "eth_mac_mii_fifo.v", "eth_mac_mii.v", "mii_phy_if.v", "ssio_sdr_in.v", "eth_mac_1g.v", "axis_gmii_rx.v", "lfsr.v", "axis_gmii_tx.v", "axis_async_fifo_adapter.v", "axis_async_fifo.v", "axis_adapter.v", "axis_fifo.v", "eth_fifo_axis_to_bram_axi.v", "arbiter_z1.v", "priority_encoder_z1.v", "perf_counter.v", "cpu.v", "ram64_memory_v3.v", "ram_module_v3.v", "shifter.v", "divider.v", "call_handler.v", "ram64_memory_v1.v", "iverilog_dump_sv.sv"]
+			COMMON_FOLDER_FILES = ["eth_nic_100m_mmi.v", "eth_mac_mii_fifo.v", "eth_mac_mii.v", "mii_phy_if.v", "ssio_sdr_in.v", "eth_mac_1g.v", "axis_gmii_rx.v", "lfsr.v", "axis_gmii_tx.v", "axis_async_fifo_adapter.v", "axis_async_fifo.v", "axis_adapter.v", "axis_fifo.v", "eth_fifo_axis_to_bram_axi.v", "arbiter_z1.v", "priority_encoder_z1.v", "perf_counter.v", "cpu.v", "ram64_memory_v3.v", "ram_module_v3.v", "shifter.v", "divider.v", "multiplier.v", "call_handler.v", "ram64_memory_v1.v", "iverilog_dump_sv.sv"]
 
 
 	[eth_nic_100m_mmi.ENCODINGS]
@@ -988,7 +988,7 @@
 			BOARD = []
 			COMMON_FOLDER = ["network_subsystem"]
 			USE_SPECIFIC_FILES_FROM_COMMON_FOLDER = ["yes"]
-			COMMON_FOLDER_FILES = ["eth_nic_1g_rgmmi.v", "eth_mac_1g_rgmii_fifo.v", "eth_mac_1g_rgmii.v", "rgmii_phy_if.v", "ssio_ddr_in.v", "iddr.v", "oddr.v", "eth_mac_1g.v", "axis_gmii_rx.v", "lfsr.v", "axis_gmii_tx.v", "axis_async_fifo_adapter.v", "axis_async_fifo.v", "axis_adapter.v", "axis_fifo.v", "eth_fifo_axis_to_bram_axi.v", "arbiter_z1.v", "priority_encoder_z1.v", "perf_counter.v", "cpu.v", "ram64_memory_v3.v", "ram_module_v3.v", "shifter.v", "divider.v", "call_handler.v", "ram64_memory_v1.v", "iverilog_dump_sv.sv"]
+			COMMON_FOLDER_FILES = ["eth_nic_1g_rgmmi.v", "eth_mac_1g_rgmii_fifo.v", "eth_mac_1g_rgmii.v", "rgmii_phy_if.v", "ssio_ddr_in.v", "iddr.v", "oddr.v", "eth_mac_1g.v", "axis_gmii_rx.v", "lfsr.v", "axis_gmii_tx.v", "axis_async_fifo_adapter.v", "axis_async_fifo.v", "axis_adapter.v", "axis_fifo.v", "eth_fifo_axis_to_bram_axi.v", "arbiter_z1.v", "priority_encoder_z1.v", "perf_counter.v", "cpu.v", "ram64_memory_v3.v", "ram_module_v3.v", "shifter.v", "divider.v", "multiplier.v", "call_handler.v", "ram64_memory_v1.v", "iverilog_dump_sv.sv"]
 
 	[eth_nic_1g_rgmmi.ENCODINGS]
 
